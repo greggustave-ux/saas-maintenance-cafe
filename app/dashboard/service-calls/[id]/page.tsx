@@ -19,6 +19,7 @@ type ServiceCallPart = {
     service_call_id: number;
     part_name: string;
     quantity: number;
+    unit_price: number;
 };
 
 export default function ServiceCallDetailsPage() {
@@ -29,7 +30,7 @@ export default function ServiceCallDetailsPage() {
     const [parts, setParts] = useState<ServiceCallPart[]>([]);
     const [partName, setPartName] = useState("");
     const [quantity, setQuantity] = useState(1);
-
+    const [unitPrice, setUnitPrice] = useState(0);
     async function fetchParts() {
         const { data, error } = await supabase
             .from("service_call_parts")
@@ -105,6 +106,22 @@ export default function ServiceCallDetailsPage() {
         fetchParts();
     }
 
+    <input
+        type="number"
+        step="0.01"
+        className="rounded-lg border p-3"
+        placeholder="Prix unitaire"
+        value={unitPrice}
+        onChange={(e) =>
+            setUnitPrice(Number(e.target.value))
+        }
+    />
+    const totalPartsCost = parts.reduce(
+        (total, part) =>
+            total + part.quantity * part.unit_price,
+        0
+    );
+
     return (
         <main className="space-y-6">
             <div className="rounded-xl bg-white p-6 shadow">
@@ -175,11 +192,22 @@ export default function ServiceCallDetailsPage() {
                                         className="flex justify-between rounded-lg bg-slate-100 p-3"
                                     >
                                         <span>{part.part_name}</span>
-                                        <span className="font-semibold">
-                                            x{part.quantity}
-                                        </span>
+                                        <div className="text-right">
+                                            <p className="font-semibold">
+                                                x{part.quantity}
+                                            </p>
+                                            <p className="text-sm text-slate-500">
+                                                ${(part.quantity * part.unit_price).toFixed(2)}
+                                            </p>
+                                        </div>
                                     </div>
                                 ))}
+                                <div className="mt-6 border-t pt-4 text-right">
+                                    <p className="text-lg font-bold">
+                                        Total pièces : $
+                                        {totalPartsCost.toFixed(2)}
+                                    </p>
+                                </div>
                             </div>
                         </div>
                         <textarea
