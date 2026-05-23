@@ -189,9 +189,12 @@ export default function ServiceCallsPage() {
                         className="rounded-xl bg-white p-6 shadow"
                     >
                         <div className="flex items-center justify-between">
-                            <h2 className="text-xl font-semibold">
+                            <a
+                                href={`/dashboard/service-calls/${call.id}`}
+                                className="text-xl font-semibold text-cyan-700 hover:underline"
+                            >
                                 {call.client_name}
-                            </h2>
+                            </a>
 
                             <select
                                 value={call.status}
