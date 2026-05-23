@@ -15,6 +15,7 @@ type ServiceCall = {
 
 export default function ServiceCallsPage() {
     const [serviceCalls, setServiceCalls] = useState<ServiceCall[]>([]);
+    const [search, setSearch] = useState("");
     const [clientName, setClientName] = useState("");
     const [address, setAddress] = useState("");
     const [machineSerial, setMachineSerial] = useState("");
@@ -67,11 +68,56 @@ export default function ServiceCallsPage() {
 
         setServiceCalls(data || []);
     }
+    function getStatusColor(status: string) {
+        switch (status) {
+            case "En attente":
+                return "bg-yellow-200 text-yellow-900";
+
+            case "En cours":
+                return "bg-blue-200 text-blue-900";
+
+            case "Terminé":
+                return "bg-green-200 text-green-900";
+
+            default:
+                return "bg-slate-200 text-slate-900";
+        }
+    }
+    async function updateStatus(id: number, status: string) {
+        const { error } = await supabase
+            .from("service_calls")
+            .update({ status })
+            .eq("id", id);
+
+        if (error) {
+            alert(error.message);
+            return;
+        }
+
+        setServiceCalls((prev) =>
+            prev.map((call) =>
+                call.id === id
+                    ? { ...call, status }
+                    : call
+            )
+        );
+    }
+    const filteredCalls = serviceCalls.filter((call) =>
+        call.client_name
+            .toLowerCase()
+            .includes(search.toLowerCase())
+    );
     return (
         <div>
             <h1 className="mb-6 text-3xl font-bold">
                 Appels de service
             </h1>
+            <input
+                className="mb-6 w-full rounded-xl border p-3"
+                placeholder="Rechercher un client..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+            />
             <form
                 onSubmit={createServiceCall}
                 className="mb-8 grid gap-4 rounded-xl bg-white p-6 shadow"
@@ -116,7 +162,7 @@ export default function ServiceCallsPage() {
                 </button>
             </form>
             <div className="space-y-4">
-                {serviceCalls.map((call) => (
+                {filteredCalls.map((call) => (
                     <div
                         key={call.id}
                         className="rounded-xl bg-white p-6 shadow"
@@ -126,9 +172,15 @@ export default function ServiceCallsPage() {
                                 {call.client_name}
                             </h2>
 
-                            <span className="rounded-full bg-slate-200 px-3 py-1 text-sm">
-                                {call.status}
-                            </span>
+                            <select
+                                value={call.status}
+                                onChange={(e) => updateStatus(call.id, e.target.value)}
+                                className={`rounded-full px-3 py-1 text-sm font-semibold ${getStatusColor(call.status)}`}
+                            >
+                                <option>En attente</option>
+                                <option>En cours</option>
+                                <option>Terminé</option>
+                            </select>
                         </div>
 
                         <p className="mt-2 text-slate-600">
