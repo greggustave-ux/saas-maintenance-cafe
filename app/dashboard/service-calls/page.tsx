@@ -107,6 +107,27 @@ export default function ServiceCallsPage() {
             .toLowerCase()
             .includes(search.toLowerCase())
     );
+    async function deleteServiceCall(id: number) {
+        const confirmDelete = window.confirm(
+            "Supprimer cet appel de service ?"
+        );
+
+        if (!confirmDelete) return;
+
+        const { error } = await supabase
+            .from("service_calls")
+            .delete()
+            .eq("id", id);
+
+        if (error) {
+            alert(error.message);
+            return;
+        }
+
+        setServiceCalls((prev) =>
+            prev.filter((call) => call.id !== id)
+        );
+    }
     return (
         <div>
             <h1 className="mb-6 text-3xl font-bold">
@@ -201,6 +222,12 @@ export default function ServiceCallsPage() {
                             <strong>Technicien :</strong>{" "}
                             {call.technician_name}
                         </p>
+                        <button
+                            onClick={() => deleteServiceCall(call.id)}
+                            className="mt-4 rounded-lg bg-red-100 px-4 py-2 font-semibold text-red-700"
+                        >
+                            Supprimer
+                        </button>
                     </div>
                 ))}
             </div>
