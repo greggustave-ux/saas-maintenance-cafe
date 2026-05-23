@@ -12,12 +12,14 @@ type ServiceCall = {
     issue_description: string;
     status: string;
     technician_name: string;
+    technician_notes: string | null;
 };
 
 export default function ServiceCallDetailsPage() {
     const params = useParams();
     const [serviceCall, setServiceCall] =
         useState<ServiceCall | null>(null);
+    const [notes, setNotes] = useState("");
 
     useEffect(() => {
         async function fetchServiceCall() {
@@ -33,6 +35,7 @@ export default function ServiceCallDetailsPage() {
             }
 
             setServiceCall(data);
+            setNotes(data.technician_notes || "");
         }
 
         fetchServiceCall();
@@ -40,6 +43,19 @@ export default function ServiceCallDetailsPage() {
 
     if (!serviceCall) {
         return <p className="p-8">Chargement...</p>;
+    }
+    async function saveNotes() {
+        const { error } = await supabase
+            .from("service_calls")
+            .update({ technician_notes: notes })
+            .eq("id", serviceCall?.id);
+
+        if (error) {
+            alert(error.message);
+            return;
+        }
+
+        alert("Notes sauvegardées.");
     }
 
     return (
@@ -73,6 +89,26 @@ export default function ServiceCallDetailsPage() {
                         <strong>Statut :</strong>{" "}
                         {serviceCall.status}
                     </p>
+
+                    <div className="rounded-xl bg-white p-6 shadow">
+                        <h2 className="text-xl font-bold">
+                            Notes technicien
+                        </h2>
+
+                        <textarea
+                            className="mt-4 min-h-40 w-full rounded-lg border p-3"
+                            placeholder="Ajouter les observations, actions effectuées, pièces à prévoir..."
+                            value={notes}
+                            onChange={(e) => setNotes(e.target.value)}
+                        />
+
+                        <button
+                            onClick={saveNotes}
+                            className="mt-4 rounded-lg bg-slate-950 px-4 py-2 font-semibold text-white"
+                        >
+                            Sauvegarder les notes
+                        </button>
+                    </div>
                 </div>
             </div>
         </main>
