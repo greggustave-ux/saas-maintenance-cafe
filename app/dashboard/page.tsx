@@ -32,16 +32,20 @@ export default function DashboardPage() {
     }
 
     return (
-        <main className="min-h-screen bg-slate-100 p-8">
-            <h1 className="text-3xl font-bold">Dashboard Welo</h1>
-            <p className="mt-2 text-slate-600">
+        <div className="w-full md:max-w-2xl">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+                Dashboard Welo
+            </h1>
+            <p className="mt-2 break-words text-base text-slate-700">
                 Bienvenue {email ?? "chargement..."}
             </p>
             <button
+                type="button"
                 onClick={handleLogout}
-                className="mt-6 rounded-lg bg-slate-900 px-4 py-2 font-semibold text-white">
+                className="mt-6 flex min-h-12 w-full items-center justify-center rounded-lg bg-slate-900 px-4 py-3 text-center text-base font-semibold text-white active:bg-slate-800 md:w-auto"
+            >
                 Se déconnecter
             </button>
-        </main>
+        </div>
     );
 }

@@ -33,6 +33,18 @@ type ServiceCallPhoto = {
     photo_url: string;
 };
 
+const inputClass =
+    "w-full min-h-12 rounded-lg border border-slate-400 bg-white px-4 py-3 text-base text-slate-900 placeholder:text-slate-500";
+
+const btnPrimaryClass =
+    "flex min-h-12 w-full items-center justify-center rounded-lg bg-slate-950 px-4 py-3 text-center text-base font-semibold text-white active:bg-slate-800 md:w-auto";
+
+const btnSecondaryClass =
+    "flex min-h-12 w-full items-center justify-center rounded-lg bg-slate-200 px-4 py-3 text-center text-base font-semibold text-slate-900 active:bg-slate-300 md:w-auto";
+
+const sectionCardClass =
+    "w-full rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6";
+
 export default function ServiceCallDetailsPage() {
     const params = useParams();
     const [serviceCall, setServiceCall] =
@@ -86,7 +98,7 @@ export default function ServiceCallDetailsPage() {
     }, [params.id]);
 
     if (!serviceCall) {
-        return <p className="p-8">Chargement...</p>;
+        return <p className="p-4 text-base text-slate-600">Chargement...</p>;
     }
     async function saveNotes() {
         const { error } = await supabase
@@ -330,59 +342,90 @@ export default function ServiceCallDetailsPage() {
     }
 
     return (
-        <main className="space-y-6">
+        <main className="w-full space-y-5 md:mx-auto md:max-w-3xl md:space-y-6">
             <button
                 type="button"
                 onClick={downloadPdf}
-                className="relative z-20 mb-6 rounded-lg bg-cyan-600 px-4 py-2 font-semibold text-white hover:bg-cyan-700"
+                className="relative z-20 flex min-h-12 w-full items-center justify-center rounded-lg bg-cyan-700 px-4 py-3 text-center text-base font-semibold text-white active:bg-cyan-800 md:w-auto"
             >
                 Télécharger le rapport PDF
             </button>
-            <div id="service-report" className="space-y-6">
-                <div className="rounded-xl bg-white p-6 shadow">
-                    <h1 className="text-3xl font-bold">
+            <div id="service-report" className="space-y-5 md:space-y-6">
+                <div className={sectionCardClass}>
+                    <h1 className="text-2xl font-bold leading-tight text-slate-900 sm:text-3xl">
                         {serviceCall.client_name}
                     </h1>
 
-                    <p className="mt-2 text-slate-600">
+                    <p className="mt-2 break-words text-base text-slate-800">
                         {serviceCall.address}
                     </p>
 
+                    <dl className="mt-6 space-y-4 text-base">
+                        <div>
+                            <dt className="text-sm font-semibold uppercase tracking-wide text-slate-700">
+                                Machine
+                            </dt>
+                            <dd className="mt-1 break-words text-slate-800">
+                                {serviceCall.machine_serial}
+                            </dd>
+                        </div>
+                        <div>
+                            <dt className="text-sm font-semibold uppercase tracking-wide text-slate-700">
+                                Problème
+                            </dt>
+                            <dd className="mt-1 break-words text-slate-800">
+                                {serviceCall.issue_description}
+                            </dd>
+                        </div>
+                        <div>
+                            <dt className="text-sm font-semibold uppercase tracking-wide text-slate-700">
+                                Technicien
+                            </dt>
+                            <dd className="mt-1 break-words text-slate-800">
+                                {serviceCall.technician_name}
+                            </dd>
+                        </div>
+                        <div>
+                            <dt className="text-sm font-semibold uppercase tracking-wide text-slate-700">
+                                Statut
+                            </dt>
+                            <dd className="mt-1 font-medium text-slate-800">
+                                {serviceCall.status}
+                            </dd>
+                        </div>
+                    </dl>
+
                     <div className="mt-6 space-y-4">
-                        <p>
-                            <strong>Machine :</strong>{" "}
-                            {serviceCall.machine_serial}
-                        </p>
-
-                        <p>
-                            <strong>Problème :</strong>{" "}
-                            {serviceCall.issue_description}
-                        </p>
-
-                        <p>
-                            <strong>Technicien :</strong>{" "}
-                            {serviceCall.technician_name}
-                        </p>
-
-                        <p>
-                            <strong>Statut :</strong>{" "}
-                            {serviceCall.status}
-                        </p>
-
-                        <div className="rounded-xl bg-white p-6 shadow">
-                            <h2 className="text-xl font-bold">
+                        <section className={sectionCardClass}>
+                            <h2 className="text-lg font-bold text-slate-900 sm:text-xl">
                                 Notes technicien
                             </h2>
-                            <div className="rounded-xl bg-white p-6 shadow">
-                                <h2 className="text-xl font-bold">
-                                    Photo intervention
-                                </h2>
+                            <textarea
+                                className={`${inputClass} mt-4 min-h-40 resize-y`}
+                                placeholder="Ajouter les observations, actions effectuées, pièces à prévoir..."
+                                value={notes}
+                                onChange={(e) => setNotes(e.target.value)}
+                            />
+
+                            <button
+                                type="button"
+                                onClick={saveNotes}
+                                className={`${btnPrimaryClass} mt-4`}
+                            >
+                                Sauvegarder les notes
+                            </button>
+                        </section>
+
+                        <section className={sectionCardClass}>
+                            <h2 className="text-lg font-bold text-slate-900 sm:text-xl">
+                                Photo intervention
+                            </h2>
 
                                 <label
-                                    className={`mt-4 inline-block rounded-lg px-4 py-2 font-semibold text-white ${
+                                    className={`mt-4 flex min-h-12 w-full items-center justify-center rounded-lg px-4 py-3 text-center text-base font-semibold text-white md:w-auto md:inline-flex ${
                                         uploading
                                             ? "cursor-not-allowed bg-slate-400 opacity-70"
-                                            : "cursor-pointer bg-slate-950 hover:bg-slate-800"
+                                            : "cursor-pointer bg-slate-950 active:bg-slate-800"
                                     }`}
                                 >
                                     {uploading
@@ -417,17 +460,17 @@ export default function ServiceCallDetailsPage() {
                                     </p>
                                 )}
 
-                                <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+                                <div className="mt-6 grid grid-cols-1 gap-5 min-[420px]:grid-cols-2">
                                     {photos.map((photo) => (
                                         <div
                                             key={photo.id}
-                                            className="relative rounded-xl border bg-white p-3"
+                                            className="relative rounded-xl border border-slate-200 bg-white p-3 shadow-sm"
                                         >
                                             <img
                                                 src={photo.photo_url}
                                                 alt="Intervention"
                                                 crossOrigin="anonymous"
-                                                className="mb-3 w-full rounded-lg object-cover"
+                                                className="mb-3 aspect-[4/3] min-h-48 w-full rounded-lg object-cover"
                                             />
 
                                             <button
@@ -439,128 +482,134 @@ export default function ServiceCallDetailsPage() {
                                                     )
                                                 }
                                                 disabled={uploading}
-                                                className="relative z-10 w-full rounded-lg bg-red-100 px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-200 disabled:cursor-not-allowed disabled:opacity-50"
+                                                className="relative z-10 flex min-h-12 w-full items-center justify-center rounded-lg bg-red-100 px-3 py-3 text-center text-base font-semibold text-red-800 active:bg-red-200 disabled:cursor-not-allowed disabled:opacity-50"
                                             >
                                                 Supprimer
                                             </button>
                                         </div>
                                     ))}
                                 </div>
-                            </div>
-                            <div className="rounded-xl bg-white p-6 shadow">
-                                <h2 className="text-xl font-bold">
-                                    Signature client
-                                </h2>
+                        </section>
 
-                                <div className="mt-4 rounded-xl border bg-white">
-                                    <SignatureCanvas
-                                        ref={signatureRef}
-                                        penColor="black"
-                                        canvasProps={{
-                                            className: "h-48 w-full rounded-xl",
-                                        }}
+                        <section className={sectionCardClass}>
+                            <h2 className="text-lg font-bold text-slate-900 sm:text-xl">
+                                Signature client
+                            </h2>
+
+                            <div className="mt-4 overflow-hidden rounded-xl border bg-white">
+                                <SignatureCanvas
+                                    ref={signatureRef}
+                                    penColor="black"
+                                    canvasProps={{
+                                        className: "h-40 w-full touch-none sm:h-48",
+                                    }}
+                                />
+                            </div>
+
+                            <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                                <button
+                                    type="button"
+                                    onClick={saveSignature}
+                                    className={btnPrimaryClass}
+                                >
+                                    {savingSignature
+                                        ? "Sauvegarde..."
+                                        : "Sauvegarder la signature"}
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={clearSignature}
+                                    className={btnSecondaryClass}
+                                >
+                                    Effacer
+                                </button>
+                            </div>
+
+                            {serviceCall.signature_url && (
+                                <div className="mt-6">
+                                    <p className="mb-2 text-sm font-semibold text-slate-600">
+                                        Signature enregistrée :
+                                    </p>
+
+                                    <img
+                                        src={serviceCall.signature_url}
+                                        alt="Signature client"
+                                        crossOrigin="anonymous"
+                                        className="w-full max-w-sm rounded-xl border"
                                     />
                                 </div>
+                            )}
+                        </section>
 
-                                <div className="mt-4 flex gap-3">
-                                    <button
-                                        type="button"
-                                        onClick={saveSignature}
-                                        className="rounded-lg bg-slate-950 px-4 py-2 font-semibold text-white"
-                                    >
-                                        {savingSignature ? "Sauvegarde..." : "Sauvegarder la signature"}
-                                    </button>
+                        <section className={sectionCardClass}>
+                            <h2 className="text-lg font-bold text-slate-900 sm:text-xl">
+                                Pièces utilisées
+                            </h2>
 
-                                    <button
-                                        type="button"
-                                        onClick={clearSignature}
-                                        className="rounded-lg bg-slate-200 px-4 py-2 font-semibold text-slate-800"
-                                    >
-                                        Effacer
-                                    </button>
-                                </div>
-
-                                {serviceCall.signature_url && (
-                                    <div className="mt-6">
-                                        <p className="mb-2 text-sm font-semibold text-slate-600">
-                                            Signature enregistrée :
-                                        </p>
-
-                                        <img
-                                            src={serviceCall.signature_url}
-                                            alt="Signature client"
-                                            crossOrigin="anonymous"
-                                            className="max-w-sm rounded-xl border"
-                                        />
-                                    </div>
-                                )}
-                            </div>
-                            <div className="rounded-xl bg-white p-6 shadow">
-                                <h2 className="text-xl font-bold">
-                                    Pièces utilisées
-                                </h2>
-
-                                <form onSubmit={addPart} className="mt-4 grid gap-4">
-                                    <input
-                                        className="rounded-lg border p-3"
-                                        placeholder="Nom de la pièce"
-                                        value={partName}
-                                        onChange={(e) => setPartName(e.target.value)}
-                                    />
-
-                                    <input
-                                        type="number"
-                                        min="1"
-                                        className="rounded-lg border p-3"
-                                        placeholder="Quantité"
-                                        value={quantity}
-                                        onChange={(e) => setQuantity(Number(e.target.value))}
-                                    />
-
-                                    <button className="rounded-lg bg-slate-950 px-4 py-2 font-semibold text-white">
-                                        Ajouter une pièce
-                                    </button>
-                                </form>
-
-                                <div className="mt-6 space-y-3">
-                                    {parts.map((part) => (
-                                        <div
-                                            key={part.id}
-                                            className="flex justify-between rounded-lg bg-slate-100 p-3"
-                                        >
-                                            <span>{part.part_name}</span>
-                                            <div className="text-right">
-                                                <p className="font-semibold">
-                                                    x{part.quantity}
-                                                </p>
-                                                <p className="text-sm text-slate-500">
-                                                    ${(part.quantity * part.unit_price).toFixed(2)}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                    <div className="mt-6 border-t pt-4 text-right">
-                                        <p className="text-lg font-bold">
-                                            Total pièces : $
-                                            {totalPartsCost.toFixed(2)}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            <textarea
-                                className="mt-4 min-h-40 w-full rounded-lg border p-3"
-                                placeholder="Ajouter les observations, actions effectuées, pièces à prévoir..."
-                                value={notes}
-                                onChange={(e) => setNotes(e.target.value)}
-                            />
-
-                            <button
-                                onClick={saveNotes}
-                                className="mt-4 rounded-lg bg-slate-950 px-4 py-2 font-semibold text-white"
+                            <form
+                                onSubmit={addPart}
+                                className="mt-4 grid gap-5"
                             >
-                                Sauvegarder les notes
-                            </button>
-                        </div>
+                                <input
+                                    className={inputClass}
+                                    placeholder="Nom de la pièce"
+                                    value={partName}
+                                    onChange={(e) =>
+                                        setPartName(e.target.value)
+                                    }
+                                />
+
+                                <input
+                                    type="number"
+                                    min="1"
+                                    className={inputClass}
+                                    placeholder="Quantité"
+                                    value={quantity}
+                                    onChange={(e) =>
+                                        setQuantity(Number(e.target.value))
+                                    }
+                                />
+
+                                <button
+                                    type="submit"
+                                    className={btnPrimaryClass}
+                                >
+                                    Ajouter une pièce
+                                </button>
+                            </form>
+
+                            <div className="mt-6 space-y-3">
+                                {parts.map((part) => (
+                                    <div
+                                        key={part.id}
+                                        className="flex flex-col gap-2 rounded-lg bg-slate-100 p-4 sm:flex-row sm:items-center sm:justify-between"
+                                    >
+                                        <span className="break-words font-medium">
+                                            {part.part_name}
+                                        </span>
+                                        <div className="sm:text-right">
+                                            <p className="font-semibold">
+                                                x{part.quantity}
+                                            </p>
+                                            <p className="text-sm text-slate-500">
+                                                $
+                                                {(
+                                                    part.quantity *
+                                                    part.unit_price
+                                                ).toFixed(2)}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                                <div className="mt-6 border-t pt-4 sm:text-right">
+                                    <p className="text-lg font-bold">
+                                        Total pièces : $
+                                        {totalPartsCost.toFixed(2)}
+                                    </p>
+                                </div>
+                            </div>
+                        </section>
                     </div>
                 </div>
             </div>

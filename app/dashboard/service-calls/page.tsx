@@ -13,6 +13,31 @@ type ServiceCall = {
     technician_name: string;
 };
 
+const inputClass =
+    "w-full min-h-12 rounded-lg border border-slate-400 bg-white px-4 py-3 text-base text-slate-900 placeholder:text-slate-500";
+
+const btnPrimaryClass =
+    "flex min-h-12 w-full items-center justify-center rounded-lg bg-slate-950 px-4 py-3 text-center text-base font-semibold text-white active:bg-slate-800 md:w-auto";
+
+const btnDangerClass =
+    "flex min-h-12 w-full items-center justify-center rounded-lg bg-red-100 px-4 py-3 text-center text-base font-semibold text-red-800 active:bg-red-200 md:w-auto";
+
+function getStatusColor(status: string) {
+    switch (status) {
+        case "En attente":
+            return "border border-yellow-400 bg-yellow-100 text-yellow-950";
+
+        case "En cours":
+            return "border border-blue-400 bg-blue-100 text-blue-950";
+
+        case "Terminé":
+            return "border border-green-400 bg-green-100 text-green-950";
+
+        default:
+            return "border border-slate-400 bg-slate-200 text-slate-900";
+    }
+}
+
 export default function ServiceCallsPage() {
     const [serviceCalls, setServiceCalls] = useState<ServiceCall[]>([]);
     const [search, setSearch] = useState("");
@@ -68,21 +93,6 @@ export default function ServiceCallsPage() {
 
         setServiceCalls(data || []);
     }
-    function getStatusColor(status: string) {
-        switch (status) {
-            case "En attente":
-                return "bg-yellow-200 text-yellow-900";
-
-            case "En cours":
-                return "bg-blue-200 text-blue-900";
-
-            case "Terminé":
-                return "bg-green-200 text-green-900";
-
-            default:
-                return "bg-slate-200 text-slate-900";
-        }
-    }
     async function updateStatus(id: number, status: string) {
         const { error } = await supabase
             .from("service_calls")
@@ -129,77 +139,92 @@ export default function ServiceCallsPage() {
         );
     }
     return (
-        <div>
-            <h1 className="mb-6 text-3xl font-bold">
-                Appels de service
-            </h1>
+        <div className="w-full space-y-6 md:mx-auto md:max-w-3xl">
+            <header>
+                <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+                    Appels de service
+                </h1>
+                <p className="mt-1 text-base text-slate-600">
+                    Gérez vos interventions terrain
+                </p>
+            </header>
+
             <input
-                className="mb-6 w-full rounded-xl border p-3"
+                className={inputClass}
                 placeholder="Rechercher un client..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
             />
+
             <form
                 onSubmit={createServiceCall}
-                className="mb-8 grid gap-4 rounded-xl bg-white p-6 shadow"
+                className="w-full space-y-5 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6"
             >
+                <h2 className="text-lg font-semibold text-slate-900">
+                    Nouvel appel
+                </h2>
+
                 <input
-                    className="rounded-lg border p-3"
+                    className={inputClass}
                     placeholder="Nom du client"
                     value={clientName}
                     onChange={(e) => setClientName(e.target.value)}
                 />
 
                 <input
-                    className="rounded-lg border p-3"
+                    className={inputClass}
                     placeholder="Adresse"
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                 />
 
                 <input
-                    className="rounded-lg border p-3"
+                    className={inputClass}
                     placeholder="Numéro de série machine"
                     value={machineSerial}
                     onChange={(e) => setMachineSerial(e.target.value)}
                 />
 
                 <textarea
-                    className="rounded-lg border p-3"
+                    className={`${inputClass} min-h-32 resize-y`}
                     placeholder="Description du problème"
                     value={issueDescription}
                     onChange={(e) => setIssueDescription(e.target.value)}
                 />
 
                 <input
-                    className="rounded-lg border p-3"
+                    className={inputClass}
                     placeholder="Technicien assigné"
                     value={technicianName}
                     onChange={(e) => setTechnicianName(e.target.value)}
                 />
 
-                <button className="rounded-lg bg-slate-950 p-3 font-semibold text-white">
+                <button type="submit" className={btnPrimaryClass}>
                     Créer l’appel de service
                 </button>
             </form>
-            <div className="space-y-4">
+
+            <div className="space-y-5">
                 {filteredCalls.map((call) => (
-                    <div
+                    <article
                         key={call.id}
-                        className="rounded-xl bg-white p-6 shadow"
+                        className="w-full rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6"
                     >
-                        <div className="flex items-center justify-between">
+                        <div className="space-y-3">
                             <a
                                 href={`/dashboard/service-calls/${call.id}`}
-                                className="text-xl font-semibold text-cyan-700 hover:underline"
+                                className="block text-xl font-bold leading-snug text-cyan-800 hover:underline"
                             >
                                 {call.client_name}
                             </a>
 
                             <select
                                 value={call.status}
-                                onChange={(e) => updateStatus(call.id, e.target.value)}
-                                className={`rounded-full px-3 py-1 text-sm font-semibold ${getStatusColor(call.status)}`}
+                                onChange={(e) =>
+                                    updateStatus(call.id, e.target.value)
+                                }
+                                aria-label={`Statut pour ${call.client_name}`}
+                                className={`min-h-12 w-full max-w-full rounded-lg px-3 py-2 text-base font-semibold ${getStatusColor(call.status)}`}
                             >
                                 <option>En attente</option>
                                 <option>En cours</option>
@@ -207,31 +232,57 @@ export default function ServiceCallsPage() {
                             </select>
                         </div>
 
-                        <p className="mt-2 text-slate-600">
-                            {call.address}
-                        </p>
+                        <dl className="mt-5 space-y-4 text-base">
+                            <div>
+                                <dt className="text-sm font-semibold uppercase tracking-wide text-slate-700">
+                                    Adresse
+                                </dt>
+                                <dd className="mt-1 break-words text-slate-800">
+                                    {call.address}
+                                </dd>
+                            </div>
+                            <div>
+                                <dt className="text-sm font-semibold uppercase tracking-wide text-slate-700">
+                                    N° série machine
+                                </dt>
+                                <dd className="mt-1 break-words text-slate-800">
+                                    {call.machine_serial}
+                                </dd>
+                            </div>
+                            <div>
+                                <dt className="text-sm font-semibold uppercase tracking-wide text-slate-700">
+                                    Problème
+                                </dt>
+                                <dd className="mt-1 break-words text-slate-800">
+                                    {call.issue_description}
+                                </dd>
+                            </div>
+                            <div>
+                                <dt className="text-sm font-semibold uppercase tracking-wide text-slate-700">
+                                    Technicien
+                                </dt>
+                                <dd className="mt-1 break-words text-slate-800">
+                                    {call.technician_name}
+                                </dd>
+                            </div>
+                        </dl>
 
-                        <p className="mt-2">
-                            <strong>Machine :</strong>{" "}
-                            {call.machine_serial}
-                        </p>
-
-                        <p className="mt-2">
-                            <strong>Problème :</strong>{" "}
-                            {call.issue_description}
-                        </p>
-
-                        <p className="mt-2">
-                            <strong>Technicien :</strong>{" "}
-                            {call.technician_name}
-                        </p>
-                        <button
-                            onClick={() => deleteServiceCall(call.id)}
-                            className="mt-4 rounded-lg bg-red-100 px-4 py-2 font-semibold text-red-700"
-                        >
-                            Supprimer
-                        </button>
-                    </div>
+                        <div className="mt-6 flex flex-col gap-3">
+                            <a
+                                href={`/dashboard/service-calls/${call.id}`}
+                                className="flex min-h-12 w-full items-center justify-center rounded-lg bg-cyan-700 px-4 py-3 text-center text-base font-semibold text-white active:bg-cyan-800"
+                            >
+                                Ouvrir la fiche
+                            </a>
+                            <button
+                                type="button"
+                                onClick={() => deleteServiceCall(call.id)}
+                                className={btnDangerClass}
+                            >
+                                Supprimer
+                            </button>
+                        </div>
+                    </article>
                 ))}
             </div>
         </div>
