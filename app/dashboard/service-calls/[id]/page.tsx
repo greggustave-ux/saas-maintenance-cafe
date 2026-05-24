@@ -129,7 +129,6 @@ export default function ServiceCallDetailsPage() {
         if (!e.target.files || !serviceCall) return;
 
         const file = e.target.files[0];
-        console.log("Fichier sélectionné :", file);
 
         setUploading(true);
 
@@ -146,8 +145,6 @@ export default function ServiceCallDetailsPage() {
                 upsert: true,
             });
 
-        console.log("Erreur upload :", uploadError);
-
         if (uploadError) {
             alert(uploadError.message);
             setUploading(false);
@@ -157,8 +154,6 @@ export default function ServiceCallDetailsPage() {
         const { data } = supabase.storage
             .from("service-photos")
             .getPublicUrl(filePath);
-
-        console.log("URL publique :", data);
 
         const publicUrl = data.publicUrl;
 
