@@ -5,6 +5,8 @@ import { useParams } from "next/navigation";
 import { supabase } from "@/src/lib/supabase-client";
 import SignatureCanvas from "react-signature-canvas";
 import { useRef } from "react";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas-pro";
 
 type ServiceCall = {
     id: number;
@@ -281,206 +283,254 @@ export default function ServiceCallDetailsPage() {
     function clearSignature() {
         signatureRef.current?.clear();
     }
+    async function downloadPdf() {
+        const element = document.getElementById("service-report");
+
+        if (!element) return;
+
+        try {
+            const canvas = await html2canvas(element, {
+                scale: 2,
+                useCORS: true,
+            });
+
+            const imgData = canvas.toDataURL("image/png");
+
+            const pdf = new jsPDF("p", "mm", "a4");
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+            let heightLeft = pdfHeight;
+            let position = 0;
+
+            pdf.addImage(imgData, "PNG", 0, position, pdfWidth, pdfHeight);
+            heightLeft -= pageHeight;
+
+            while (heightLeft > 0) {
+                position = heightLeft - pdfHeight;
+                pdf.addPage();
+                pdf.addImage(imgData, "PNG", 0, position, pdfWidth, pdfHeight);
+                heightLeft -= pageHeight;
+            }
+
+            pdf.save(`rapport-intervention-${serviceCall?.id}.pdf`);
+        } catch (err) {
+            console.error(err);
+            alert("Impossible de générer le PDF. Voir la console pour plus de détails.");
+        }
+    }
 
     return (
         <main className="space-y-6">
-            <div className="rounded-xl bg-white p-6 shadow">
-                <h1 className="text-3xl font-bold">
-                    {serviceCall.client_name}
-                </h1>
+            <button
+                type="button"
+                onClick={downloadPdf}
+                className="relative z-20 mb-6 rounded-lg bg-cyan-600 px-4 py-2 font-semibold text-white hover:bg-cyan-700"
+            >
+                Télécharger le rapport PDF
+            </button>
+            <div id="service-report" className="space-y-6">
+                <div className="rounded-xl bg-white p-6 shadow">
+                    <h1 className="text-3xl font-bold">
+                        {serviceCall.client_name}
+                    </h1>
 
-                <p className="mt-2 text-slate-600">
-                    {serviceCall.address}
-                </p>
-
-                <div className="mt-6 space-y-4">
-                    <p>
-                        <strong>Machine :</strong>{" "}
-                        {serviceCall.machine_serial}
+                    <p className="mt-2 text-slate-600">
+                        {serviceCall.address}
                     </p>
 
-                    <p>
-                        <strong>Problème :</strong>{" "}
-                        {serviceCall.issue_description}
-                    </p>
+                    <div className="mt-6 space-y-4">
+                        <p>
+                            <strong>Machine :</strong>{" "}
+                            {serviceCall.machine_serial}
+                        </p>
 
-                    <p>
-                        <strong>Technicien :</strong>{" "}
-                        {serviceCall.technician_name}
-                    </p>
+                        <p>
+                            <strong>Problème :</strong>{" "}
+                            {serviceCall.issue_description}
+                        </p>
 
-                    <p>
-                        <strong>Statut :</strong>{" "}
-                        {serviceCall.status}
-                    </p>
+                        <p>
+                            <strong>Technicien :</strong>{" "}
+                            {serviceCall.technician_name}
+                        </p>
 
-                    <div className="rounded-xl bg-white p-6 shadow">
-                        <h2 className="text-xl font-bold">
-                            Notes technicien
-                        </h2>
+                        <p>
+                            <strong>Statut :</strong>{" "}
+                            {serviceCall.status}
+                        </p>
+
                         <div className="rounded-xl bg-white p-6 shadow">
                             <h2 className="text-xl font-bold">
-                                Photo intervention
+                                Notes technicien
                             </h2>
-                            <label className="mt-4 inline-block cursor-pointer rounded-lg bg-slate-950 px-4 py-2 font-semibold text-white">
-                                Ajouter une photo
+                            <div className="rounded-xl bg-white p-6 shadow">
+                                <h2 className="text-xl font-bold">
+                                    Photo intervention
+                                </h2>
+                                <label className="mt-4 inline-block cursor-pointer rounded-lg bg-slate-950 px-4 py-2 font-semibold text-white">
+                                    Ajouter une photo
 
-                                <div className="rounded-xl bg-white p-6 shadow">
-                                    <h2 className="text-xl font-bold">
-                                        Photo intervention
-                                    </h2>
+                                    <div className="rounded-xl bg-white p-6 shadow">
+                                        <h2 className="text-xl font-bold">
+                                            Photo intervention
+                                        </h2>
 
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={uploadPhoto}
-                                        className="mt-4 block w-full rounded-lg border p-3"
-                                    />
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={uploadPhoto}
+                                            className="mt-4 block w-full rounded-lg border p-3"
+                                        />
 
-                                    {uploading && (
-                                        <p className="mt-4 text-sm text-slate-500">
-                                            Upload en cours...
-                                        </p>
-                                    )}
+                                        {uploading && (
+                                            <p className="mt-4 text-sm text-slate-500">
+                                                Upload en cours...
+                                            </p>
+                                        )}
 
-                                    <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-                                        {photos.map((photo) => (
-                                            <div
-                                                key={photo.id}
-                                                className="relative rounded-xl border bg-white p-3"
-                                            >
-                                                <img
-                                                    src={photo.photo_url}
-                                                    alt="Intervention"
-                                                    className="mb-3 w-full rounded-lg object-cover"
-                                                />
-
-                                                <button
-                                                    type="button"
-                                                    onClick={() => deletePhoto(photo.id, photo.photo_url)}
-                                                    className="relative z-10 w-full rounded-lg bg-red-100 px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-200"
+                                        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+                                            {photos.map((photo) => (
+                                                <div
+                                                    key={photo.id}
+                                                    className="relative rounded-xl border bg-white p-3"
                                                 >
-                                                    Supprimer
-                                                </button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </label>
+                                                    <img
+                                                        src={photo.photo_url}
+                                                        alt="Intervention"
+                                                        crossOrigin="anonymous"
+                                                        className="mb-3 w-full rounded-lg object-cover"
+                                                    />
 
-                        </div>
-                        <div className="rounded-xl bg-white p-6 shadow">
-                            <h2 className="text-xl font-bold">
-                                Signature client
-                            </h2>
-
-                            <div className="mt-4 rounded-xl border bg-white">
-                                <SignatureCanvas
-                                    ref={signatureRef}
-                                    penColor="black"
-                                    canvasProps={{
-                                        className: "h-48 w-full rounded-xl",
-                                    }}
-                                />
-                            </div>
-
-                            <div className="mt-4 flex gap-3">
-                                <button
-                                    type="button"
-                                    onClick={saveSignature}
-                                    className="rounded-lg bg-slate-950 px-4 py-2 font-semibold text-white"
-                                >
-                                    {savingSignature ? "Sauvegarde..." : "Sauvegarder la signature"}
-                                </button>
-
-                                <button
-                                    type="button"
-                                    onClick={clearSignature}
-                                    className="rounded-lg bg-slate-200 px-4 py-2 font-semibold text-slate-800"
-                                >
-                                    Effacer
-                                </button>
-                            </div>
-
-                            {serviceCall.signature_url && (
-                                <div className="mt-6">
-                                    <p className="mb-2 text-sm font-semibold text-slate-600">
-                                        Signature enregistrée :
-                                    </p>
-
-                                    <img
-                                        src={serviceCall.signature_url}
-                                        alt="Signature client"
-                                        className="max-w-sm rounded-xl border"
-                                    />
-                                </div>
-                            )}
-                        </div>
-                        <div className="rounded-xl bg-white p-6 shadow">
-                            <h2 className="text-xl font-bold">
-                                Pièces utilisées
-                            </h2>
-
-                            <form onSubmit={addPart} className="mt-4 grid gap-4">
-                                <input
-                                    className="rounded-lg border p-3"
-                                    placeholder="Nom de la pièce"
-                                    value={partName}
-                                    onChange={(e) => setPartName(e.target.value)}
-                                />
-
-                                <input
-                                    type="number"
-                                    min="1"
-                                    className="rounded-lg border p-3"
-                                    placeholder="Quantité"
-                                    value={quantity}
-                                    onChange={(e) => setQuantity(Number(e.target.value))}
-                                />
-
-                                <button className="rounded-lg bg-slate-950 px-4 py-2 font-semibold text-white">
-                                    Ajouter une pièce
-                                </button>
-                            </form>
-
-                            <div className="mt-6 space-y-3">
-                                {parts.map((part) => (
-                                    <div
-                                        key={part.id}
-                                        className="flex justify-between rounded-lg bg-slate-100 p-3"
-                                    >
-                                        <span>{part.part_name}</span>
-                                        <div className="text-right">
-                                            <p className="font-semibold">
-                                                x{part.quantity}
-                                            </p>
-                                            <p className="text-sm text-slate-500">
-                                                ${(part.quantity * part.unit_price).toFixed(2)}
-                                            </p>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => deletePhoto(photo.id, photo.photo_url)}
+                                                        className="relative z-10 w-full rounded-lg bg-red-100 px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-200"
+                                                    >
+                                                        Supprimer
+                                                    </button>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
-                                ))}
-                                <div className="mt-6 border-t pt-4 text-right">
-                                    <p className="text-lg font-bold">
-                                        Total pièces : $
-                                        {totalPartsCost.toFixed(2)}
-                                    </p>
+                                </label>
+
+                            </div>
+                            <div className="rounded-xl bg-white p-6 shadow">
+                                <h2 className="text-xl font-bold">
+                                    Signature client
+                                </h2>
+
+                                <div className="mt-4 rounded-xl border bg-white">
+                                    <SignatureCanvas
+                                        ref={signatureRef}
+                                        penColor="black"
+                                        canvasProps={{
+                                            className: "h-48 w-full rounded-xl",
+                                        }}
+                                    />
+                                </div>
+
+                                <div className="mt-4 flex gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={saveSignature}
+                                        className="rounded-lg bg-slate-950 px-4 py-2 font-semibold text-white"
+                                    >
+                                        {savingSignature ? "Sauvegarde..." : "Sauvegarder la signature"}
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={clearSignature}
+                                        className="rounded-lg bg-slate-200 px-4 py-2 font-semibold text-slate-800"
+                                    >
+                                        Effacer
+                                    </button>
+                                </div>
+
+                                {serviceCall.signature_url && (
+                                    <div className="mt-6">
+                                        <p className="mb-2 text-sm font-semibold text-slate-600">
+                                            Signature enregistrée :
+                                        </p>
+
+                                        <img
+                                            src={serviceCall.signature_url}
+                                            alt="Signature client"
+                                            crossOrigin="anonymous"
+                                            className="max-w-sm rounded-xl border"
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                            <div className="rounded-xl bg-white p-6 shadow">
+                                <h2 className="text-xl font-bold">
+                                    Pièces utilisées
+                                </h2>
+
+                                <form onSubmit={addPart} className="mt-4 grid gap-4">
+                                    <input
+                                        className="rounded-lg border p-3"
+                                        placeholder="Nom de la pièce"
+                                        value={partName}
+                                        onChange={(e) => setPartName(e.target.value)}
+                                    />
+
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        className="rounded-lg border p-3"
+                                        placeholder="Quantité"
+                                        value={quantity}
+                                        onChange={(e) => setQuantity(Number(e.target.value))}
+                                    />
+
+                                    <button className="rounded-lg bg-slate-950 px-4 py-2 font-semibold text-white">
+                                        Ajouter une pièce
+                                    </button>
+                                </form>
+
+                                <div className="mt-6 space-y-3">
+                                    {parts.map((part) => (
+                                        <div
+                                            key={part.id}
+                                            className="flex justify-between rounded-lg bg-slate-100 p-3"
+                                        >
+                                            <span>{part.part_name}</span>
+                                            <div className="text-right">
+                                                <p className="font-semibold">
+                                                    x{part.quantity}
+                                                </p>
+                                                <p className="text-sm text-slate-500">
+                                                    ${(part.quantity * part.unit_price).toFixed(2)}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    <div className="mt-6 border-t pt-4 text-right">
+                                        <p className="text-lg font-bold">
+                                            Total pièces : $
+                                            {totalPartsCost.toFixed(2)}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <textarea
-                            className="mt-4 min-h-40 w-full rounded-lg border p-3"
-                            placeholder="Ajouter les observations, actions effectuées, pièces à prévoir..."
-                            value={notes}
-                            onChange={(e) => setNotes(e.target.value)}
-                        />
+                            <textarea
+                                className="mt-4 min-h-40 w-full rounded-lg border p-3"
+                                placeholder="Ajouter les observations, actions effectuées, pièces à prévoir..."
+                                value={notes}
+                                onChange={(e) => setNotes(e.target.value)}
+                            />
 
-                        <button
-                            onClick={saveNotes}
-                            className="mt-4 rounded-lg bg-slate-950 px-4 py-2 font-semibold text-white"
-                        >
-                            Sauvegarder les notes
-                        </button>
+                            <button
+                                onClick={saveNotes}
+                                className="mt-4 rounded-lg bg-slate-950 px-4 py-2 font-semibold text-white"
+                            >
+                                Sauvegarder les notes
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
