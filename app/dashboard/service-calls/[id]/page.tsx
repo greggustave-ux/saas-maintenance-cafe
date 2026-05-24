@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "@/src/lib/supabase-client";
+import SignatureCanvas from "react-signature-canvas";
+import { useRef } from "react";
 
 type ServiceCall = {
     id: number;
@@ -14,6 +16,7 @@ type ServiceCall = {
     technician_name: string;
     technician_notes: string | null;
     photo_url: string | null;
+    signature_url: string | null;
 };
 type ServiceCallPart = {
     id: number;
@@ -38,6 +41,8 @@ export default function ServiceCallDetailsPage() {
     const [unitPrice, setUnitPrice] = useState(0);
     const [uploading, setUploading] = useState(false);
     const [photos, setPhotos] = useState<ServiceCallPhoto[]>([]);
+    const signatureRef = useRef<any>(null);
+    const [savingSignature, setSavingSignature] = useState(false);
 
     async function fetchParts() {
         const { data, error } = await supabase
@@ -218,6 +223,64 @@ export default function ServiceCallDetailsPage() {
             prev.filter((photo) => photo.id !== photoId)
         );
     }
+    async function saveSignature() {
+        if (!signatureRef.current || !serviceCall) return;
+
+        if (signatureRef.current.isEmpty()) {
+            alert("La signature est vide.");
+            return;
+        }
+
+        setSavingSignature(true);
+
+        const dataUrl = signatureRef.current
+            .getTrimmedCanvas()
+            .toDataURL("image/png");
+
+        const blob = await fetch(dataUrl).then((res) => res.blob());
+
+        const filePath = `${serviceCall.id}/signature-${Date.now()}.png`;
+
+        const { error: uploadError } = await supabase.storage
+            .from("service-photos")
+            .upload(filePath, blob, {
+                contentType: "image/png",
+                upsert: true,
+            });
+
+        if (uploadError) {
+            alert(uploadError.message);
+            setSavingSignature(false);
+            return;
+        }
+
+        const { data } = supabase.storage
+            .from("service-photos")
+            .getPublicUrl(filePath);
+
+        const publicUrl = data.publicUrl;
+
+        const { error: updateError } = await supabase
+            .from("service_calls")
+            .update({ signature_url: publicUrl })
+            .eq("id", serviceCall.id);
+
+        if (updateError) {
+            alert(updateError.message);
+            setSavingSignature(false);
+            return;
+        }
+
+        setServiceCall({
+            ...serviceCall,
+            signature_url: publicUrl,
+        });
+
+        setSavingSignature(false);
+    }
+    function clearSignature() {
+        signatureRef.current?.clear();
+    }
 
     return (
         <main className="space-y-6">
@@ -305,6 +368,53 @@ export default function ServiceCallDetailsPage() {
                                 </div>
                             </label>
 
+                        </div>
+                        <div className="rounded-xl bg-white p-6 shadow">
+                            <h2 className="text-xl font-bold">
+                                Signature client
+                            </h2>
+
+                            <div className="mt-4 rounded-xl border bg-white">
+                                <SignatureCanvas
+                                    ref={signatureRef}
+                                    penColor="black"
+                                    canvasProps={{
+                                        className: "h-48 w-full rounded-xl",
+                                    }}
+                                />
+                            </div>
+
+                            <div className="mt-4 flex gap-3">
+                                <button
+                                    type="button"
+                                    onClick={saveSignature}
+                                    className="rounded-lg bg-slate-950 px-4 py-2 font-semibold text-white"
+                                >
+                                    {savingSignature ? "Sauvegarde..." : "Sauvegarder la signature"}
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={clearSignature}
+                                    className="rounded-lg bg-slate-200 px-4 py-2 font-semibold text-slate-800"
+                                >
+                                    Effacer
+                                </button>
+                            </div>
+
+                            {serviceCall.signature_url && (
+                                <div className="mt-6">
+                                    <p className="mb-2 text-sm font-semibold text-slate-600">
+                                        Signature enregistrée :
+                                    </p>
+
+                                    <img
+                                        src={serviceCall.signature_url}
+                                        alt="Signature client"
+                                        className="max-w-sm rounded-xl border"
+                                    />
+                                </div>
+                            )}
                         </div>
                         <div className="rounded-xl bg-white p-6 shadow">
                             <h2 className="text-xl font-bold">
