@@ -192,6 +192,32 @@ export default function ServiceCallDetailsPage() {
 
         setPhotos(data || []);
     }
+    async function deletePhoto(photoId: number, photoUrl: string) {
+        const confirmDelete = window.confirm("Supprimer cette photo ?");
+        if (!confirmDelete) return;
+
+        const path = photoUrl.split("/service-photos/")[1];
+
+        if (path) {
+            await supabase.storage
+                .from("service-photos")
+                .remove([path]);
+        }
+
+        const { error } = await supabase
+            .from("service_call_photos")
+            .delete()
+            .eq("id", photoId);
+
+        if (error) {
+            alert(error.message);
+            return;
+        }
+
+        setPhotos((prev) =>
+            prev.filter((photo) => photo.id !== photoId)
+        );
+    }
 
     return (
         <main className="space-y-6">
@@ -254,14 +280,26 @@ export default function ServiceCallDetailsPage() {
                                         </p>
                                     )}
 
-                                    <div className="mt-6 grid grid-cols-2 gap-4">
+                                    <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
                                         {photos.map((photo) => (
-                                            <img
+                                            <div
                                                 key={photo.id}
-                                                src={photo.photo_url}
-                                                alt="Intervention"
-                                                className="rounded-xl border"
-                                            />
+                                                className="relative rounded-xl border bg-white p-3"
+                                            >
+                                                <img
+                                                    src={photo.photo_url}
+                                                    alt="Intervention"
+                                                    className="mb-3 w-full rounded-lg object-cover"
+                                                />
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() => deletePhoto(photo.id, photo.photo_url)}
+                                                    className="relative z-10 w-full rounded-lg bg-red-100 px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-200"
+                                                >
+                                                    Supprimer
+                                                </button>
+                                            </div>
                                         ))}
                                     </div>
                                 </div>
