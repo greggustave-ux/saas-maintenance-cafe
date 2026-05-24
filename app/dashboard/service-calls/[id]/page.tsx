@@ -7,6 +7,7 @@ import SignatureCanvas from "react-signature-canvas";
 import { useRef } from "react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas-pro";
+import { compressImageForUpload } from "@/src/lib/compress-image";
 
 type ServiceCall = {
     id: number;
@@ -42,6 +43,7 @@ export default function ServiceCallDetailsPage() {
     const [quantity, setQuantity] = useState(1);
     const [unitPrice, setUnitPrice] = useState(0);
     const [uploading, setUploading] = useState(false);
+    const [uploadError, setUploadError] = useState<string | null>(null);
     const [photos, setPhotos] = useState<ServiceCallPhoto[]>([]);
     const signatureRef = useRef<any>(null);
     const [savingSignature, setSavingSignature] = useState(false);
@@ -139,51 +141,57 @@ export default function ServiceCallDetailsPage() {
     );
 
     async function uploadPhoto(e: React.ChangeEvent<HTMLInputElement>) {
-        if (!e.target.files || !serviceCall) return;
+        const input = e.target;
+        const file = input.files?.[0];
 
-        const file = e.target.files[0];
+        if (!file || !serviceCall) return;
 
+        setUploadError(null);
         setUploading(true);
 
-        const safeFileName = file.name
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "")
-            .replace(/[^a-zA-Z0-9.-]/g, "_");
+        try {
+            const compressed = await compressImageForUpload(file);
+            const filePath = `${serviceCall.id}/${Date.now()}-photo.jpg`;
 
-        const filePath = `${serviceCall.id}/${Date.now()}-${safeFileName}`;
+            const { error: storageError } = await supabase.storage
+                .from("service-photos")
+                .upload(filePath, compressed, {
+                    upsert: true,
+                    contentType: "image/jpeg",
+                });
 
-        const { error: uploadError } = await supabase.storage
-            .from("service-photos")
-            .upload(filePath, file, {
-                upsert: true,
-            });
+            if (storageError) {
+                setUploadError(storageError.message);
+                return;
+            }
 
-        if (uploadError) {
-            alert(uploadError.message);
+            const { data } = supabase.storage
+                .from("service-photos")
+                .getPublicUrl(filePath);
+
+            const { error: insertError } = await supabase
+                .from("service_call_photos")
+                .insert({
+                    service_call_id: serviceCall.id,
+                    photo_url: data.publicUrl,
+                });
+
+            if (insertError) {
+                setUploadError(insertError.message);
+                return;
+            }
+
+            await fetchPhotos();
+        } catch (err) {
+            setUploadError(
+                err instanceof Error
+                    ? err.message
+                    : "Échec du téléversement. Réessayez."
+            );
+        } finally {
             setUploading(false);
-            return;
+            input.value = "";
         }
-
-        const { data } = supabase.storage
-            .from("service-photos")
-            .getPublicUrl(filePath);
-
-        const publicUrl = data.publicUrl;
-
-        const { error: insertError } = await supabase
-            .from("service_call_photos")
-            .insert({
-                service_call_id: serviceCall.id,
-                photo_url: publicUrl,
-            });
-
-        if (insertError) {
-            alert(insertError.message);
-            setUploading(false);
-            return;
-        }
-
-        fetchPhotos();
     }
     async function fetchPhotos() {
         const { data, error } = await supabase
@@ -369,53 +377,75 @@ export default function ServiceCallDetailsPage() {
                                 <h2 className="text-xl font-bold">
                                     Photo intervention
                                 </h2>
-                                <label className="mt-4 inline-block cursor-pointer rounded-lg bg-slate-950 px-4 py-2 font-semibold text-white">
-                                    Ajouter une photo
 
-                                    <div className="rounded-xl bg-white p-6 shadow">
-                                        <h2 className="text-xl font-bold">
-                                            Photo intervention
-                                        </h2>
-
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={uploadPhoto}
-                                            className="mt-4 block w-full rounded-lg border p-3"
-                                        />
-
-                                        {uploading && (
-                                            <p className="mt-4 text-sm text-slate-500">
-                                                Upload en cours...
-                                            </p>
-                                        )}
-
-                                        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-                                            {photos.map((photo) => (
-                                                <div
-                                                    key={photo.id}
-                                                    className="relative rounded-xl border bg-white p-3"
-                                                >
-                                                    <img
-                                                        src={photo.photo_url}
-                                                        alt="Intervention"
-                                                        crossOrigin="anonymous"
-                                                        className="mb-3 w-full rounded-lg object-cover"
-                                                    />
-
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => deletePhoto(photo.id, photo.photo_url)}
-                                                        className="relative z-10 w-full rounded-lg bg-red-100 px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-200"
-                                                    >
-                                                        Supprimer
-                                                    </button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
+                                <label
+                                    className={`mt-4 inline-block rounded-lg px-4 py-2 font-semibold text-white ${
+                                        uploading
+                                            ? "cursor-not-allowed bg-slate-400 opacity-70"
+                                            : "cursor-pointer bg-slate-950 hover:bg-slate-800"
+                                    }`}
+                                >
+                                    {uploading
+                                        ? "Téléversement…"
+                                        : "Ajouter une photo"}
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={uploadPhoto}
+                                        disabled={uploading}
+                                        className="sr-only"
+                                    />
                                 </label>
 
+                                {uploading && (
+                                    <div className="mt-4" aria-live="polite">
+                                        <p className="text-sm font-medium text-slate-700">
+                                            Téléversement en cours…
+                                        </p>
+                                        <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-200">
+                                            <div className="h-full w-full animate-pulse rounded-full bg-cyan-600" />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {uploadError && (
+                                    <p
+                                        className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700"
+                                        role="alert"
+                                    >
+                                        {uploadError}
+                                    </p>
+                                )}
+
+                                <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+                                    {photos.map((photo) => (
+                                        <div
+                                            key={photo.id}
+                                            className="relative rounded-xl border bg-white p-3"
+                                        >
+                                            <img
+                                                src={photo.photo_url}
+                                                alt="Intervention"
+                                                crossOrigin="anonymous"
+                                                className="mb-3 w-full rounded-lg object-cover"
+                                            />
+
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    deletePhoto(
+                                                        photo.id,
+                                                        photo.photo_url
+                                                    )
+                                                }
+                                                disabled={uploading}
+                                                className="relative z-10 w-full rounded-lg bg-red-100 px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-200 disabled:cursor-not-allowed disabled:opacity-50"
+                                            >
+                                                Supprimer
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                             <div className="rounded-xl bg-white p-6 shadow">
                                 <h2 className="text-xl font-bold">
