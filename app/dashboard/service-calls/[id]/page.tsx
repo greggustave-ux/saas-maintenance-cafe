@@ -22,6 +22,10 @@ type ServiceCallPart = {
     quantity: number;
     unit_price: number;
 };
+type ServiceCallPhoto = {
+    id: number;
+    photo_url: string;
+};
 
 export default function ServiceCallDetailsPage() {
     const params = useParams();
@@ -33,6 +37,7 @@ export default function ServiceCallDetailsPage() {
     const [quantity, setQuantity] = useState(1);
     const [unitPrice, setUnitPrice] = useState(0);
     const [uploading, setUploading] = useState(false);
+    const [photos, setPhotos] = useState<ServiceCallPhoto[]>([]);
 
     async function fetchParts() {
         const { data, error } = await supabase
@@ -68,6 +73,7 @@ export default function ServiceCallDetailsPage() {
 
         fetchServiceCall();
         fetchParts();
+        fetchPhotos();
     }, [params.id]);
 
     if (!serviceCall) {
@@ -157,23 +163,34 @@ export default function ServiceCallDetailsPage() {
 
         const publicUrl = data.publicUrl;
 
-        const { error: updateError } = await supabase
-            .from("service_calls")
-            .update({ photo_url: publicUrl })
-            .eq("id", serviceCall.id);
+        const { error: insertError } = await supabase
+            .from("service_call_photos")
+            .insert({
+                service_call_id: serviceCall.id,
+                photo_url: publicUrl,
+            });
 
-        if (updateError) {
-            alert(updateError.message);
+        if (insertError) {
+            alert(insertError.message);
             setUploading(false);
             return;
         }
 
-        setServiceCall({
-            ...serviceCall,
-            photo_url: publicUrl,
-        });
+        fetchPhotos();
+    }
+    async function fetchPhotos() {
+        const { data, error } = await supabase
+            .from("service_call_photos")
+            .select("*")
+            .eq("service_call_id", params.id)
+            .order("id", { ascending: false });
 
-        setUploading(false);
+        if (error) {
+            alert(error.message);
+            return;
+        }
+
+        setPhotos(data || []);
     }
 
     return (
@@ -237,13 +254,16 @@ export default function ServiceCallDetailsPage() {
                                         </p>
                                     )}
 
-                                    {serviceCall.photo_url && (
-                                        <img
-                                            src={serviceCall.photo_url}
-                                            alt="Intervention"
-                                            className="mt-6 max-w-md rounded-xl border"
-                                        />
-                                    )}
+                                    <div className="mt-6 grid grid-cols-2 gap-4">
+                                        {photos.map((photo) => (
+                                            <img
+                                                key={photo.id}
+                                                src={photo.photo_url}
+                                                alt="Intervention"
+                                                className="rounded-xl border"
+                                            />
+                                        ))}
+                                    </div>
                                 </div>
                             </label>
 
