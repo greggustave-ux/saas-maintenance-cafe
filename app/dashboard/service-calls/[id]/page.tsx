@@ -13,6 +13,7 @@ type ServiceCall = {
     status: string;
     technician_name: string;
     technician_notes: string | null;
+    photo_url: string | null;
 };
 type ServiceCallPart = {
     id: number;
@@ -31,6 +32,8 @@ export default function ServiceCallDetailsPage() {
     const [partName, setPartName] = useState("");
     const [quantity, setQuantity] = useState(1);
     const [unitPrice, setUnitPrice] = useState(0);
+    const [uploading, setUploading] = useState(false);
+
     async function fetchParts() {
         const { data, error } = await supabase
             .from("service_call_parts")
@@ -122,6 +125,62 @@ export default function ServiceCallDetailsPage() {
         0
     );
 
+    async function uploadPhoto(e: React.ChangeEvent<HTMLInputElement>) {
+        if (!e.target.files || !serviceCall) return;
+
+        const file = e.target.files[0];
+        console.log("Fichier sélectionné :", file);
+
+        setUploading(true);
+
+        const safeFileName = file.name
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/[^a-zA-Z0-9.-]/g, "_");
+
+        const filePath = `${serviceCall.id}/${Date.now()}-${safeFileName}`;
+
+        const { error: uploadError } = await supabase.storage
+            .from("service-photos")
+            .upload(filePath, file, {
+                upsert: true,
+            });
+
+        console.log("Erreur upload :", uploadError);
+
+        if (uploadError) {
+            alert(uploadError.message);
+            setUploading(false);
+            return;
+        }
+
+        const { data } = supabase.storage
+            .from("service-photos")
+            .getPublicUrl(filePath);
+
+        console.log("URL publique :", data);
+
+        const publicUrl = data.publicUrl;
+
+        const { error: updateError } = await supabase
+            .from("service_calls")
+            .update({ photo_url: publicUrl })
+            .eq("id", serviceCall.id);
+
+        if (updateError) {
+            alert(updateError.message);
+            setUploading(false);
+            return;
+        }
+
+        setServiceCall({
+            ...serviceCall,
+            photo_url: publicUrl,
+        });
+
+        setUploading(false);
+    }
+
     return (
         <main className="space-y-6">
             <div className="rounded-xl bg-white p-6 shadow">
@@ -158,6 +217,42 @@ export default function ServiceCallDetailsPage() {
                         <h2 className="text-xl font-bold">
                             Notes technicien
                         </h2>
+                        <div className="rounded-xl bg-white p-6 shadow">
+                            <h2 className="text-xl font-bold">
+                                Photo intervention
+                            </h2>
+                            <label className="mt-4 inline-block cursor-pointer rounded-lg bg-slate-950 px-4 py-2 font-semibold text-white">
+                                Ajouter une photo
+
+                                <div className="rounded-xl bg-white p-6 shadow">
+                                    <h2 className="text-xl font-bold">
+                                        Photo intervention
+                                    </h2>
+
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={uploadPhoto}
+                                        className="mt-4 block w-full rounded-lg border p-3"
+                                    />
+
+                                    {uploading && (
+                                        <p className="mt-4 text-sm text-slate-500">
+                                            Upload en cours...
+                                        </p>
+                                    )}
+
+                                    {serviceCall.photo_url && (
+                                        <img
+                                            src={serviceCall.photo_url}
+                                            alt="Intervention"
+                                            className="mt-6 max-w-md rounded-xl border"
+                                        />
+                                    )}
+                                </div>
+                            </label>
+
+                        </div>
                         <div className="rounded-xl bg-white p-6 shadow">
                             <h2 className="text-xl font-bold">
                                 Pièces utilisées
