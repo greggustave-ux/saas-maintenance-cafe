@@ -141,7 +141,7 @@ export default function ServiceCallDetailsPage() {
         handleDownloadPdf,
         successMessage,
         machineHistory,
-        historyLoading,
+        machineHistoryLoading,
     } = useServiceCallDetails(id);
 
     if (loading) {
@@ -250,9 +250,9 @@ export default function ServiceCallDetailsPage() {
 
                     {serviceCall.machine_serial && (
                         <MachineHistorySection
-                            history={machineHistory}
+                            machineHistory={machineHistory}
                             currentCallId={serviceCall.id}
-                            loading={historyLoading}
+                            machineHistoryLoading={machineHistoryLoading}
                         />
                     )}
                 </div>

@@ -33,7 +33,11 @@ export async function createServiceCall(call: {
     status: string;
     technician_name: string;
 }): Promise<void> {
-    const { error } = await supabase.from("service_calls").insert(call);
+    const normalizedCall = {
+        ...call,
+        machine_serial: call.machine_serial ? call.machine_serial.trim().toLowerCase() : "",
+    };
+    const { error } = await supabase.from("service_calls").insert(normalizedCall);
     if (error) throw error;
 }
 
@@ -202,10 +206,11 @@ export async function getServiceCallsByMachineSerial(
     machineSerial: string
 ): Promise<ServiceCall[]> {
     if (!machineSerial) return [];
+    const normalizedSerial = machineSerial.trim().toLowerCase();
     const { data, error } = await supabase
         .from("service_calls")
         .select("id, client_name, address, machine_serial, issue_description, status, technician_name, technician_notes, created_at")
-        .eq("machine_serial", machineSerial)
+        .ilike("machine_serial", normalizedSerial)
         .order("id", { ascending: false });
 
     if (error) throw error;

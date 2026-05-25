@@ -191,7 +191,7 @@ export function useServiceCallDetails(id: number) {
     const [activePhotoModal, setActivePhotoModal] = useState<string | null>(null);
 
     const [machineHistory, setMachineHistory] = useState<ServiceCall[]>([]);
-    const [historyLoading, setHistoryLoading] = useState(false);
+    const [machineHistoryLoading, setMachineHistoryLoading] = useState(false);
 
     const isFetchingRef = useRef(false);
 
@@ -235,17 +235,34 @@ export function useServiceCallDetails(id: number) {
             setParts(partsData);
             setPhotos(photosData);
 
+            if (process.env.NODE_ENV === "development") {
+                console.log("[DEV] serviceCall.id:", details.id);
+                console.log("[DEV] serviceCall.machine_serial:", details.machine_serial);
+            }
+
             if (details.machine_serial) {
-                setHistoryLoading(true);
+                const normalizedSerial = details.machine_serial.trim().toLowerCase();
+                if (process.env.NODE_ENV === "development") {
+                    console.log("[DEV] normalized serial:", normalizedSerial);
+                }
+                setMachineHistoryLoading(true);
                 try {
                     const historyData = await api.getServiceCallsByMachineSerial(details.machine_serial);
                     setMachineHistory(historyData);
-                } catch (hErr) {
                     if (process.env.NODE_ENV === "development") {
-                        console.error("fetchMachineHistory error:", hErr);
+                        console.log("[DEV] machineHistory.length:", historyData.length);
+                    }
+                } catch (hErr: any) {
+                    if (process.env.NODE_ENV === "development") {
+                        console.error("[DEV] query error:", hErr);
                     }
                 } finally {
-                    setHistoryLoading(false);
+                    setMachineHistoryLoading(false);
+                }
+            } else {
+                setMachineHistory([]);
+                if (process.env.NODE_ENV === "development") {
+                    console.log("[DEV] machine_serial is empty, skipped lookup");
                 }
             }
         } catch (err: any) {
@@ -483,6 +500,6 @@ export function useServiceCallDetails(id: number) {
         handleDownloadPdf,
         refresh: fetchDetails,
         machineHistory,
-        historyLoading,
+        machineHistoryLoading,
     };
 }

@@ -3,9 +3,9 @@
 import { ServiceCall } from "../types";
 
 interface MachineHistorySectionProps {
-    history: ServiceCall[];
+    machineHistory: ServiceCall[];
     currentCallId: number;
-    loading: boolean;
+    machineHistoryLoading: boolean;
 }
 
 function getStatusBadgeClass(status: string) {
@@ -22,12 +22,12 @@ function getStatusBadgeClass(status: string) {
 }
 
 export default function MachineHistorySection({
-    history,
+    machineHistory,
     currentCallId,
-    loading,
+    machineHistoryLoading,
 }: MachineHistorySectionProps) {
     // Filter out the current intervention so we only show the history list
-    const otherInterventions = history.filter((item) => item.id !== currentCallId);
+    const otherInterventions = machineHistory.filter((item) => item.id !== currentCallId);
 
     return (
         <section className="w-full rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-5 shadow-xs sm:p-6 space-y-4">
@@ -45,7 +45,7 @@ export default function MachineHistorySection({
                 </p>
             </div>
 
-            {loading ? (
+            {machineHistoryLoading ? (
                 <div className="space-y-4 animate-pulse pt-2">
                     <div className="flex gap-4">
                         <div className="h-4 w-12 bg-slate-200 dark:bg-slate-800 rounded" />
