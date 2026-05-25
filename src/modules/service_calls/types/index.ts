@@ -9,6 +9,7 @@ export type ServiceCall = {
     technician_notes: string | null;
     photo_url: string | null;
     signature_url: string | null;
+    created_at?: string;
 };
 
 export type ServiceCallPart = {

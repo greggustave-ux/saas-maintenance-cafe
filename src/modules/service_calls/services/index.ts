@@ -196,3 +196,18 @@ export async function uploadClientSignature(
 
     return data.publicUrl;
 }
+
+// 13. Get service calls by machine serial
+export async function getServiceCallsByMachineSerial(
+    machineSerial: string
+): Promise<ServiceCall[]> {
+    if (!machineSerial) return [];
+    const { data, error } = await supabase
+        .from("service_calls")
+        .select("id, client_name, address, machine_serial, issue_description, status, technician_name, technician_notes, created_at")
+        .eq("machine_serial", machineSerial)
+        .order("id", { ascending: false });
+
+    if (error) throw error;
+    return data as ServiceCall[] || [];
+}

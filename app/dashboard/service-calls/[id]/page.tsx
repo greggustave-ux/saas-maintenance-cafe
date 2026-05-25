@@ -5,6 +5,7 @@ import { useServiceCallDetails } from "@/src/modules/service_calls/hooks";
 import PartsSection from "@/src/modules/service_calls/components/PartsSection";
 import SignatureSection from "@/src/modules/service_calls/components/SignatureSection";
 import PhotosSection from "@/src/modules/service_calls/components/PhotosSection";
+import MachineHistorySection from "@/src/modules/service_calls/components/MachineHistorySection";
 
 const inputClass =
     "w-full min-h-12 rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 px-4 py-3 text-base text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15";
@@ -33,26 +34,46 @@ function ServiceCallDetailsSkeleton() {
                 <div className="md:col-span-1 space-y-6">
                     <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-5 space-y-4">
                         <div className="flex items-center justify-between">
-                            <div className="h-3 w-12 bg-slate-250 dark:bg-slate-750 rounded" />
+                            <div className="h-3 w-12 bg-slate-250 dark:bg-slate-755 rounded" />
                             <div className="h-5 w-16 bg-slate-200 dark:bg-slate-850 rounded-full" />
                         </div>
                         <div className="space-y-4 pt-1">
                             <div>
-                                <div className="h-6 w-32 bg-slate-250 dark:bg-slate-750 rounded" />
+                                <div className="h-6 w-32 bg-slate-250 dark:bg-slate-755 rounded" />
                                 <div className="mt-2 h-4 w-48 bg-slate-200 dark:bg-slate-800 rounded" />
                             </div>
                             <div className="border-t border-slate-100 dark:border-slate-800/60 pt-4 space-y-4">
                                 <div>
-                                    <div className="h-3 w-24 bg-slate-250 dark:bg-slate-750 rounded" />
+                                    <div className="h-3 w-24 bg-slate-250 dark:bg-slate-755 rounded" />
                                     <div className="mt-1.5 h-4 w-28 bg-slate-200 dark:bg-slate-800 rounded" />
                                 </div>
                                 <div>
-                                    <div className="h-3 w-28 bg-slate-250 dark:bg-slate-750 rounded" />
+                                    <div className="h-3 w-28 bg-slate-250 dark:bg-slate-755 rounded" />
                                     <div className="mt-1.5 h-4 w-32 bg-slate-200 dark:bg-slate-800 rounded" />
                                 </div>
                                 <div>
-                                    <div className="h-3 w-32 bg-slate-250 dark:bg-slate-750 rounded" />
+                                    <div className="h-3 w-32 bg-slate-250 dark:bg-slate-755 rounded" />
                                     <div className="mt-2 h-16 w-full bg-slate-150 dark:bg-slate-850 rounded" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Machine History Skeleton */}
+                    <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-5 space-y-4">
+                        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-850 pb-3">
+                            <div className="space-y-2">
+                                <div className="h-5 w-36 bg-slate-250 dark:bg-slate-755 rounded" />
+                                <div className="h-3 w-48 bg-slate-200 dark:bg-slate-800 rounded" />
+                            </div>
+                            <div className="h-5 w-16 bg-slate-200 dark:bg-slate-800 rounded-full" />
+                        </div>
+                        <div className="space-y-4 pt-2">
+                            <div className="flex gap-4">
+                                <div className="h-4 w-12 bg-slate-200 dark:bg-slate-800 rounded" />
+                                <div className="space-y-2 flex-1">
+                                    <div className="h-4 w-32 bg-slate-250 dark:bg-slate-755 rounded" />
+                                    <div className="h-3 w-full bg-slate-150 dark:bg-slate-850 rounded" />
                                 </div>
                             </div>
                         </div>
@@ -77,11 +98,11 @@ function ServiceCallDetailsSkeleton() {
                         <div className="h-12 w-full bg-slate-200 dark:bg-slate-800 rounded-xl" />
                         <div className="grid grid-cols-1 gap-4 min-[420px]:grid-cols-2">
                             <div className="rounded-xl border border-slate-200/50 dark:border-slate-800/50 p-2 space-y-2">
-                                <div className="aspect-4/3 w-full bg-slate-150 dark:bg-slate-850 rounded-lg" />
+                                <div className="aspect-4/3 w-full bg-slate-150 dark:bg-slate-855 rounded-lg" />
                                 <div className="h-10 w-full bg-slate-200 dark:bg-slate-800 rounded-lg" />
                             </div>
                             <div className="rounded-xl border border-slate-200/50 dark:border-slate-800/50 p-2 space-y-2">
-                                <div className="aspect-4/3 w-full bg-slate-150 dark:bg-slate-850 rounded-lg" />
+                                <div className="aspect-4/3 w-full bg-slate-150 dark:bg-slate-855 rounded-lg" />
                                 <div className="h-10 w-full bg-slate-200 dark:bg-slate-800 rounded-lg" />
                             </div>
                         </div>
@@ -119,6 +140,8 @@ export default function ServiceCallDetailsPage() {
         handleSaveSignature,
         handleDownloadPdf,
         successMessage,
+        machineHistory,
+        historyLoading,
     } = useServiceCallDetails(id);
 
     if (loading) {
@@ -188,7 +211,7 @@ export default function ServiceCallDetailsPage() {
 
             {/* Content panels */}
             <div className="grid gap-6 md:grid-cols-3">
-                {/* Left side: details card */}
+                {/* Left side: details card & machine history */}
                 <div className="md:col-span-1 space-y-6">
                     <section className={sectionCardClass}>
                         <div className="flex items-center justify-between">
@@ -224,6 +247,14 @@ export default function ServiceCallDetailsPage() {
                             </dl>
                         </div>
                     </section>
+
+                    {serviceCall.machine_serial && (
+                        <MachineHistorySection
+                            history={machineHistory}
+                            currentCallId={serviceCall.id}
+                            loading={historyLoading}
+                        />
+                    )}
                 </div>
 
                 {/* Right side: technician updates */}

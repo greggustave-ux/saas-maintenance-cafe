@@ -127,8 +127,11 @@ export function useServiceCalls() {
     }, []);
 
     const filteredCalls = useMemo(() => {
+        const term = search.toLowerCase();
         return serviceCalls.filter((call) =>
-            call.client_name.toLowerCase().includes(search.toLowerCase())
+            call.client_name.toLowerCase().includes(term) ||
+            (call.machine_serial && call.machine_serial.toLowerCase().includes(term)) ||
+            call.address.toLowerCase().includes(term)
         );
     }, [serviceCalls, search]);
 
@@ -187,6 +190,9 @@ export function useServiceCallDetails(id: number) {
     const [generatingPdf, setGeneratingPdf] = useState(false);
     const [activePhotoModal, setActivePhotoModal] = useState<string | null>(null);
 
+    const [machineHistory, setMachineHistory] = useState<ServiceCall[]>([]);
+    const [historyLoading, setHistoryLoading] = useState(false);
+
     const isFetchingRef = useRef(false);
 
     const refreshParts = useCallback(async () => {
@@ -228,6 +234,20 @@ export function useServiceCallDetails(id: number) {
             ]);
             setParts(partsData);
             setPhotos(photosData);
+
+            if (details.machine_serial) {
+                setHistoryLoading(true);
+                try {
+                    const historyData = await api.getServiceCallsByMachineSerial(details.machine_serial);
+                    setMachineHistory(historyData);
+                } catch (hErr) {
+                    if (process.env.NODE_ENV === "development") {
+                        console.error("fetchMachineHistory error:", hErr);
+                    }
+                } finally {
+                    setHistoryLoading(false);
+                }
+            }
         } catch (err: any) {
             const msg = err.message || "Erreur lors de la récupération des détails de l'intervention.";
             setError(msg);
@@ -462,5 +482,7 @@ export function useServiceCallDetails(id: number) {
         handleSaveSignature,
         handleDownloadPdf,
         refresh: fetchDetails,
+        machineHistory,
+        historyLoading,
     };
 }
