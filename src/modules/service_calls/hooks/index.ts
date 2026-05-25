@@ -1,9 +1,11 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { ServiceCall, ServiceCallPart, ServiceCallPhoto } from "../types";
 import * as api from "../services";
 import { compressImageForUpload } from "@/src/lib/compress-image";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas-pro";
+
+export type UploadStatus = "idle" | "compressing" | "uploading" | "saving" | "success" | "error";
 
 // ==========================================
 // 1. Hook for Service Calls List Page
@@ -14,6 +16,7 @@ export function useServiceCalls() {
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
     // Form inputs state
     const [clientName, setClientName] = useState("");
@@ -22,7 +25,11 @@ export function useServiceCalls() {
     const [issueDescription, setIssueDescription] = useState("");
     const [technicianName, setTechnicianName] = useState("");
 
-    const fetchServiceCalls = useCallback(async () => {
+    const isFetchingRef = useRef(false);
+
+    const fetchServiceCalls = useCallback(async (force = false) => {
+        if (isFetchingRef.current && !force) return;
+        isFetchingRef.current = true;
         setLoading(true);
         setError(null);
         try {
@@ -36,6 +43,7 @@ export function useServiceCalls() {
             }
         } finally {
             setLoading(false);
+            isFetchingRef.current = false;
         }
     }, []);
 
@@ -46,6 +54,7 @@ export function useServiceCalls() {
     const handleCreateServiceCall = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
+        setSuccessMessage(null);
         try {
             await api.createServiceCall({
                 client_name: clientName,
@@ -64,8 +73,11 @@ export function useServiceCalls() {
             setTechnicianName("");
             setIsFormOpen(false);
 
+            setSuccessMessage("Intervention créée avec succès.");
+            setTimeout(() => setSuccessMessage(null), 3000);
+
             // Reload list
-            await fetchServiceCalls();
+            await fetchServiceCalls(true);
         } catch (err: any) {
             const msg = err.message || "Erreur lors de la création de la fiche.";
             setError(msg);
@@ -77,11 +89,14 @@ export function useServiceCalls() {
 
     const handleUpdateStatus = useCallback(async (id: number, status: string) => {
         setError(null);
+        setSuccessMessage(null);
         try {
             await api.updateServiceCallStatus(id, status);
             setServiceCalls((prev) =>
                 prev.map((call) => (call.id === id ? { ...call, status } : call))
             );
+            setSuccessMessage("Statut mis à jour.");
+            setTimeout(() => setSuccessMessage(null), 3000);
         } catch (err: any) {
             const msg = err.message || "Erreur lors de la mise à jour du statut.";
             setError(msg);
@@ -96,9 +111,12 @@ export function useServiceCalls() {
         if (!confirmDelete) return;
 
         setError(null);
+        setSuccessMessage(null);
         try {
             await api.deleteServiceCall(id);
             setServiceCalls((prev) => prev.filter((call) => call.id !== id));
+            setSuccessMessage("Intervention supprimée.");
+            setTimeout(() => setSuccessMessage(null), 3000);
         } catch (err: any) {
             const msg = err.message || "Erreur lors de la suppression de l'appel.";
             setError(msg);
@@ -123,6 +141,8 @@ export function useServiceCalls() {
         loading,
         error,
         setError,
+        successMessage,
+        setSuccessMessage,
         form: {
             clientName,
             setClientName,
@@ -160,13 +180,16 @@ export function useServiceCallDetails(id: number) {
     // Operation loading and error states
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [uploading, setUploading] = useState(false);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [uploadStatus, setUploadStatus] = useState<UploadStatus>("idle");
     const [uploadError, setUploadError] = useState<string | null>(null);
     const [savingSignature, setSavingSignature] = useState(false);
     const [generatingPdf, setGeneratingPdf] = useState(false);
     const [activePhotoModal, setActivePhotoModal] = useState<string | null>(null);
 
-    const fetchParts = useCallback(async () => {
+    const isFetchingRef = useRef(false);
+
+    const refreshParts = useCallback(async () => {
         try {
             const data = await api.getServiceCallParts(id);
             setParts(data);
@@ -177,7 +200,7 @@ export function useServiceCallDetails(id: number) {
         }
     }, [id]);
 
-    const fetchPhotos = useCallback(async () => {
+    const refreshPhotos = useCallback(async () => {
         try {
             const data = await api.getServiceCallPhotos(id);
             setPhotos(data);
@@ -188,7 +211,9 @@ export function useServiceCallDetails(id: number) {
         }
     }, [id]);
 
-    const fetchDetails = useCallback(async () => {
+    const fetchDetails = useCallback(async (force = false) => {
+        if (isFetchingRef.current && !force) return;
+        isFetchingRef.current = true;
         setLoading(true);
         setError(null);
         try {
@@ -197,7 +222,12 @@ export function useServiceCallDetails(id: number) {
             setNotes(details.technician_notes || "");
             
             // Fetch associated lists
-            await Promise.all([fetchParts(), fetchPhotos()]);
+            const [partsData, photosData] = await Promise.all([
+                api.getServiceCallParts(id),
+                api.getServiceCallPhotos(id),
+            ]);
+            setParts(partsData);
+            setPhotos(photosData);
         } catch (err: any) {
             const msg = err.message || "Erreur lors de la récupération des détails de l'intervention.";
             setError(msg);
@@ -206,8 +236,9 @@ export function useServiceCallDetails(id: number) {
             }
         } finally {
             setLoading(false);
+            isFetchingRef.current = false;
         }
-    }, [id, fetchParts, fetchPhotos]);
+    }, [id]);
 
     useEffect(() => {
         fetchDetails();
@@ -215,9 +246,12 @@ export function useServiceCallDetails(id: number) {
 
     const handleSaveNotes = useCallback(async () => {
         setError(null);
+        setSuccessMessage(null);
         try {
             await api.saveTechnicianNotes(id, notes);
             setServiceCall((prev) => (prev ? { ...prev, technician_notes: notes } : null));
+            setSuccessMessage("Notes d'intervention enregistrées.");
+            setTimeout(() => setSuccessMessage(null), 3000);
             return true;
         } catch (err: any) {
             const msg = err.message || "Erreur lors de la sauvegarde des notes.";
@@ -232,6 +266,7 @@ export function useServiceCallDetails(id: number) {
     const handleAddPart = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
+        setSuccessMessage(null);
         try {
             await api.addServiceCallPart({
                 service_call_id: id,
@@ -243,7 +278,11 @@ export function useServiceCallDetails(id: number) {
             setPartName("");
             setQuantity(1);
             setUnitPrice(0);
-            await fetchParts();
+            
+            setSuccessMessage("Pièce ajoutée avec succès.");
+            setTimeout(() => setSuccessMessage(null), 3000);
+
+            await refreshParts();
         } catch (err: any) {
             const msg = err.message || "Erreur lors de l'ajout de la pièce.";
             setError(msg);
@@ -251,7 +290,7 @@ export function useServiceCallDetails(id: number) {
                 console.error("addPart error:", err);
             }
         }
-    }, [id, partName, quantity, unitPrice, fetchParts]);
+    }, [id, partName, quantity, unitPrice, refreshParts]);
 
     const handleUploadPhoto = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
         const input = e.target;
@@ -259,32 +298,45 @@ export function useServiceCallDetails(id: number) {
         if (!file) return;
 
         setUploadError(null);
-        setUploading(true);
+        setUploadStatus("compressing");
 
         try {
             const compressed = await compressImageForUpload(file);
-            const publicUrl = await api.uploadInterventionPhoto(id, compressed);
-            await fetchPhotos();
+            setUploadStatus("uploading");
+            
+            await api.uploadInterventionPhoto(id, compressed);
+            setUploadStatus("saving");
+            
+            await refreshPhotos();
+            setUploadStatus("success");
+            setSuccessMessage("Photo ajoutée avec succès.");
+            setTimeout(() => {
+                setSuccessMessage(null);
+                setUploadStatus("idle");
+            }, 3000);
         } catch (err: any) {
             const msg = err.message || "Échec du téléversement de la photo.";
             setUploadError(msg);
+            setUploadStatus("error");
             if (process.env.NODE_ENV === "development") {
                 console.error("uploadPhoto error:", err);
             }
         } finally {
-            setUploading(false);
             input.value = "";
         }
-    }, [id, fetchPhotos]);
+    }, [id, refreshPhotos]);
 
     const handleDeletePhoto = useCallback(async (photoId: number, photoUrl: string) => {
         const confirmDelete = window.confirm("Supprimer cette photo ?");
         if (!confirmDelete) return;
 
         setError(null);
+        setSuccessMessage(null);
         try {
             await api.deleteInterventionPhoto(photoId, photoUrl);
             setPhotos((prev) => prev.filter((p) => p.id !== photoId));
+            setSuccessMessage("Photo supprimée.");
+            setTimeout(() => setSuccessMessage(null), 3000);
         } catch (err: any) {
             const msg = err.message || "Impossible de supprimer la photo.";
             setError(msg);
@@ -304,6 +356,7 @@ export function useServiceCallDetails(id: number) {
 
         setSavingSignature(true);
         setError(null);
+        setSuccessMessage(null);
 
         try {
             const dataUrl = signatureCanvasInstance.getTrimmedCanvas().toDataURL("image/png");
@@ -311,6 +364,8 @@ export function useServiceCallDetails(id: number) {
             const publicUrl = await api.uploadClientSignature(id, blob);
 
             setServiceCall((prev) => (prev ? { ...prev, signature_url: publicUrl } : null));
+            setSuccessMessage("Signature client enregistrée.");
+            setTimeout(() => setSuccessMessage(null), 3000);
         } catch (err: any) {
             const msg = err.message || "Erreur lors de la sauvegarde de la signature.";
             setError(msg);
@@ -383,7 +438,9 @@ export function useServiceCallDetails(id: number) {
         loading,
         error,
         setError,
-        uploading,
+        successMessage,
+        setSuccessMessage,
+        uploadStatus,
         uploadError,
         savingSignature,
         generatingPdf,

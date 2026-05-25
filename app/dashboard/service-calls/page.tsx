@@ -1,7 +1,7 @@
 "use client";
 
 import { useServiceCalls } from "@/src/modules/service_calls/hooks";
-import ServiceCallCard from "@/src/modules/service_calls/components/ServiceCallCard";
+import ServiceCallCard, { ServiceCallCardSkeleton } from "@/src/modules/service_calls/components/ServiceCallCard";
 import NewServiceCallForm from "@/src/modules/service_calls/components/NewServiceCallForm";
 
 const inputClass =
@@ -28,6 +28,7 @@ export default function ServiceCallsPage() {
         setIsFormOpen,
         loading,
         error,
+        successMessage,
         form,
         handleCreateServiceCall,
         handleUpdateStatus,
@@ -65,6 +66,12 @@ export default function ServiceCallsPage() {
                 </div>
             )}
 
+            {successMessage && (
+                <div className="rounded-xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30 p-4 text-sm text-emerald-600 dark:text-emerald-400 animate-fadeIn" role="alert">
+                    {successMessage}
+                </div>
+            )}
+
             {isFormOpen && (
                 <NewServiceCallForm
                     form={form}
@@ -88,9 +95,11 @@ export default function ServiceCallsPage() {
             </div>
 
             {loading ? (
-                <div className="flex min-h-[20vh] flex-col items-center justify-center space-y-3">
-                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-300 border-t-cyan-500" />
-                    <p className="text-sm text-slate-500 dark:text-slate-400">Chargement des interventions...</p>
+                <div className="grid gap-4 sm:grid-cols-2">
+                    <ServiceCallCardSkeleton />
+                    <ServiceCallCardSkeleton />
+                    <ServiceCallCardSkeleton />
+                    <ServiceCallCardSkeleton />
                 </div>
             ) : (
                 <div className="grid gap-4 sm:grid-cols-2">

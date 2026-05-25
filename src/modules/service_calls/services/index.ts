@@ -5,23 +5,23 @@ import { ServiceCall, ServiceCallPart, ServiceCallPhoto } from "../types";
 export async function getServiceCalls(): Promise<ServiceCall[]> {
     const { data, error } = await supabase
         .from("service_calls")
-        .select("*")
+        .select("id, client_name, address, machine_serial, issue_description, status, technician_name")
         .order("id", { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    return data as ServiceCall[] || [];
 }
 
 // 2. Fetch single service call by ID
 export async function getServiceCallById(id: number): Promise<ServiceCall> {
     const { data, error } = await supabase
         .from("service_calls")
-        .select("*")
+        .select("id, client_name, address, machine_serial, issue_description, status, technician_name, technician_notes, photo_url, signature_url")
         .eq("id", id)
         .single();
 
     if (error) throw error;
-    return data;
+    return data as ServiceCall;
 }
 
 // 3. Create a new service call
@@ -71,12 +71,12 @@ export async function saveTechnicianNotes(id: number, notes: string): Promise<vo
 export async function getServiceCallParts(serviceCallId: number): Promise<ServiceCallPart[]> {
     const { data, error } = await supabase
         .from("service_call_parts")
-        .select("*")
+        .select("id, service_call_id, part_name, quantity, unit_price")
         .eq("service_call_id", serviceCallId)
         .order("id", { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    return data as ServiceCallPart[] || [];
 }
 
 // 8. Add a part to a service call
@@ -94,12 +94,12 @@ export async function addServiceCallPart(part: {
 export async function getServiceCallPhotos(serviceCallId: number): Promise<ServiceCallPhoto[]> {
     const { data, error } = await supabase
         .from("service_call_photos")
-        .select("*")
+        .select("id, photo_url")
         .eq("service_call_id", serviceCallId)
         .order("id", { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    return data as ServiceCallPhoto[] || [];
 }
 
 // 10. Upload intervention photo to storage and insert metadata
@@ -186,7 +186,13 @@ export async function uploadClientSignature(
         .update({ signature_url: data.publicUrl })
         .eq("id", serviceCallId);
 
-    if (updateError) throw updateError;
+    if (updateError) {
+        // Rollback signature upload from storage
+        await supabase.storage
+            .from("service-photos")
+            .remove([filePath]);
+        throw updateError;
+    }
 
     return data.publicUrl;
 }

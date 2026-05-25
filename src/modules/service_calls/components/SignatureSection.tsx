@@ -68,7 +68,7 @@ export default function SignatureSection({
             clearTimeout(timer);
             window.removeEventListener("resize", resizeCanvas);
         };
-    }, [serviceCall]);
+    }, [serviceCall?.id]);
 
     function clearSignature() {
         signatureRef.current?.clear();

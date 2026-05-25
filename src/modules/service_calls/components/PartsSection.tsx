@@ -23,6 +23,7 @@ interface PartsSectionProps {
     };
     handleAddPart: (e: React.FormEvent) => Promise<void>;
     totalPartsCost: number;
+    loading?: boolean;
 }
 
 export default function PartsSection({
@@ -30,6 +31,7 @@ export default function PartsSection({
     partsForm,
     handleAddPart,
     totalPartsCost,
+    loading,
 }: PartsSectionProps) {
     return (
         <section className={sectionCardClass}>
@@ -84,7 +86,30 @@ export default function PartsSection({
             </form>
 
             <div className="mt-4 border-t border-slate-100 dark:border-slate-800/60 pt-4 space-y-2.5">
-                {parts.length === 0 ? (
+                {loading ? (
+                    <>
+                        <div className="flex items-center justify-between rounded-xl bg-slate-50/50 dark:bg-slate-900/30 border border-slate-200/10 p-4 animate-pulse">
+                            <div className="space-y-2">
+                                <div className="h-4 w-28 rounded bg-slate-200 dark:bg-slate-800" />
+                                <div className="h-3 w-20 rounded bg-slate-150 dark:bg-slate-850" />
+                            </div>
+                            <div className="space-y-2 text-right">
+                                <div className="h-4 w-8 rounded bg-slate-200 dark:bg-slate-850 ml-auto" />
+                                <div className="h-3 w-12 rounded bg-slate-150 dark:bg-slate-850 ml-auto" />
+                            </div>
+                        </div>
+                        <div className="flex items-center justify-between rounded-xl bg-slate-50/50 dark:bg-slate-900/30 border border-slate-200/10 p-4 animate-pulse">
+                            <div className="space-y-2">
+                                <div className="h-4 w-20 rounded bg-slate-200 dark:bg-slate-800" />
+                                <div className="h-3 w-24 rounded bg-slate-150 dark:bg-slate-850" />
+                            </div>
+                            <div className="space-y-2 text-right">
+                                <div className="h-4 w-6 rounded bg-slate-250 dark:bg-slate-850 ml-auto" />
+                                <div className="h-3 w-14 rounded bg-slate-150 dark:bg-slate-850 ml-auto" />
+                            </div>
+                        </div>
+                    </>
+                ) : parts.length === 0 ? (
                     <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-2">Aucune pièce répertoriée.</p>
                 ) : (
                     parts.map((part) => (

@@ -99,3 +99,42 @@ export default function ServiceCallCard({
         </article>
     );
 }
+
+export function ServiceCallCardSkeleton() {
+    return (
+        <div className="flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/60 dark:border-slate-800/60 bg-white dark:bg-slate-900 p-5 shadow-xs animate-pulse">
+            <div className="space-y-4">
+                <div className="flex items-start justify-between gap-3">
+                    <div className="h-6 w-1/2 rounded-md bg-slate-200 dark:bg-slate-800" />
+                    <div className="h-7 w-20 rounded-lg bg-slate-100 dark:bg-slate-700" />
+                </div>
+
+                <div className="space-y-3.5 border-t border-slate-150 dark:border-slate-850/65 pt-4">
+                    <div>
+                        <div className="h-3 w-16 rounded bg-slate-250 dark:bg-slate-700/80" />
+                        <div className="mt-2 h-4 w-3/4 rounded bg-slate-150 dark:bg-slate-800/80" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <div className="h-3 w-20 rounded bg-slate-250 dark:bg-slate-700/80" />
+                            <div className="mt-2 h-4 w-24 rounded bg-slate-150 dark:bg-slate-800/80" />
+                        </div>
+                        <div>
+                            <div className="h-3 w-16 rounded bg-slate-250 dark:bg-slate-700/80" />
+                            <div className="mt-2 h-4 w-20 rounded bg-slate-150 dark:bg-slate-800/80" />
+                        </div>
+                    </div>
+                    <div>
+                        <div className="h-3 w-16 rounded bg-slate-250 dark:bg-slate-700/80" />
+                        <div className="mt-2 h-4 w-5/6 rounded bg-slate-150 dark:bg-slate-800/80" />
+                    </div>
+                </div>
+            </div>
+
+            <div className="mt-6 flex gap-3 border-t border-slate-100 dark:border-slate-800/60 pt-4">
+                <div className="h-11 flex-1 rounded-xl bg-slate-100 dark:bg-slate-800" />
+                <div className="h-11 w-11 rounded-xl bg-red-100/30 dark:bg-red-950/10" />
+            </div>
+        </div>
+    );
+}

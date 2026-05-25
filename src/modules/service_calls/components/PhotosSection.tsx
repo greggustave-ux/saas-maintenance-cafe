@@ -1,6 +1,7 @@
 "use client";
 
 import { ServiceCallPhoto } from "../types";
+import { UploadStatus } from "../hooks";
 
 const btnDangerClass =
     "flex min-h-12 w-full items-center justify-center rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/40 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/50 active:scale-98 transition-all cursor-pointer";
@@ -10,21 +11,38 @@ const sectionCardClass =
 
 interface PhotosSectionProps {
     photos: ServiceCallPhoto[];
-    uploading: boolean;
+    uploadStatus: UploadStatus;
     uploadError: string | null;
     handleUploadPhoto: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
     handleDeletePhoto: (photoId: number, photoUrl: string) => Promise<void>;
     setActivePhotoModal: (url: string) => void;
 }
 
+function getUploadLabel(status: UploadStatus) {
+    switch (status) {
+        case "compressing":
+            return "Compression en cours...";
+        case "uploading":
+            return "Envoi vers le stockage...";
+        case "saving":
+            return "Enregistrement en cours...";
+        case "success":
+            return "Photo téléversée !";
+        default:
+            return "Prendre / Ajouter une photo";
+    }
+}
+
 export default function PhotosSection({
     photos,
-    uploading,
+    uploadStatus,
     uploadError,
     handleUploadPhoto,
     handleDeletePhoto,
     setActivePhotoModal,
 }: PhotosSectionProps) {
+    const isUploading = uploadStatus !== "idle" && uploadStatus !== "success" && uploadStatus !== "error";
+
     return (
         <section className={sectionCardClass}>
             <div className="flex items-center justify-between pb-1">
@@ -37,21 +55,25 @@ export default function PhotosSection({
             <div className="flex flex-col gap-4">
                 <label
                     className={`flex min-h-12 w-full items-center justify-center rounded-xl px-5 py-3 text-center text-base font-semibold text-white shadow-xs transition-all ${
-                        uploading
+                        isUploading
                             ? "cursor-not-allowed bg-slate-400 dark:bg-slate-700 opacity-60"
                             : "cursor-pointer bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-950 hover:bg-slate-800 dark:hover:bg-white active:scale-98"
                     }`}
                 >
-                    <svg className="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    {uploading ? "Téléversement en cours..." : "Prendre / Ajouter une photo"}
+                    {isUploading ? (
+                        <div className="mr-2 h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                    ) : (
+                        <svg className="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    )}
+                    {getUploadLabel(uploadStatus)}
                     <input
                         type="file"
                         accept="image/*"
                         onChange={handleUploadPhoto}
-                        disabled={uploading}
+                        disabled={isUploading}
                         className="sr-only"
                     />
                 </label>
@@ -63,6 +85,21 @@ export default function PhotosSection({
                 )}
 
                 <div className="grid grid-cols-1 gap-4 min-[420px]:grid-cols-2">
+                    {/* Pulsing loading skeleton placeholder during image processing */}
+                    {isUploading && (
+                        <div className="group relative overflow-hidden rounded-xl border border-dashed border-slate-300 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/30 p-2 shadow-xs animate-pulse">
+                            <div className="relative aspect-4/3 w-full overflow-hidden rounded-lg bg-slate-200 dark:bg-slate-800 flex flex-col items-center justify-center gap-1.5">
+                                <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-350 border-t-cyan-500" />
+                                <span className="text-[11px] font-semibold text-slate-400">
+                                    {uploadStatus === "compressing" && "Compression..."}
+                                    {uploadStatus === "uploading" && "Envoi..."}
+                                    {uploadStatus === "saving" && "Sauvegarde..."}
+                                </span>
+                            </div>
+                            <div className="mt-2 h-10 w-full rounded-xl bg-slate-100 dark:bg-slate-850" />
+                        </div>
+                    )}
+
                     {photos.map((photo) => (
                         <div
                             key={photo.id}

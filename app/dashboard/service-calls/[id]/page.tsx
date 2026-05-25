@@ -15,6 +15,83 @@ const btnPrimaryClass =
 const sectionCardClass =
     "w-full rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-5 shadow-xs sm:p-6 space-y-4";
 
+function ServiceCallDetailsSkeleton() {
+    return (
+        <div className="w-full space-y-6 md:mx-auto md:max-w-4xl animate-pulse">
+            {/* Header skeleton */}
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 dark:border-slate-800 pb-5">
+                <div className="space-y-2 w-full max-w-xs">
+                    <div className="h-4 w-28 bg-slate-200 dark:bg-slate-800 rounded" />
+                    <div className="h-8 w-48 bg-slate-250 dark:bg-slate-750 rounded" />
+                </div>
+                <div className="h-12 w-full sm:w-44 bg-slate-200 dark:bg-slate-800 rounded-xl" />
+            </div>
+
+            {/* Content panels skeleton */}
+            <div className="grid gap-6 md:grid-cols-3">
+                {/* Left column skeleton */}
+                <div className="md:col-span-1 space-y-6">
+                    <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-5 space-y-4">
+                        <div className="flex items-center justify-between">
+                            <div className="h-3 w-12 bg-slate-250 dark:bg-slate-750 rounded" />
+                            <div className="h-5 w-16 bg-slate-200 dark:bg-slate-850 rounded-full" />
+                        </div>
+                        <div className="space-y-4 pt-1">
+                            <div>
+                                <div className="h-6 w-32 bg-slate-250 dark:bg-slate-750 rounded" />
+                                <div className="mt-2 h-4 w-48 bg-slate-200 dark:bg-slate-800 rounded" />
+                            </div>
+                            <div className="border-t border-slate-100 dark:border-slate-800/60 pt-4 space-y-4">
+                                <div>
+                                    <div className="h-3 w-24 bg-slate-250 dark:bg-slate-750 rounded" />
+                                    <div className="mt-1.5 h-4 w-28 bg-slate-200 dark:bg-slate-800 rounded" />
+                                </div>
+                                <div>
+                                    <div className="h-3 w-28 bg-slate-250 dark:bg-slate-750 rounded" />
+                                    <div className="mt-1.5 h-4 w-32 bg-slate-200 dark:bg-slate-800 rounded" />
+                                </div>
+                                <div>
+                                    <div className="h-3 w-32 bg-slate-250 dark:bg-slate-750 rounded" />
+                                    <div className="mt-2 h-16 w-full bg-slate-150 dark:bg-slate-850 rounded" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Right column skeleton */}
+                <div className="md:col-span-2 space-y-6">
+                    {/* Notes Section skeleton */}
+                    <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-5 space-y-4">
+                        <div className="h-6 w-40 bg-slate-250 dark:bg-slate-750 rounded" />
+                        <div className="h-32 w-full bg-slate-150 dark:bg-slate-850 rounded-xl" />
+                        <div className="h-12 w-full bg-slate-200 dark:bg-slate-800 rounded-xl" />
+                    </div>
+
+                    {/* Photos Section skeleton */}
+                    <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-5 space-y-4">
+                        <div className="flex items-center justify-between">
+                            <div className="h-6 w-44 bg-slate-250 dark:bg-slate-750 rounded" />
+                            <div className="h-4 w-12 bg-slate-200 dark:bg-slate-850 rounded" />
+                        </div>
+                        <div className="h-12 w-full bg-slate-200 dark:bg-slate-800 rounded-xl" />
+                        <div className="grid grid-cols-1 gap-4 min-[420px]:grid-cols-2">
+                            <div className="rounded-xl border border-slate-200/50 dark:border-slate-800/50 p-2 space-y-2">
+                                <div className="aspect-4/3 w-full bg-slate-150 dark:bg-slate-850 rounded-lg" />
+                                <div className="h-10 w-full bg-slate-200 dark:bg-slate-800 rounded-lg" />
+                            </div>
+                            <div className="rounded-xl border border-slate-200/50 dark:border-slate-800/50 p-2 space-y-2">
+                                <div className="aspect-4/3 w-full bg-slate-150 dark:bg-slate-850 rounded-lg" />
+                                <div className="h-10 w-full bg-slate-200 dark:bg-slate-800 rounded-lg" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 export default function ServiceCallDetailsPage() {
     const params = useParams();
     const id = Number(params.id);
@@ -27,7 +104,7 @@ export default function ServiceCallDetailsPage() {
         photos,
         loading,
         error,
-        uploading,
+        uploadStatus,
         uploadError,
         savingSignature,
         generatingPdf,
@@ -41,20 +118,16 @@ export default function ServiceCallDetailsPage() {
         handleDeletePhoto,
         handleSaveSignature,
         handleDownloadPdf,
+        successMessage,
     } = useServiceCallDetails(id);
 
     if (loading) {
-        return (
-            <div className="flex min-h-[50vh] flex-col items-center justify-center space-y-3">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-300 border-t-cyan-500" />
-                <p className="text-base text-slate-500 dark:text-slate-400">Chargement de la fiche d'intervention...</p>
-            </div>
-        );
+        return <ServiceCallDetailsSkeleton />;
     }
 
     if (error || !serviceCall) {
         return (
-            <div className="flex min-h-[50vh] flex-col items-center justify-center space-y-3 text-center p-4">
+            <div className="flex min-h-[50vh] flex-col items-center justify-center space-y-3 text-center p-4 animate-fadeIn">
                 <div className="rounded-full bg-red-100 dark:bg-red-955/20 p-3 text-red-600 dark:text-red-400">
                     <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -70,7 +143,7 @@ export default function ServiceCallDetailsPage() {
     }
 
     return (
-        <main className="w-full space-y-6 md:mx-auto md:max-w-4xl">
+        <main className="w-full space-y-6 md:mx-auto md:max-w-4xl animate-fadeIn">
             {/* Header / Actions bar */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 dark:border-slate-800 pb-5">
                 <div className="space-y-1">
@@ -106,6 +179,12 @@ export default function ServiceCallDetailsPage() {
                     )}
                 </button>
             </div>
+
+            {successMessage && (
+                <div className="rounded-xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30 p-4 text-sm text-emerald-600 dark:text-emerald-400 animate-fadeIn" role="alert">
+                    {successMessage}
+                </div>
+            )}
 
             {/* Content panels */}
             <div className="grid gap-6 md:grid-cols-3">
@@ -172,7 +251,7 @@ export default function ServiceCallDetailsPage() {
                     {/* Photos Section */}
                     <PhotosSection
                         photos={photos}
-                        uploading={uploading}
+                        uploadStatus={uploadStatus}
                         uploadError={uploadError}
                         handleUploadPhoto={handleUploadPhoto}
                         handleDeletePhoto={handleDeletePhoto}
@@ -192,13 +271,14 @@ export default function ServiceCallDetailsPage() {
                         partsForm={partsForm}
                         handleAddPart={handleAddPart}
                         totalPartsCost={totalPartsCost}
+                        loading={false}
                     />
                 </div>
             </div>
 
             {/* Photo preview modal */}
             {activePhotoModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-xs p-4" onClick={() => setActivePhotoModal(null)}>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-xs p-4 animate-fadeIn" onClick={() => setActivePhotoModal(null)}>
                     <div className="relative max-w-3xl max-h-[85vh] overflow-hidden rounded-2xl bg-slate-900 border border-white/10" onClick={(e) => e.stopPropagation()}>
                         <button
                             type="button"
@@ -323,7 +403,13 @@ export default function ServiceCallDetailsPage() {
                             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
                                 {photos.slice(0, 4).map((p) => (
                                     <div key={p.id} style={{ border: "1px solid #e2e8f0", borderRadius: "6px", padding: "6px" }}>
-                                        <img src={p.photo_url} alt="Intervention" crossOrigin="anonymous" style={{ width: "100%", height: "180px", objectFit: "cover", borderRadius: "4px" }} />
+                                        <img 
+                                            src={p.photo_url} 
+                                            alt="Intervention" 
+                                            crossOrigin="anonymous" 
+                                            style={{ width: "100%", height: "180px", objectFit: "cover", borderRadius: "4px" }} 
+                                            onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                                        />
                                     </div>
                                 ))}
                             </div>
@@ -337,7 +423,13 @@ export default function ServiceCallDetailsPage() {
                                 <div style={{ textAlign: "center", width: "250px" }}>
                                     <p style={{ fontSize: "12px", color: "#64748b", margin: "0 0 8px 0" }}>Bon pour accord - Signature du client</p>
                                     <div style={{ border: "1px solid #e2e8f0", borderRadius: "6px", padding: "6px", backgroundColor: "#f8fafc" }}>
-                                        <img src={serviceCall.signature_url} alt="Signature" crossOrigin="anonymous" style={{ height: "60px", width: "auto", margin: "0 auto", display: "block" }} />
+                                        <img 
+                                            src={serviceCall.signature_url} 
+                                            alt="Signature" 
+                                            crossOrigin="anonymous" 
+                                            style={{ height: "60px", width: "auto", margin: "0 auto", display: "block" }} 
+                                            onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -347,4 +439,4 @@ export default function ServiceCallDetailsPage() {
             </div>
         </main>
     );
-}
+}
