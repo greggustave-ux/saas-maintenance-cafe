@@ -8,10 +8,13 @@ export default function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [message, setMessage] = useState("");
+    const [loading, setLoading] = useState(false);
     const router = useRouter();
 
     async function handleLogin(e: React.FormEvent) {
         e.preventDefault();
+        setLoading(true);
+        setMessage("");
 
         const { error } = await supabase.auth.signInWithPassword({
             email,
@@ -20,6 +23,7 @@ export default function LoginPage() {
 
         if (error) {
             setMessage(error.message);
+            setLoading(false);
             return;
         }
 
@@ -28,6 +32,9 @@ export default function LoginPage() {
     }
 
     async function handleSignup() {
+        setLoading(true);
+        setMessage("");
+
         const { error } = await supabase.auth.signUp({
             email,
             password,
@@ -35,60 +42,78 @@ export default function LoginPage() {
 
         if (error) {
             setMessage(error.message);
+            setLoading(false);
             return;
         }
 
-        setMessage("Compte créé.");
+        setMessage("Compte créé avec succès. Vérifiez vos emails !");
+        setLoading(false);
     }
 
     return (
-        <main className="flex min-h-screen items-center justify-center bg-slate-950 text-white">
-            <div className="w-full max-w-md rounded-2xl bg-slate-900 p-8 shadow-xl">
-                <h1 className="mb-6 text-3xl font-bold">
-                    Connexion Welo
-                </h1>
+        <main className="flex min-h-screen items-center justify-center bg-radial from-slate-900 via-slate-950 to-black px-4 text-white">
+            <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900/60 p-6 shadow-2xl backdrop-blur-md sm:p-8 animate-fade-in">
+                <div className="mb-8 text-center">
+                    <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-500 font-bold text-white text-xl shadow-lg">W</span>
+                    <h1 className="mt-4 text-2xl font-bold tracking-tight bg-gradient-to-r from-cyan-400 to-cyan-200 bg-clip-text text-transparent sm:text-3xl">
+                        Connexion Welo
+                    </h1>
+                    <p className="mt-1 text-sm text-slate-400">
+                        Accédez à votre espace de gestion d'interventions
+                    </p>
+                </div>
 
                 <form
                     onSubmit={handleLogin}
                     className="space-y-4"
                 >
-                    <input
-                        type="email"
-                        placeholder="Email"
-                        className="w-full rounded-lg bg-slate-800 p-3"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                    />
+                    <div className="space-y-1">
+                        <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">Adresse Email</label>
+                        <input
+                            type="email"
+                            placeholder="nom@exemple.com"
+                            className="w-full min-h-12 rounded-xl border border-slate-800 bg-slate-950/50 px-4 py-3 text-base text-slate-100 placeholder:text-slate-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
+                    </div>
 
-                    <input
-                        type="password"
-                        placeholder="Mot de passe"
-                        className="w-full rounded-lg bg-slate-800 p-3"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
+                    <div className="space-y-1">
+                        <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">Mot de passe</label>
+                        <input
+                            type="password"
+                            placeholder="••••••••"
+                            className="w-full min-h-12 rounded-xl border border-slate-800 bg-slate-950/50 px-4 py-3 text-base text-slate-100 placeholder:text-slate-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                    </div>
 
                     <button
                         type="submit"
-                        className="w-full rounded-lg bg-cyan-400 p-3 font-bold text-slate-950"
+                        disabled={loading}
+                        className="mt-2 w-full min-h-12 rounded-xl bg-cyan-500 py-3 font-semibold text-slate-950 hover:bg-cyan-400 active:scale-98 transition-all shadow-md cursor-pointer disabled:opacity-50"
                     >
-                        Se connecter
+                        {loading ? "Chargement..." : "Se connecter"}
                     </button>
                 </form>
 
                 <button
                     onClick={handleSignup}
-                    className="mt-4 w-full rounded-lg border border-slate-700 p-3"
+                    disabled={loading}
+                    className="mt-3 w-full min-h-12 rounded-xl border border-slate-800 bg-transparent py-3 text-sm font-semibold text-slate-300 hover:bg-slate-800/40 hover:text-white active:scale-98 transition-all cursor-pointer disabled:opacity-50"
                 >
-                    Créer un compte
+                    Créer un compte technicien
                 </button>
 
                 {message && (
-                    <p className="mt-4 text-sm text-slate-300">
+                    <div className="mt-6 rounded-xl border border-slate-800 bg-slate-950/80 p-3 text-center text-sm font-medium text-slate-300 leading-relaxed">
                         {message}
-                    </p>
+                    </div>
                 )}
             </div>
         </main>
     );
-}
+}
