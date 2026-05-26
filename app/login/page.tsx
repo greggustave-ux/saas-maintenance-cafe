@@ -1,3 +1,6 @@
+<div style={{ background: "red", color: "white", padding: 12 }}>
+    VERSION TEST LOGIN 2026-05-25
+</div>
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -16,19 +19,33 @@ export default function LoginPage() {
         setLoading(true);
         setMessage("");
 
-        const { error } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-        });
+        let success = false;
+        try {
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
 
-        if (error) {
-            setMessage(error.message);
-            setLoading(false);
-            return;
+            console.log("[LOGIN] error message:", error?.message || "none");
+            console.log("[LOGIN] session exists:", !!data?.session);
+            console.log("[LOGIN] user id exists:", !!data?.user?.id);
+
+            if (error) {
+                setMessage(error.message || "Une erreur est survenue lors de la connexion.");
+            } else if (!data?.user) {
+                setMessage("Utilisateur non trouvé.");
+            } else {
+                success = true;
+                window.location.href = "/dashboard";
+            }
+        } catch (err: any) {
+            console.error("[LOGIN] unexpected error:", err);
+            setMessage(err.message || "Une erreur inattendue est survenue.");
+        } finally {
+            if (!success) {
+                setLoading(false);
+            }
         }
-
-        router.push("/dashboard");
-        router.refresh();
     }
 
     async function handleSignup() {
@@ -116,4 +133,4 @@ export default function LoginPage() {
             </div>
         </main>
     );
-}
+}

@@ -34,6 +34,11 @@ export async function middleware(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser();
 
+    // Ensure /login is never intercepted by middleware
+    if (request.nextUrl.pathname.startsWith("/login")) {
+        return supabaseResponse;
+    }
+
     // Route Protection: Redirect unauthenticated requests to login
     if (!user && request.nextUrl.pathname.startsWith("/dashboard")) {
         const redirectUrl = request.nextUrl.clone();
