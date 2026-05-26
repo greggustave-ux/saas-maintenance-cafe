@@ -192,6 +192,7 @@ export function useServiceCallDetails(id: number) {
 
     const [machineHistory, setMachineHistory] = useState<ServiceCall[]>([]);
     const [machineHistoryLoading, setMachineHistoryLoading] = useState(false);
+    const [machineHistoryError, setMachineHistoryError] = useState<string | null>(null);
 
     const isFetchingRef = useRef(false);
 
@@ -235,35 +236,20 @@ export function useServiceCallDetails(id: number) {
             setParts(partsData);
             setPhotos(photosData);
 
-            if (process.env.NODE_ENV === "development") {
-                console.log("[DEV] serviceCall.id:", details.id);
-                console.log("[DEV] serviceCall.machine_serial:", details.machine_serial);
-            }
-
             if (details.machine_serial) {
-                const normalizedSerial = details.machine_serial.trim().toLowerCase();
-                if (process.env.NODE_ENV === "development") {
-                    console.log("[DEV] normalized serial:", normalizedSerial);
-                }
                 setMachineHistoryLoading(true);
                 try {
                     const historyData = await api.getServiceCallsByMachineSerial(details.machine_serial);
                     setMachineHistory(historyData);
-                    if (process.env.NODE_ENV === "development") {
-                        console.log("[DEV] machineHistory.length:", historyData.length);
-                    }
+                    setMachineHistoryError(null);
                 } catch (hErr: any) {
-                    if (process.env.NODE_ENV === "development") {
-                        console.error("[DEV] query error:", hErr);
-                    }
+                    setMachineHistoryError(hErr.message || String(hErr));
                 } finally {
                     setMachineHistoryLoading(false);
                 }
             } else {
                 setMachineHistory([]);
-                if (process.env.NODE_ENV === "development") {
-                    console.log("[DEV] machine_serial is empty, skipped lookup");
-                }
+                setMachineHistoryError(null);
             }
         } catch (err: any) {
             const msg = err.message || "Erreur lors de la récupération des détails de l'intervention.";
@@ -501,5 +487,6 @@ export function useServiceCallDetails(id: number) {
         refresh: fetchDetails,
         machineHistory,
         machineHistoryLoading,
+        machineHistoryError,
     };
 }

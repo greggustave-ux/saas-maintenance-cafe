@@ -142,6 +142,7 @@ export default function ServiceCallDetailsPage() {
         successMessage,
         machineHistory,
         machineHistoryLoading,
+        machineHistoryError,
     } = useServiceCallDetails(id);
 
     if (loading) {
@@ -220,7 +221,7 @@ export default function ServiceCallDetailsPage() {
                                 {serviceCall.status}
                             </span>
                         </div>
-                        
+
                         <div className="space-y-4 pt-1">
                             <div>
                                 <h3 className="text-lg font-bold text-slate-900 dark:text-white leading-tight">
@@ -248,13 +249,11 @@ export default function ServiceCallDetailsPage() {
                         </div>
                     </section>
 
-                    {serviceCall.machine_serial && (
-                        <MachineHistorySection
-                            machineHistory={machineHistory}
-                            currentCallId={serviceCall.id}
-                            machineHistoryLoading={machineHistoryLoading}
-                        />
-                    )}
+                    <MachineHistorySection
+                        machineHistory={machineHistory}
+                        currentCallId={serviceCall.id}
+                        machineHistoryLoading={machineHistoryLoading}
+                    />
                 </div>
 
                 {/* Right side: technician updates */}
@@ -434,11 +433,11 @@ export default function ServiceCallDetailsPage() {
                             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
                                 {photos.slice(0, 4).map((p) => (
                                     <div key={p.id} style={{ border: "1px solid #e2e8f0", borderRadius: "6px", padding: "6px" }}>
-                                        <img 
-                                            src={p.photo_url} 
-                                            alt="Intervention" 
-                                            crossOrigin="anonymous" 
-                                            style={{ width: "100%", height: "180px", objectFit: "cover", borderRadius: "4px" }} 
+                                        <img
+                                            src={p.photo_url}
+                                            alt="Intervention"
+                                            crossOrigin="anonymous"
+                                            style={{ width: "100%", height: "180px", objectFit: "cover", borderRadius: "4px" }}
                                             onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
                                         />
                                     </div>
@@ -454,11 +453,11 @@ export default function ServiceCallDetailsPage() {
                                 <div style={{ textAlign: "center", width: "250px" }}>
                                     <p style={{ fontSize: "12px", color: "#64748b", margin: "0 0 8px 0" }}>Bon pour accord - Signature du client</p>
                                     <div style={{ border: "1px solid #e2e8f0", borderRadius: "6px", padding: "6px", backgroundColor: "#f8fafc" }}>
-                                        <img 
-                                            src={serviceCall.signature_url} 
-                                            alt="Signature" 
-                                            crossOrigin="anonymous" 
-                                            style={{ height: "60px", width: "auto", margin: "0 auto", display: "block" }} 
+                                        <img
+                                            src={serviceCall.signature_url}
+                                            alt="Signature"
+                                            crossOrigin="anonymous"
+                                            style={{ height: "60px", width: "auto", margin: "0 auto", display: "block" }}
                                             onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
                                         />
                                     </div>

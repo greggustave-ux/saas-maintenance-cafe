@@ -30,13 +30,13 @@ export default function MachineHistorySection({
     const otherInterventions = machineHistory.filter((item) => item.id !== currentCallId);
 
     return (
-        <section className="w-full rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-5 shadow-xs sm:p-6 space-y-4">
+        <section className="w-full rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-5 shadow-xs sm:p-6 space-y-4 min-w-0 overflow-hidden">
             <div className="flex flex-col gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     <h2 className="text-lg font-bold text-slate-900 dark:text-white sm:text-xl">
                         Historique de la machine
                     </h2>
-                    <span className="inline-flex items-center rounded-full bg-cyan-50 dark:bg-cyan-950/30 px-2.5 py-0.5 text-xs font-semibold text-cyan-800 dark:text-cyan-400 border border-cyan-200/25">
+                    <span className="inline-flex items-center self-start sm:self-auto rounded-full bg-cyan-50 dark:bg-cyan-950/30 px-2.5 py-0.5 text-xs font-semibold text-cyan-800 dark:text-cyan-400 border border-cyan-200/25">
                         {otherInterventions.length} précédente(s)
                     </span>
                 </div>
@@ -67,7 +67,7 @@ export default function MachineHistorySection({
                     Aucune autre intervention enregistrée pour cette machine.
                 </div>
             ) : (
-                <div className="relative border-l border-slate-200 dark:border-slate-800 ml-3 pl-5 space-y-6 pt-2 max-h-[350px] overflow-y-auto pr-2">
+                <div className="relative border-l border-slate-200 dark:border-slate-800 ml-3 pl-5 space-y-6 pt-2 max-h-[350px] overflow-y-auto pr-2 min-w-0">
                     {otherInterventions.map((item) => {
                         const dateStr = item.created_at
                             ? new Date(item.created_at).toLocaleDateString("fr-FR", {
@@ -78,23 +78,23 @@ export default function MachineHistorySection({
                             : `Intervention #${item.id}`;
 
                         return (
-                            <div key={item.id} className="relative group">
+                            <div key={item.id} className="relative group min-w-0">
                                 {/* Timeline Bullet dot */}
                                 <div className="absolute -left-[26px] mt-1.5 h-3.5 w-3.5 rounded-full border-2 border-white dark:border-slate-900 bg-cyan-500 dark:bg-cyan-400 group-hover:scale-125 transition-transform" />
 
-                                <div className="space-y-1.5">
-                                    <div className="flex items-center justify-between gap-2">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-sm font-semibold text-slate-900 dark:text-white">
+                                <div className="space-y-2.5 min-w-0">
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 min-w-0">
+                                        <div className="flex flex-wrap items-center gap-2 min-w-0">
+                                            <span className="text-sm font-semibold text-slate-900 dark:text-white shrink-0">
                                                 {dateStr}
                                             </span>
-                                            <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${getStatusBadgeClass(item.status)}`}>
+                                            <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold shrink-0 ${getStatusBadgeClass(item.status)}`}>
                                                 {item.status}
                                             </span>
                                         </div>
                                         <a
                                             href={`/dashboard/service-calls/${item.id}`}
-                                            className="text-xs font-semibold text-cyan-600 dark:text-cyan-400 hover:underline inline-flex items-center gap-0.5 min-h-8 px-2.5 rounded-lg bg-slate-50 dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-850/80 active:scale-98 transition-all shadow-xs border border-slate-200/20"
+                                            className="text-xs font-semibold text-cyan-600 dark:text-cyan-400 hover:underline inline-flex items-center gap-0.5 min-h-9 px-3 rounded-lg bg-slate-50 dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-98 transition-all shadow-xs border border-slate-200/20 shrink-0 self-start sm:self-auto"
                                         >
                                             Consulter
                                             <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -103,13 +103,13 @@ export default function MachineHistorySection({
                                         </a>
                                     </div>
 
-                                    <div className="text-xs text-slate-550 dark:text-slate-400">
+                                    <div className="text-xs text-slate-550 dark:text-slate-400 min-w-0 truncate">
                                         Technicien : <span className="font-medium text-slate-800 dark:text-slate-300">{item.technician_name || "Non assigné"}</span>
                                     </div>
 
                                     {/* Issue / Notes preview */}
-                                    <div className="rounded-xl bg-slate-50 dark:bg-slate-850/40 p-2.5 border border-slate-200/10 text-xs text-slate-600 dark:text-slate-355 leading-relaxed max-w-full truncate break-words">
-                                        <p className="font-semibold text-[9px] uppercase text-slate-450 tracking-wider mb-0.5">Notes de clôture / Description</p>
+                                    <div className="rounded-xl bg-slate-50 dark:bg-slate-850/40 p-2.5 border border-slate-200/10 text-xs text-slate-600 dark:text-slate-355 leading-relaxed max-w-full min-w-0 break-words">
+                                        <p className="font-semibold text-[9px] uppercase text-slate-455 tracking-wider mb-0.5">Notes de clôture / Description</p>
                                         <p className="line-clamp-2">
                                             {item.technician_notes || item.issue_description}
                                         </p>
