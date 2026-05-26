@@ -1,7 +1,8 @@
+"use client";
+
 <div style={{ background: "red", color: "white", padding: 12 }}>
     VERSION TEST LOGIN 2026-05-25
 </div>
-"use client";
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
