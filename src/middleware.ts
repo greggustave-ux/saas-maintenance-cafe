@@ -36,8 +36,14 @@ export async function middleware(request: NextRequest) {
 
     const pathname = request.nextUrl.pathname;
 
-    console.log(`[MIDDLEWARE DEBUG] Pathname: ${pathname}`);
-    console.log(`[MIDDLEWARE DEBUG] User ID present: ${user ? user.id : "NO"}`);
+    console.log(`[VERCEL MIDDLEWARE LOG] Pathname: ${pathname}`);
+    console.log(`[VERCEL MIDDLEWARE LOG] User ID: ${user ? user.id : "NULL"}`);
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "NOT_SET";
+    const maskedUrl = supabaseUrl.replace(/https:\/\/([a-z0-9]+)\.supabase\.co/i, (match, ref) => {
+        return `https://${ref.substring(0, 4)}...${ref.substring(ref.length - 2)}.supabase.co`;
+    });
+    console.log(`[VERCEL MIDDLEWARE LOG] Supabase URL: ${maskedUrl}`);
 
     // Helper to construct a redirect response while preserving session cookies
     const redirectWithCookies = (targetPath: string) => {
@@ -60,7 +66,7 @@ export async function middleware(request: NextRequest) {
     // 1. Unauthenticated users redirect to /login
     if (!user) {
         if (pathname.startsWith("/dashboard") || pathname === "/awaiting-approval") {
-            console.log(`[MIDDLEWARE DEBUG] Redirecting to /login (Unauthenticated)`);
+            console.log(`[VERCEL MIDDLEWARE LOG] Redirecting to /login (Unauthenticated)`);
             return redirectWithCookies("/login");
         }
         return supabaseResponse;
@@ -73,8 +79,8 @@ export async function middleware(request: NextRequest) {
         .eq("id", user.id)
         .single();
 
-    console.log(`[MIDDLEWARE DEBUG] Profile query error:`, profileError ? profileError.message : "NONE");
-    console.log(`[MIDDLEWARE DEBUG] Profile approved value:`, profile ? profile.approved : "NULL/NO_PROFILE");
+    console.log(`[VERCEL MIDDLEWARE LOG] Profile Error:`, profileError ? `${profileError.code} - ${profileError.message}` : "NONE");
+    console.log(`[VERCEL MIDDLEWARE LOG] Profile Data:`, profile ? `approved=${profile.approved}, role=${profile.role}` : "NULL");
 
     const isApproved = !!profile?.approved;
 
