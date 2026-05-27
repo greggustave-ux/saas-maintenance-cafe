@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
+import { supabase } from "@/src/lib/supabase-client";
+
 const navLinks = [
     { 
         href: "/dashboard", 
@@ -57,7 +59,29 @@ export default function DashboardShell({
     children: React.ReactNode;
 }) {
     const [menuOpen, setMenuOpen] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
     const pathname = usePathname();
+
+    useEffect(() => {
+        async function checkAdmin() {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    const { data: profile } = await supabase
+                        .from("profiles")
+                        .select("role")
+                        .eq("id", user.id)
+                        .single();
+                    if (profile?.role === "admin") {
+                        setIsAdmin(true);
+                    }
+                }
+            } catch (error) {
+                console.error("Error loading user profile:", error);
+            }
+        }
+        checkAdmin();
+    }, []);
 
     useEffect(() => {
         if (!menuOpen) return;
@@ -73,6 +97,21 @@ export default function DashboardShell({
     function closeMenu() {
         setMenuOpen(false);
     }
+
+    const links = isAdmin
+        ? [
+              ...navLinks,
+              {
+                  href: "/admin/users",
+                  label: "Utilisateurs",
+                  icon: (
+                      <svg className="h-5.5 w-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                      </svg>
+                  ),
+              },
+          ]
+        : navLinks;
 
     return (
         <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
@@ -108,7 +147,7 @@ export default function DashboardShell({
                 </div>
 
                 <nav className="mt-8 flex flex-col gap-1.5">
-                    {navLinks.map((link) => {
+                    {links.map((link) => {
                         const isActive = pathname === link.href || pathname.startsWith(link.href + "/");
                         return (
                             <a

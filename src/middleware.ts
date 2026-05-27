@@ -56,7 +56,7 @@ export async function middleware(request: NextRequest) {
 
     // 1. Unauthenticated users redirect to /login
     if (!user) {
-        if (pathname.startsWith("/dashboard") || pathname === "/awaiting-approval") {
+        if (pathname.startsWith("/dashboard") || pathname.startsWith("/admin") || pathname === "/awaiting-approval") {
             return redirectWithCookies("/login");
         }
         return supabaseResponse;
@@ -73,7 +73,7 @@ export async function middleware(request: NextRequest) {
 
     // 3. Authenticated but unapproved users redirect to /awaiting-approval
     if (!isApproved) {
-        if (pathname.startsWith("/dashboard")) {
+        if (pathname.startsWith("/dashboard") || pathname.startsWith("/admin")) {
             return redirectWithCookies("/awaiting-approval");
         }
     }
@@ -85,9 +85,17 @@ export async function middleware(request: NextRequest) {
         }
     }
 
+    // 5. Restrict /admin routes to admins only
+    const isAdmin = profile?.role === "admin";
+    if (pathname.startsWith("/admin")) {
+        if (!isAdmin) {
+            return redirectWithCookies("/dashboard");
+        }
+    }
+
     return supabaseResponse;
 }
 
 export const config = {
-    matcher: ["/dashboard", "/dashboard/:path*", "/awaiting-approval"],
+    matcher: ["/dashboard", "/dashboard/:path*", "/awaiting-approval", "/admin", "/admin/:path*"],
 };
