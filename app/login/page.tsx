@@ -66,13 +66,16 @@ export default function LoginPage() {
         });
 
         if (error) {
+            console.log("[SIGNUP] signup error:", error.message);
             setMessage(error.message);
             setLoading(false);
             return;
         }
 
+        console.log("[SIGNUP] signup success, calling notify-signup");
+
         try {
-            await fetch("/api/notify-signup", {
+            const res = await fetch("/api/notify-signup", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -83,8 +86,11 @@ export default function LoginPage() {
                     role: "technician",
                 }),
             });
+            console.log("[SIGNUP] notify-signup response status:", res.status);
+            const resData = await res.json();
+            console.log("[SIGNUP] notify-signup response data:", resData);
         } catch (err) {
-            console.error("Erreur de notification admin:", err);
+            console.error("[SIGNUP] notify-signup error:", err);
         }
 
         setMessage("Votre compte est en attente d’approbation par un administrateur.");

@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
+    console.log("[SERVER] /api/notify-signup route called");
     try {
-        const { email, fullName, role } = await request.json();
+        const payload = await request.json();
+        console.log("[SERVER] Received payload:", payload);
+        const { email, fullName, role } = payload;
 
         // Basic payload validation
         if (!email) {
+            console.error("[SERVER] Email validation failed: missing email");
             return NextResponse.json({ error: "Email requis" }, { status: 400 });
         }
 
@@ -18,13 +22,19 @@ export async function POST(request: Request) {
             minute: "2-digit"
         });
 
-        const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || "greg.gustave@gmail.com";
+        const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL;
         const resendKey = process.env.RESEND_API_KEY;
+
+        console.log("[SERVER] Env check - ADMIN_NOTIFICATION_EMAIL:", adminEmail ? `PRÉSENT (${adminEmail})` : "ABSENT (utilisera la valeur par défaut)");
+        console.log("[SERVER] Env check - RESEND_API_KEY:", resendKey ? `PRÉSENT (longueur ${resendKey.length})` : "ABSENT");
+
+        const targetAdminEmail = adminEmail || "greg.gustave@gmail.com";
+        console.log("[SERVER] Target admin email resolved to:", targetAdminEmail);
 
         console.log(`[SIGNUP NOTIFICATION] User registered: ${fullName} (${email}) at ${dateStr}. Role: ${role}`);
 
         if (!resendKey) {
-            console.warn("[SIGNUP NOTIFICATION] RESEND_API_KEY non configurée dans .env.local. Email de notification simulé.");
+            console.warn("[SIGNUP NOTIFICATION] RESEND_API_KEY non configurée. Email de notification simulé.");
             return NextResponse.json({ 
                 success: true, 
                 message: "Email simulé dans la console (RESEND_API_KEY manquante)." 
@@ -34,6 +44,7 @@ export async function POST(request: Request) {
         const origin = new URL(request.url).origin;
         const adminUsersLink = `${origin}/admin/users`;
 
+        console.log("[SERVER] Calling Resend API...");
         // Send email via Resend REST API
         const response = await fetch("https://api.resend.com/emails", {
             method: "POST",
@@ -43,7 +54,7 @@ export async function POST(request: Request) {
             },
             body: JSON.stringify({
                 from: "Welo Platform <onboarding@resend.dev>",
-                to: adminEmail,
+                to: targetAdminEmail,
                 subject: "Nouveau compte Welo en attente d'approbation",
                 html: `
                     <div style="font-family: sans-serif; padding: 24px; color: #334155; line-height: 1.6; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px;">
@@ -74,7 +85,7 @@ export async function POST(request: Request) {
                                 </tr>
                             </table>
                         </div>
-
+ 
                         <p style="font-size: 14px; color: #475569; margin-bottom: 24px;">Vous pouvez approuver ce compte ou lui affecter un rôle différent depuis la console administrative.</p>
                         
                         <div style="text-align: center;">
@@ -89,15 +100,21 @@ export async function POST(request: Request) {
                 `
             })
         });
+ 
+        console.log("[SERVER] Resend API response status:", response.status);
 
         if (!response.ok) {
             const errText = await response.text();
+            console.error("[SERVER] Resend API error body:", errText);
             throw new Error(`Erreur Resend: ${errText}`);
         }
+ 
+        const resData = await response.json();
+        console.log("[SERVER] Resend API success body:", resData);
 
-        return NextResponse.json({ success: true });
+        return NextResponse.json({ success: true, resendData: resData });
     } catch (err: any) {
-        console.error("Signup notification error:", err);
+        console.error("[SERVER] Signup notification handler crashed:", err);
         return NextResponse.json({ error: err.message || "Erreur interne" }, { status: 500 });
     }
 }
