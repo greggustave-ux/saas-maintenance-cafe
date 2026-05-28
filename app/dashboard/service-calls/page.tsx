@@ -37,7 +37,7 @@ export default function ServiceCallsPage() {
     } = useServiceCalls();
 
     return (
-        <div className="w-full space-y-6 md:mx-auto md:max-w-4xl">
+        <div className="w-full max-w-3xl mx-auto space-y-6 md:max-w-4xl">
             <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">

@@ -160,7 +160,7 @@ export default function AdminUsersPage() {
     const pendingCount = profiles.filter((p) => !p.approved).length;
 
     return (
-        <div className="w-full space-y-6">
+        <div className="w-full max-w-4xl mx-auto space-y-6">
             {/* Header Area */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>

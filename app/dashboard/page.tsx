@@ -29,7 +29,7 @@ export default function DashboardPage() {
     }
 
     return (
-        <div className="w-full md:max-w-2xl">
+        <div className="w-full max-w-2xl mx-auto">
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
                 Dashboard Welo
             </h1>

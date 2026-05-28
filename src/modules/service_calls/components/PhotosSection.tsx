@@ -84,7 +84,7 @@ export default function PhotosSection({
                     </div>
                 )}
 
-                <div className="grid grid-cols-1 gap-4 min-[420px]:grid-cols-2">
+                <div className="grid grid-cols-2 gap-4 landscape:grid-cols-3 sm:grid-cols-3">
                     {/* Pulsing loading skeleton placeholder during image processing */}
                     {isUploading && (
                         <div className="group relative overflow-hidden rounded-xl border border-dashed border-slate-300 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/30 p-2 shadow-xs animate-pulse">

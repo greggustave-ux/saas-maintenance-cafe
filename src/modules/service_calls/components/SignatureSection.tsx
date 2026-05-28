@@ -102,7 +102,7 @@ export default function SignatureSection({
                     penColor="black"
                     backgroundColor="white"
                     canvasProps={{
-                        className: "h-[220px] w-full touch-none bg-white",
+                        className: "h-[220px] landscape:h-[160px] md:landscape:h-[220px] w-full touch-none bg-white",
                     }}
                 />
             </div>

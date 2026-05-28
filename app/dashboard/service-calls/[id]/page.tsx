@@ -167,7 +167,7 @@ export default function ServiceCallDetailsPage() {
     }
 
     return (
-        <main className="w-full space-y-6 md:mx-auto md:max-w-4xl animate-fadeIn">
+        <main className="w-full max-w-3xl mx-auto space-y-6 md:max-w-4xl animate-fadeIn">
             {/* Header / Actions bar */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 dark:border-slate-800 pb-5">
                 <div className="space-y-1">
