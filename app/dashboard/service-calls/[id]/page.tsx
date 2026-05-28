@@ -146,6 +146,9 @@ export default function ServiceCallDetailsPage() {
         savingNotes,
         addingPart,
         deletingPhotoId,
+        userRole,
+        technicians,
+        handleUpdateTechnician,
     } = useServiceCallDetails(id);
 
     if (loading) {
@@ -242,7 +245,22 @@ export default function ServiceCallDetailsPage() {
                                 </div>
                                 <div>
                                     <dt className="text-xs font-semibold uppercase tracking-wider text-slate-400">Technicien terrain</dt>
-                                    <dd className="mt-0.5 font-semibold text-slate-800 dark:text-slate-200">{serviceCall.technician_name || "Non assigné"}</dd>
+                                    {userRole === "admin" || userRole === "dispatcher" ? (
+                                        <select
+                                            className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-850 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-semibold text-slate-800 dark:text-slate-200 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15 focus:outline-none"
+                                            value={serviceCall.technician_name || ""}
+                                            onChange={(e) => handleUpdateTechnician(e.target.value)}
+                                        >
+                                            <option value="">Non assigné</option>
+                                            {technicians.map((tech) => (
+                                                <option key={tech.id} value={tech.full_name}>
+                                                    {tech.full_name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    ) : (
+                                        <dd className="mt-0.5 font-semibold text-slate-800 dark:text-slate-200">{serviceCall.technician_name || "Non assigné"}</dd>
+                                    )}
                                 </div>
                                 <div>
                                     <dt className="text-xs font-semibold uppercase tracking-wider text-slate-400">Description du problème</dt>

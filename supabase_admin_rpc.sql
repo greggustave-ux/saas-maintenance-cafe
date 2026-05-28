@@ -69,3 +69,33 @@ BEGIN
   WHERE id = target_user_id;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+-- 3. Fonction sécurisée pour récupérer les techniciens approuvés pour l'assignation
+CREATE OR REPLACE FUNCTION public.get_approved_technicians_for_assignment()
+RETURNS TABLE (
+  id uuid,
+  full_name text,
+  role text
+) AS $$
+BEGIN
+  -- Vérifier que l'utilisateur connecté est approuvé et est admin ou dispatcher
+  IF NOT EXISTS (
+    SELECT 1 FROM public.profiles 
+    WHERE public.profiles.id = auth.uid() 
+      AND public.profiles.approved = true 
+      AND (public.profiles.role = 'admin' OR public.profiles.role = 'dispatcher')
+  ) THEN
+    RAISE EXCEPTION 'Non autorisé : Réservé aux administrateurs et répartiteurs.';
+  END IF;
+
+  RETURN QUERY
+  SELECT 
+    p.id,
+    p.full_name,
+    p.role
+  FROM public.profiles p
+  WHERE p.approved = true AND p.role = 'technician'
+  ORDER BY p.full_name ASC;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+

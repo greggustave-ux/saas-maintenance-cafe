@@ -34,6 +34,8 @@ export default function ServiceCallsPage() {
         handleUpdateStatus,
         handleDeleteServiceCall,
         filteredCalls,
+        userRole,
+        technicians,
     } = useServiceCalls();
 
     return (
@@ -48,16 +50,18 @@ export default function ServiceCallsPage() {
                     </p>
                 </div>
 
-                <button
-                    type="button"
-                    onClick={() => setIsFormOpen(!isFormOpen)}
-                    className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-cyan-600 dark:bg-cyan-500 px-5 py-3 text-base font-semibold text-white hover:bg-cyan-700 dark:hover:bg-cyan-400 active:scale-98 transition-all cursor-pointer shadow-xs"
-                >
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d={isFormOpen ? "M18 12H6" : "M12 6v12M6 12h12"} />
-                    </svg>
-                    {isFormOpen ? "Fermer le formulaire" : "Nouvel appel"}
-                </button>
+                {userRole && userRole !== "technician" && (
+                    <button
+                        type="button"
+                        onClick={() => setIsFormOpen(!isFormOpen)}
+                        className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-cyan-600 dark:bg-cyan-500 px-5 py-3 text-base font-semibold text-white hover:bg-cyan-700 dark:hover:bg-cyan-400 active:scale-98 transition-all cursor-pointer shadow-xs"
+                    >
+                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d={isFormOpen ? "M18 12H6" : "M12 6v12M6 12h12"} />
+                        </svg>
+                        {isFormOpen ? "Fermer le formulaire" : "Nouvel appel"}
+                    </button>
+                )}
             </header>
 
             {error && (
@@ -77,6 +81,7 @@ export default function ServiceCallsPage() {
                     form={form}
                     onSubmit={handleCreateServiceCall}
                     onCancel={() => setIsFormOpen(false)}
+                    technicians={technicians}
                 />
             )}
 

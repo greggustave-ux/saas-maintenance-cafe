@@ -5,6 +5,7 @@ import { compressImageForUpload } from "@/src/lib/compress-image";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas-pro";
 import { analyzeMachineHistory } from "../utils/machine-intelligence";
+import { supabase } from "@/src/lib/supabase-client";
 
 
 export type UploadStatus = "idle" | "compressing" | "uploading" | "saving" | "success" | "error";
@@ -19,6 +20,8 @@ export function useServiceCalls() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [userRole, setUserRole] = useState<string | null>(null);
+    const [technicians, setTechnicians] = useState<{ id: string; full_name: string }[]>([]);
 
     // Form inputs state
     const [clientName, setClientName] = useState("");
@@ -52,6 +55,31 @@ export function useServiceCalls() {
     useEffect(() => {
         fetchServiceCalls();
     }, [fetchServiceCalls]);
+
+    useEffect(() => {
+        async function loadUserRoleAndTechs() {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    const { data: profile } = await supabase
+                        .from("profiles")
+                        .select("role")
+                        .eq("id", user.id)
+                        .single();
+                    if (profile) {
+                        setUserRole(profile.role);
+                        if (profile.role === "admin" || profile.role === "dispatcher") {
+                            const techs = await api.getApprovedTechnicians();
+                            setTechnicians(techs);
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to load user profile or technicians in useServiceCalls:", err);
+            }
+        }
+        loadUserRoleAndTechs();
+    }, []);
 
     const handleCreateServiceCall = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
@@ -165,6 +193,8 @@ export function useServiceCalls() {
         handleDeleteServiceCall,
         filteredCalls,
         refresh: fetchServiceCalls,
+        userRole,
+        technicians,
     };
 }
 
@@ -176,6 +206,8 @@ export function useServiceCallDetails(id: number) {
     const [notes, setNotes] = useState("");
     const [parts, setParts] = useState<ServiceCallPart[]>([]);
     const [photos, setPhotos] = useState<ServiceCallPhoto[]>([]);
+    const [userRole, setUserRole] = useState<string | null>(null);
+    const [technicians, setTechnicians] = useState<{ id: string; full_name: string }[]>([]);
 
     // Form inputs state for parts
     const [partName, setPartName] = useState("");
@@ -272,6 +304,31 @@ export function useServiceCallDetails(id: number) {
         fetchDetails();
     }, [fetchDetails]);
 
+    useEffect(() => {
+        async function loadUserRoleAndTechs() {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    const { data: profile } = await supabase
+                        .from("profiles")
+                        .select("role")
+                        .eq("id", user.id)
+                        .single();
+                    if (profile) {
+                        setUserRole(profile.role);
+                        if (profile.role === "admin" || profile.role === "dispatcher") {
+                            const techs = await api.getApprovedTechnicians();
+                            setTechnicians(techs);
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to load user profile or technicians in useServiceCallDetails:", err);
+            }
+        }
+        loadUserRoleAndTechs();
+    }, []);
+
     const handleSaveNotes = useCallback(async () => {
         if (savingNotes) return false;
         setError(null);
@@ -294,6 +351,25 @@ export function useServiceCallDetails(id: number) {
             setSavingNotes(false);
         }
     }, [id, notes, savingNotes]);
+
+    const handleUpdateTechnician = useCallback(async (technicianName: string) => {
+        setError(null);
+        setSuccessMessage(null);
+        try {
+            await api.updateServiceCallTechnician(id, technicianName);
+            setServiceCall((prev) => (prev ? { ...prev, technician_name: technicianName } : null));
+            setSuccessMessage("Technicien mis à jour.");
+            setTimeout(() => setSuccessMessage(null), 3000);
+            return true;
+        } catch (err: any) {
+            const msg = err.message || "Erreur lors de la mise à jour du technicien.";
+            setError(msg);
+            if (process.env.NODE_ENV === "development") {
+                console.error("updateTechnician error:", err);
+            }
+            return false;
+        }
+    }, [id]);
 
     const handleAddPart = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
@@ -508,6 +584,9 @@ export function useServiceCallDetails(id: number) {
         savingNotes,
         addingPart,
         deletingPhotoId,
+        userRole,
+        technicians,
+        handleUpdateTechnician,
     };
 }
 

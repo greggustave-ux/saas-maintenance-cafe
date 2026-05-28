@@ -24,12 +24,14 @@ interface NewServiceCallFormProps {
     };
     onSubmit: (e: React.FormEvent) => Promise<void>;
     onCancel: () => void;
+    technicians?: { id: string; full_name: string }[];
 }
 
 export default function NewServiceCallForm({
     form,
     onSubmit,
     onCancel,
+    technicians = [],
 }: NewServiceCallFormProps) {
     return (
         <form
@@ -54,13 +56,19 @@ export default function NewServiceCallForm({
 
                 <div className="space-y-1">
                     <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">Technicien assigné</label>
-                    <input
+                    <select
                         className={inputClass}
-                        placeholder="ex. Jean Dupont"
                         value={form.technicianName}
                         onChange={(e) => form.setTechnicianName(e.target.value)}
                         required
-                    />
+                    >
+                        <option value="">Sélectionner un technicien...</option>
+                        {technicians.map((tech) => (
+                            <option key={tech.id} value={tech.full_name}>
+                                {tech.full_name}
+                            </option>
+                        ))}
+                    </select>
                 </div>
             </div>
 

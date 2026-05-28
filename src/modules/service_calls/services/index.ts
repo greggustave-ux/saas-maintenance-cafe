@@ -295,3 +295,21 @@ export async function getServiceCallsByMachineSerial(
     if (error) throw error;
     return data as ServiceCall[] || [];
 }
+
+// 14. Get approved technicians for assignment
+export async function getApprovedTechnicians(): Promise<{ id: string; full_name: string }[]> {
+    const { data, error } = await supabase.rpc("get_approved_technicians_for_assignment");
+    if (error) throw error;
+    return data || [];
+}
+
+// 15. Update service call assigned technician
+export async function updateServiceCallTechnician(id: number, technicianName: string): Promise<void> {
+    const { error } = await supabase
+        .from("service_calls")
+        .update({ technician_name: technicianName })
+        .eq("id", id);
+
+    if (error) throw error;
+}
+
