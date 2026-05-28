@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ServiceCall } from "../types";
+import { analyzeMachineHistory } from "../utils/machine-intelligence";
 
 interface MachineHistorySectionProps {
     machineHistory: ServiceCall[];
@@ -34,6 +35,8 @@ export default function MachineHistorySection({
         setExpandedIds((prev) => ({ ...prev, [id]: !prev[id] }));
     }
 
+    const analysis = analyzeMachineHistory(machineHistory);
+
     return (
         <section className="w-full rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-5 shadow-xs sm:p-6 space-y-4 min-w-0 overflow-hidden">
             <div className="flex flex-col gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
@@ -49,6 +52,148 @@ export default function MachineHistorySection({
                     Suivi des interventions sur ce numéro de série
                 </p>
             </div>
+
+            {/* Machine Intelligence Panel */}
+            {machineHistory.length > 0 && !machineHistoryLoading && (
+                <div className={`rounded-xl border p-4 space-y-3.5 transition-all animate-fadeIn ${
+                    analysis.riskStatus === "Problématique"
+                        ? "border-red-500/20 bg-red-500/5 dark:bg-red-950/10"
+                        : analysis.riskStatus === "À surveiller"
+                        ? "border-amber-500/20 bg-amber-500/5 dark:bg-amber-950/10"
+                        : "border-emerald-500/20 bg-emerald-500/5 dark:bg-emerald-950/10"
+                }`}>
+                    {/* Header: Status and Score */}
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                                Analyse prédictive
+                            </span>
+                            <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-[9px] font-semibold border ${
+                                analysis.riskStatus === "Problématique"
+                                    ? "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20"
+                                    : analysis.riskStatus === "À surveiller"
+                                    ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20"
+                                    : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                            }`}>
+                                {analysis.riskStatus}
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Score de risque :</span>
+                            <span className={`text-base font-bold ${
+                                analysis.riskStatus === "Problématique"
+                                    ? "text-red-600 dark:text-red-400"
+                                    : analysis.riskStatus === "À surveiller"
+                                    ? "text-amber-600 dark:text-amber-400"
+                                    : "text-emerald-600 dark:text-emerald-400"
+                            }`}>
+                                {analysis.riskScore}/100
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Progress Bar */}
+                    <div className="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                        <div
+                            className={`h-full rounded-full transition-all duration-500 ${
+                                analysis.riskStatus === "Problématique"
+                                    ? "bg-red-500"
+                                    : analysis.riskStatus === "À surveiller"
+                                    ? "bg-amber-500"
+                                    : "bg-emerald-500"
+                            }`}
+                            style={{ width: `${analysis.riskScore}%` }}
+                        />
+                    </div>
+
+                    {/* Recommendation Banner */}
+                    <div className={`rounded-lg px-3 py-2 text-xs font-medium border flex items-center gap-2 ${
+                        analysis.riskStatus === "Problématique"
+                            ? "bg-red-500/10 text-red-700 dark:text-red-300 border-red-500/15"
+                            : analysis.riskStatus === "À surveiller"
+                            ? "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/15"
+                            : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/15"
+                    }`}>
+                        <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                            {analysis.riskStatus === "Stable" ? (
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            ) : (
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            )}
+                        </svg>
+                        <span>
+                            Recommandation : <strong className="font-semibold">{analysis.recommendation}</strong> ({analysis.riskExplanation})
+                        </span>
+                    </div>
+
+                    {/* Key Stats Grid */}
+                    <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 pt-2 text-[10px] text-slate-500 dark:text-slate-400 border-t border-slate-200/50 dark:border-slate-800/40">
+                        <div>
+                            <span className="font-bold text-slate-400 uppercase tracking-wider block">Interventions</span>
+                            <p className="font-semibold text-slate-800 dark:text-slate-350 mt-0.5 text-xs">
+                                {analysis.totalInterventions} au total
+                            </p>
+                            <p className="text-[10px] mt-0.5 text-slate-400">
+                                {analysis.interventions30Days} en 30j. / {analysis.interventions90Days} en 90j.
+                            </p>
+                        </div>
+                        <div>
+                            <span className="font-bold text-slate-400 uppercase tracking-wider block">Qualité rapports</span>
+                            <p className="font-semibold text-slate-800 dark:text-slate-350 mt-0.5 text-xs">
+                                📸 {analysis.hasPhotosCount} photo{analysis.hasPhotosCount > 1 ? "s" : ""}
+                            </p>
+                            <p className="font-semibold text-slate-800 dark:text-slate-350 text-xs">
+                                ✍️ {analysis.hasSignaturesCount} signature{analysis.hasSignaturesCount > 1 ? "s" : ""}
+                            </p>
+                        </div>
+                        <div className="col-span-2 sm:col-span-1">
+                            <span className="font-bold text-slate-400 uppercase tracking-wider block">Dernier passage</span>
+                            <p className="font-semibold text-slate-800 dark:text-slate-350 mt-0.5 text-xs">
+                                {analysis.lastInterventionDate || "N/A"}
+                            </p>
+                            <p className="text-[10px] mt-0.5 text-slate-400">
+                                par {analysis.lastTechnician || "N/A"}
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Extensible Future Financial Placeholders Panel */}
+                    <div className="pt-3 border-t border-slate-200/50 dark:border-slate-800/40 text-[10px] space-y-2">
+                        <div className="flex items-center justify-between">
+                            <span className="font-bold text-slate-400 uppercase tracking-wider">Coût total maintenance (est.)</span>
+                            <span className="font-semibold text-slate-800 dark:text-slate-200">${analysis.estimatedMaintenanceCost}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <span className="font-bold text-slate-400 uppercase tracking-wider">Fréquence moyenne</span>
+                            <span className="font-semibold text-slate-800 dark:text-slate-200">{analysis.averageInterventionFrequency}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <span className="font-bold text-slate-400 uppercase tracking-wider">Risque d'indisponibilité (downtime)</span>
+                            <span className={`font-bold px-1.5 py-0.5 rounded-md ${
+                                analysis.downtimeRisk === "Élevé"
+                                    ? "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/10"
+                                    : analysis.downtimeRisk === "Moyen"
+                                    ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/10"
+                                    : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/10"
+                            }`}>{analysis.downtimeRisk}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <span className="font-bold text-slate-400 uppercase tracking-wider">Préconisation remplacement</span>
+                            <span className="font-semibold text-slate-800 dark:text-slate-200">{analysis.replacementRecommendation}</span>
+                        </div>
+                        {analysis.mostFrequentParts.length > 0 && (
+                            <div className="pt-2 flex flex-wrap gap-1.5 items-center">
+                                <span className="font-bold text-slate-400 uppercase tracking-wider mr-1">Pièces fréquentes :</span>
+                                {analysis.mostFrequentParts.map((p, idx) => (
+                                    <span key={idx} className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-350 font-medium px-2 py-0.5 rounded text-[10px]">
+                                        {p}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {machineHistoryLoading ? (
                 <div className="space-y-4 animate-pulse pt-2">
