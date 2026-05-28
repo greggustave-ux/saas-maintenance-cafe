@@ -72,7 +72,8 @@ export default function LoginPage() {
             return;
         }
 
-        console.log("[SIGNUP] signup success, calling notify-signup");
+        console.log("[SIGNUP] signup success");
+        console.log("[SIGNUP] calling notify-signup");
 
         try {
             const res = await fetch("/api/notify-signup", {
@@ -93,8 +94,9 @@ export default function LoginPage() {
             console.error("[SIGNUP] notify-signup error:", err);
         }
 
-        setMessage("Votre compte est en attente d’approbation par un administrateur.");
-        setLoading(false);
+        console.log("[SIGNUP] notify-signup done");
+
+        router.push("/awaiting-approval");
     }
 
     return (
