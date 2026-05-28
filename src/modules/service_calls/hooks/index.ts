@@ -189,6 +189,9 @@ export function useServiceCallDetails(id: number) {
     const [savingSignature, setSavingSignature] = useState(false);
     const [generatingPdf, setGeneratingPdf] = useState(false);
     const [activePhotoModal, setActivePhotoModal] = useState<string | null>(null);
+    const [savingNotes, setSavingNotes] = useState(false);
+    const [addingPart, setAddingPart] = useState(false);
+    const [deletingPhotoId, setDeletingPhotoId] = useState<number | null>(null);
 
     const [machineHistory, setMachineHistory] = useState<ServiceCall[]>([]);
     const [machineHistoryLoading, setMachineHistoryLoading] = useState(false);
@@ -268,8 +271,10 @@ export function useServiceCallDetails(id: number) {
     }, [fetchDetails]);
 
     const handleSaveNotes = useCallback(async () => {
+        if (savingNotes) return false;
         setError(null);
         setSuccessMessage(null);
+        setSavingNotes(true);
         try {
             await api.saveTechnicianNotes(id, notes);
             setServiceCall((prev) => (prev ? { ...prev, technician_notes: notes } : null));
@@ -283,13 +288,17 @@ export function useServiceCallDetails(id: number) {
                 console.error("saveNotes error:", err);
             }
             return false;
+        } finally {
+            setSavingNotes(false);
         }
-    }, [id, notes]);
+    }, [id, notes, savingNotes]);
 
     const handleAddPart = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
+        if (addingPart) return;
         setError(null);
         setSuccessMessage(null);
+        setAddingPart(true);
         try {
             await api.addServiceCallPart({
                 service_call_id: id,
@@ -312,8 +321,10 @@ export function useServiceCallDetails(id: number) {
             if (process.env.NODE_ENV === "development") {
                 console.error("addPart error:", err);
             }
+        } finally {
+            setAddingPart(false);
         }
-    }, [id, partName, quantity, unitPrice, refreshParts]);
+    }, [id, partName, quantity, unitPrice, refreshParts, addingPart]);
 
     const handleUploadPhoto = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
         const input = e.target;
@@ -350,11 +361,13 @@ export function useServiceCallDetails(id: number) {
     }, [id, refreshPhotos]);
 
     const handleDeletePhoto = useCallback(async (photoId: number, photoUrl: string) => {
+        if (deletingPhotoId !== null) return;
         const confirmDelete = window.confirm("Supprimer cette photo ?");
         if (!confirmDelete) return;
 
         setError(null);
         setSuccessMessage(null);
+        setDeletingPhotoId(photoId);
         try {
             await api.deleteInterventionPhoto(photoId, photoUrl);
             setPhotos((prev) => prev.filter((p) => p.id !== photoId));
@@ -366,8 +379,10 @@ export function useServiceCallDetails(id: number) {
             if (process.env.NODE_ENV === "development") {
                 console.error("deletePhoto error:", err);
             }
+        } finally {
+            setDeletingPhotoId(null);
         }
-    }, []);
+    }, [deletingPhotoId]);
 
     const handleSaveSignature = useCallback(async (signatureCanvasInstance: any) => {
         if (!signatureCanvasInstance) return;
@@ -488,5 +503,8 @@ export function useServiceCallDetails(id: number) {
         machineHistory,
         machineHistoryLoading,
         machineHistoryError,
+        savingNotes,
+        addingPart,
+        deletingPhotoId,
     };
 }

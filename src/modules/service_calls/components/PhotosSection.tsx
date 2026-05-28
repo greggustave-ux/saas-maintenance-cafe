@@ -16,6 +16,7 @@ interface PhotosSectionProps {
     handleUploadPhoto: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
     handleDeletePhoto: (photoId: number, photoUrl: string) => Promise<void>;
     setActivePhotoModal: (url: string) => void;
+    deletingPhotoId?: number | null;
 }
 
 function getUploadLabel(status: UploadStatus) {
@@ -40,6 +41,7 @@ export default function PhotosSection({
     handleUploadPhoto,
     handleDeletePhoto,
     setActivePhotoModal,
+    deletingPhotoId,
 }: PhotosSectionProps) {
     const isUploading = uploadStatus !== "idle" && uploadStatus !== "success" && uploadStatus !== "error";
 
@@ -106,13 +108,14 @@ export default function PhotosSection({
                             className="group relative overflow-hidden rounded-xl border border-slate-200/70 dark:border-slate-800/70 bg-slate-50 dark:bg-slate-850 p-2 shadow-xs"
                         >
                             <div 
-                                className="relative aspect-4/3 w-full overflow-hidden rounded-lg bg-slate-200 dark:bg-slate-800 cursor-pointer"
+                                className="relative aspect-4/3 w-full overflow-hidden rounded-lg bg-slate-200 dark:bg-slate-850 cursor-pointer"
                                 onClick={() => setActivePhotoModal(photo.photo_url)}
-                            >
+                             >
                                 <img
                                     src={photo.photo_url}
                                     alt="Aperçu de l'intervention"
                                     crossOrigin="anonymous"
+                                    loading="lazy"
                                     className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                                 />
                                 <div className="absolute inset-0 bg-slate-950/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -125,9 +128,17 @@ export default function PhotosSection({
                             <button
                                 type="button"
                                 onClick={() => handleDeletePhoto(photo.id, photo.photo_url)}
-                                className={`${btnDangerClass} mt-2 w-full min-h-10 text-sm py-2`}
+                                disabled={deletingPhotoId === photo.id}
+                                className={`${btnDangerClass} mt-2 w-full min-h-10 text-sm py-2 disabled:opacity-50`}
                             >
-                                Supprimer la photo
+                                {deletingPhotoId === photo.id ? (
+                                    <>
+                                        <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-red-500/30 border-t-red-500 inline-block" />
+                                        Suppression...
+                                    </>
+                                ) : (
+                                    "Supprimer la photo"
+                                )}
                             </button>
                         </div>
                     ))}

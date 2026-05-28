@@ -260,9 +260,49 @@ export default function AdminUsersPage() {
 
             {/* Profiles List */}
             {loading ? (
-                <div className="flex h-64 flex-col items-center justify-center rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white/50 dark:bg-slate-900/50 p-8">
-                    <div className="h-8 w-8 animate-spin rounded-full border-3 border-cyan-500 border-t-transparent"></div>
-                    <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">Chargement des utilisateurs...</p>
+                <div className="overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 shadow-xs animate-pulse">
+                    <div className="hidden md:block">
+                        <div className="bg-slate-50 dark:bg-slate-950/60 h-12 border-b border-slate-200/80 dark:border-slate-800/80 flex items-center px-6 gap-6">
+                            <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-28"></div>
+                            <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-20 ml-28"></div>
+                            <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-24 ml-24"></div>
+                            <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-32 ml-24"></div>
+                        </div>
+                        <div className="divide-y divide-slate-200/80 dark:divide-slate-800/80">
+                            {[1, 2, 3, 4, 5].map((i) => (
+                                <div key={i} className="px-6 py-5 flex items-center justify-between gap-6">
+                                    <div className="space-y-2 flex-1">
+                                        <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-36"></div>
+                                        <div className="h-3 bg-slate-150 dark:bg-slate-850/80 rounded w-48"></div>
+                                    </div>
+                                    <div className="h-6 bg-slate-200 dark:bg-slate-800 rounded-full w-20"></div>
+                                    <div className="h-8 bg-slate-200 dark:bg-slate-800 rounded-lg w-28"></div>
+                                    <div className="h-4 bg-slate-150 dark:bg-slate-850 rounded w-24"></div>
+                                    <div className="h-4 bg-slate-150 dark:bg-slate-855 rounded w-28"></div>
+                                    <div className="h-8 bg-slate-200 dark:bg-slate-800 rounded-lg w-16"></div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    {/* Mobile skeleton */}
+                    <div className="md:hidden divide-y divide-slate-200/80 dark:divide-slate-800/80">
+                        {[1, 2, 3].map((i) => (
+                            <div key={i} className="p-4 space-y-3.5">
+                                <div className="flex justify-between items-start">
+                                    <div className="space-y-1.5 flex-1">
+                                        <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-2/3"></div>
+                                        <div className="h-3 bg-slate-150 dark:bg-slate-855 rounded w-1/2"></div>
+                                    </div>
+                                    <div className="h-5 bg-slate-200 dark:bg-slate-800 rounded-full w-16"></div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2 pt-1">
+                                    <div className="h-8 bg-slate-150 dark:bg-slate-850 rounded-lg w-full"></div>
+                                    <div className="h-8 bg-slate-150 dark:bg-slate-850 rounded-lg w-3/4"></div>
+                                </div>
+                                <div className="h-9 bg-slate-200 dark:bg-slate-800 rounded-lg w-full mt-1"></div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             ) : filteredProfiles.length === 0 ? (
                 <div className="flex h-64 flex-col items-center justify-center rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white/50 dark:bg-slate-900/50 p-8 text-center">

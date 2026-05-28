@@ -24,6 +24,7 @@ interface PartsSectionProps {
     handleAddPart: (e: React.FormEvent) => Promise<void>;
     totalPartsCost: number;
     loading?: boolean;
+    addingPart?: boolean;
 }
 
 export default function PartsSection({
@@ -32,6 +33,7 @@ export default function PartsSection({
     handleAddPart,
     totalPartsCost,
     loading,
+    addingPart,
 }: PartsSectionProps) {
     return (
         <section className={sectionCardClass}>
@@ -48,6 +50,7 @@ export default function PartsSection({
                         value={partsForm.partName}
                         onChange={(e) => partsForm.setPartName(e.target.value)}
                         required
+                        disabled={addingPart}
                     />
                 </div>
 
@@ -61,6 +64,7 @@ export default function PartsSection({
                         value={partsForm.quantity}
                         onChange={(e) => partsForm.setQuantity(Number(e.target.value))}
                         required
+                        disabled={addingPart}
                     />
                 </div>
 
@@ -75,12 +79,20 @@ export default function PartsSection({
                         value={partsForm.unitPrice || ""}
                         onChange={(e) => partsForm.setUnitPrice(Number(e.target.value))}
                         required
+                        disabled={addingPart}
                     />
                 </div>
 
                 <div className="sm:col-span-3 pt-2">
-                    <button type="submit" className={`${btnPrimaryClass} w-full`}>
-                        Ajouter la pièce
+                    <button type="submit" disabled={addingPart} className={`${btnPrimaryClass} w-full disabled:opacity-50`}>
+                        {addingPart ? (
+                            <>
+                                <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white inline-block" />
+                                Ajout en cours...
+                            </>
+                        ) : (
+                            "Ajouter la pièce"
+                        )}
                     </button>
                 </div>
             </form>

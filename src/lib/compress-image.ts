@@ -1,8 +1,8 @@
 export const MAX_INPUT_BYTES = 10 * 1024 * 1024;
 export const MAX_OUTPUT_BYTES = 2 * 1024 * 1024;
 
-const MAX_IMAGE_DIMENSION = 1920;
-const JPEG_QUALITY = 0.82;
+const MAX_IMAGE_DIMENSION = 1600;
+const JPEG_QUALITY = 0.80;
 
 export async function compressImageForUpload(file: File): Promise<Blob> {
     if (file.size > MAX_INPUT_BYTES) {

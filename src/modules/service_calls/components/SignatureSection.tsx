@@ -127,7 +127,8 @@ export default function SignatureSection({
                 <button
                     type="button"
                     onClick={clearSignature}
-                    className={btnSecondaryClass}
+                    disabled={savingSignature}
+                    className={`${btnSecondaryClass} disabled:opacity-50`}
                 >
                     Effacer
                 </button>

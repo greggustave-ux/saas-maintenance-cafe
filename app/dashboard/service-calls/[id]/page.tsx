@@ -143,6 +143,9 @@ export default function ServiceCallDetailsPage() {
         machineHistory,
         machineHistoryLoading,
         machineHistoryError,
+        savingNotes,
+        addingPart,
+        deletingPhotoId,
     } = useServiceCallDetails(id);
 
     if (loading) {
@@ -272,9 +275,17 @@ export default function ServiceCallDetailsPage() {
                         <button
                             type="button"
                             onClick={handleSaveNotes}
-                            className={`${btnPrimaryClass} w-full`}
+                            disabled={savingNotes}
+                            className={`${btnPrimaryClass} w-full disabled:opacity-50`}
                         >
-                            Sauvegarder les notes
+                            {savingNotes ? (
+                                <>
+                                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white inline-block" />
+                                    Sauvegarde en cours...
+                                </>
+                            ) : (
+                                "Sauvegarder les notes"
+                            )}
                         </button>
                     </section>
 
@@ -286,6 +297,7 @@ export default function ServiceCallDetailsPage() {
                         handleUploadPhoto={handleUploadPhoto}
                         handleDeletePhoto={handleDeletePhoto}
                         setActivePhotoModal={setActivePhotoModal}
+                        deletingPhotoId={deletingPhotoId}
                     />
 
                     {/* Signature Section */}
@@ -302,6 +314,7 @@ export default function ServiceCallDetailsPage() {
                         handleAddPart={handleAddPart}
                         totalPartsCost={totalPartsCost}
                         loading={false}
+                        addingPart={addingPart}
                     />
                 </div>
             </div>
