@@ -47,13 +47,23 @@ export default function SignatureSection({
                     const data = signatureRef.current?.toDataURL();
                     canvas.width = width * ratio;
                     canvas.height = height * ratio;
-                    canvas.getContext("2d")?.scale(ratio, ratio);
+                    const ctx = canvas.getContext("2d");
+                    if (ctx) {
+                        ctx.scale(ratio, ratio);
+                        ctx.fillStyle = "white";
+                        ctx.fillRect(0, 0, width, height);
+                    }
                     signatureRef.current?.clear();
                     
                     if (data && !signatureRef.current?.isEmpty()) {
                         const img = new Image();
                         img.onload = () => {
-                            canvas.getContext("2d")?.drawImage(img, 0, 0, width, height);
+                            const ctx2 = canvas.getContext("2d");
+                            if (ctx2) {
+                                ctx2.fillStyle = "white";
+                                ctx2.fillRect(0, 0, width, height);
+                                ctx2.drawImage(img, 0, 0, width, height);
+                            }
                         };
                         img.src = data;
                     }
@@ -62,7 +72,10 @@ export default function SignatureSection({
         }
 
         // Delay slightly for render cycles
-        const timer = setTimeout(resizeCanvas, 300);
+        const timer = setTimeout(() => {
+            resizeCanvas();
+            signatureRef.current?.clear();
+        }, 300);
         window.addEventListener("resize", resizeCanvas);
         return () => {
             clearTimeout(timer);
@@ -83,12 +96,13 @@ export default function SignatureSection({
                 Veuillez faire signer le client ci-dessous pour valider la fin de l'intervention :
             </p>
 
-            <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950">
+            <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white">
                 <SignatureCanvas
                     ref={signatureRef}
                     penColor="black"
+                    backgroundColor="white"
                     canvasProps={{
-                        className: "h-36 w-full touch-none sm:h-44",
+                        className: "h-[220px] w-full touch-none bg-white",
                     }}
                 />
             </div>
