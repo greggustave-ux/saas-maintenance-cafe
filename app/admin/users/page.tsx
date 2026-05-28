@@ -32,6 +32,44 @@ export default function AdminUsersPage() {
     const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "approved">("all");
     const [roleFilter, setRoleFilter] = useState<string>("all");
 
+    // Temporary test email state
+    const [testEmailStatus, setTestEmailStatus] = useState<{
+        loading: boolean;
+        message: string | null;
+        type: "success" | "error" | null;
+    }>({
+        loading: false,
+        message: null,
+        type: null,
+    });
+
+    async function handleTestEmail() {
+        setTestEmailStatus({ loading: true, message: "Envoi du mail de test...", type: null });
+        try {
+            const res = await fetch("/api/test-email");
+            const data = await res.json();
+            if (res.ok && data.success) {
+                setTestEmailStatus({
+                    loading: false,
+                    message: `Succès! ID de message: ${data.resendResponse?.id || "inconnu"}. Réponse API: ${JSON.stringify(data.resendResponse)}`,
+                    type: "success",
+                });
+            } else {
+                setTestEmailStatus({
+                    loading: false,
+                    message: `Échec! ${data.error || "Erreur inconnue"}. Réponse API: ${JSON.stringify(data)}`,
+                    type: "error",
+                });
+            }
+        } catch (err: any) {
+            setTestEmailStatus({
+                loading: false,
+                message: `Erreur réseau: ${err.message || String(err)}`,
+                type: "error",
+            });
+        }
+    }
+
     // Modal state
     const [modalConfig, setModalConfig] = useState<{
         isOpen: boolean;
@@ -171,13 +209,52 @@ export default function AdminUsersPage() {
                         Approuvez les nouvelles inscriptions et configurez les rôles d'accès de l'application.
                     </p>
                 </div>
-                {pendingCount > 0 && (
-                    <span className="inline-flex self-start items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-600 dark:text-amber-400 border border-amber-500/20 animate-pulse">
-                        <span className="h-2 w-2 rounded-full bg-amber-500"></span>
-                        {pendingCount} inscription{pendingCount > 1 ? "s" : ""} en attente
-                    </span>
-                )}
+                <div className="flex flex-wrap items-center gap-3">
+                    <button
+                        type="button"
+                        onClick={handleTestEmail}
+                        disabled={testEmailStatus.loading}
+                        className="inline-flex min-h-11 items-center justify-center rounded-xl bg-indigo-600 dark:bg-indigo-500 hover:bg-indigo-700 dark:hover:bg-indigo-400 active:scale-98 text-white px-4 py-2.5 text-sm font-semibold transition-all disabled:opacity-50 cursor-pointer shadow-md"
+                    >
+                        {testEmailStatus.loading ? (
+                            <>
+                                <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white inline-block" />
+                                Envoi...
+                            </>
+                        ) : (
+                            "Tester email (Resend)"
+                        )}
+                    </button>
+                    {pendingCount > 0 && (
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-600 dark:text-amber-400 border border-amber-500/20 animate-pulse">
+                            <span className="h-2 w-2 rounded-full bg-amber-500"></span>
+                            {pendingCount} inscription{pendingCount > 1 ? "s" : ""} en attente
+                        </span>
+                    )}
+                </div>
             </div>
+
+            {/* Temporary test email status notification */}
+            {testEmailStatus.message && (
+                <div className={`rounded-xl border p-4 text-sm flex items-start gap-3 animate-fade-in ${
+                    testEmailStatus.type === "success" 
+                        ? "border-emerald-500/20 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400" 
+                        : "border-red-500/20 bg-red-500/5 text-red-600 dark:text-red-400"
+                }`}>
+                    <div className="flex-1 break-all">
+                        <p className="font-semibold">{testEmailStatus.type === "success" ? "Notification Resend envoyée" : "Erreur Envoi Resend"}</p>
+                        <p className="mt-0.5">{testEmailStatus.message}</p>
+                    </div>
+                    <button 
+                        onClick={() => setTestEmailStatus(prev => ({ ...prev, message: null }))}
+                        className={testEmailStatus.type === "success" ? "text-emerald-500 hover:text-emerald-700" : "text-red-500 hover:text-red-700"}
+                    >
+                        <svg className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            )}
 
             {/* Notification messages */}
             {error && (
