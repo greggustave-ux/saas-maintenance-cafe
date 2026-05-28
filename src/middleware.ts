@@ -62,30 +62,44 @@ export async function middleware(request: NextRequest) {
         return supabaseResponse;
     }
 
-    // 2. Fetch minimal profile fields (approved, role)
+    // 2. Fetch minimal profile fields (approved, role, status)
     const { data: profile } = await supabase
         .from("profiles")
-        .select("approved, role")
+        .select("approved, role, status")
         .eq("id", user.id)
         .single();
 
+    const status = profile?.status || "pending";
     const isApproved = !!profile?.approved;
 
-    // 3. Authenticated but unapproved users redirect to /awaiting-approval
-    if (!isApproved) {
-        if (pathname.startsWith("/dashboard") || pathname.startsWith("/admin")) {
+    // 3. Handle status based redirections
+    if (status === "blocked") {
+        if (pathname !== "/blocked") {
+            return redirectWithCookies("/blocked");
+        }
+        return supabaseResponse;
+    }
+
+    if (status === "rejected") {
+        if (pathname !== "/rejected") {
+            return redirectWithCookies("/rejected");
+        }
+        return supabaseResponse;
+    }
+
+    // If user is approved, they should not be on awaiting/blocked/rejected pages
+    if (status === "approved" || isApproved) {
+        if (pathname === "/awaiting-approval" || pathname === "/blocked" || pathname === "/rejected") {
+            return redirectWithCookies("/dashboard");
+        }
+    } else {
+        // If not approved and not blocked/rejected, they are pending
+        if (pathname.startsWith("/dashboard") || pathname.startsWith("/admin") || pathname === "/blocked" || pathname === "/rejected") {
             return redirectWithCookies("/awaiting-approval");
         }
     }
 
-    // 4. Approved users going to /awaiting-approval redirect to /dashboard
-    if (isApproved) {
-        if (pathname === "/awaiting-approval") {
-            return redirectWithCookies("/dashboard");
-        }
-    }
-
-    // 5. Restrict /admin routes to admins only
+    // 4. Restrict /admin routes to admins only
     const isAdmin = profile?.role === "admin";
     if (pathname.startsWith("/admin")) {
         if (!isAdmin) {
@@ -93,7 +107,7 @@ export async function middleware(request: NextRequest) {
         }
     }
 
-    // 6. Restrict /dashboard/operations routes to admin and dispatcher only
+    // 5. Restrict /dashboard/operations routes to admin and dispatcher only
     if (pathname.startsWith("/dashboard/operations")) {
         const isAllowed = profile?.role === "admin" || profile?.role === "dispatcher";
         if (!isAllowed) {
@@ -105,5 +119,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ["/dashboard", "/dashboard/:path*", "/awaiting-approval", "/admin", "/admin/:path*"],
+    matcher: ["/dashboard", "/dashboard/:path*", "/awaiting-approval", "/admin", "/admin/:path*", "/blocked", "/rejected"],
 };

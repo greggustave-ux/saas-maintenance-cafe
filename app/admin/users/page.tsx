@@ -8,6 +8,7 @@ interface Profile {
     full_name: string | null;
     role: string;
     approved: boolean;
+    status?: string;
     approved_at: string | null;
     approved_by: string | null;
     created_at: string | null;
@@ -20,6 +21,48 @@ const ROLE_LABELS: Record<string, string> = {
     dispatcher: "Répartiteur",
     viewer: "Lecteur",
 };
+
+function renderStatusBadge(status: string) {
+    switch (status) {
+        case "approved":
+            return (
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 border border-emerald-500/10">
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                    Approuvé
+                </span>
+            );
+        case "rejected":
+            return (
+                <span className="inline-flex items-center gap-1 rounded-full bg-red-500/10 px-2.5 py-1 text-xs font-semibold text-red-650 dark:text-red-400 border border-red-500/10">
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Refusé
+                </span>
+            );
+        case "blocked":
+            return (
+                <span className="inline-flex items-center gap-1 rounded-full bg-slate-500/10 px-2.5 py-1 text-xs font-semibold text-slate-600 dark:text-slate-400 border border-slate-500/10">
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    Bloqué
+                </span>
+            );
+        case "pending":
+        default:
+            return (
+                <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-600 dark:text-amber-400 border border-amber-500/10">
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    En attente
+                </span>
+            );
+    }
+}
 
 export default function AdminUsersPage() {
     const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -116,7 +159,7 @@ export default function AdminUsersPage() {
     }, []);
 
     // Perform the database update
-    async function updateProfile(userId: string, newRole: string, newApproved: boolean) {
+    async function updateProfile(userId: string, newRole: string, newStatus: string) {
         setSubmittingId(userId);
         setError(null);
         setSuccess(null);
@@ -124,7 +167,7 @@ export default function AdminUsersPage() {
             const { error: updateError } = await supabase.rpc("admin_update_profile", {
                 target_user_id: userId,
                 new_role: newRole,
-                new_approved: newApproved,
+                new_status: newStatus,
             });
 
             if (updateError) {
@@ -143,14 +186,24 @@ export default function AdminUsersPage() {
     }
 
     // Handlers to open confirmation modal
-    function handleToggleApproval(profile: Profile) {
-        const nextApproved = !profile.approved;
-        const actionText = nextApproved ? "approuver" : "bloquer/désapprouver";
-        const title = nextApproved ? "Approuver l'utilisateur ?" : "Bloquer l'utilisateur ?";
-        const description = `Êtes-vous sûr de vouloir ${actionText} l'utilisateur "${profile.full_name || profile.email}" ?`;
+    function handleStatusChange(profile: Profile, newStatus: string) {
+        const statusLabels: Record<string, string> = {
+            approved: "approuver et activer",
+            rejected: "refuser l'accès pour",
+            blocked: "bloquer le compte de",
+            pending: "mettre en attente de validation",
+        };
+        const actionLabels: Record<string, string> = {
+            approved: "Approuver l'utilisateur ?",
+            rejected: "Refuser l'accès ?",
+            blocked: "Bloquer l'utilisateur ?",
+            pending: "Mettre en attente ?",
+        };
+        const title = actionLabels[newStatus] || "Modifier le statut ?";
+        const description = `Êtes-vous sûr de vouloir ${statusLabels[newStatus] || "modifier"} l'utilisateur "${profile.full_name || profile.email}" ?`;
 
-        if (profile.id === currentUserId && !nextApproved) {
-            setError("Action interdite : Vous ne pouvez pas désapprouver votre propre compte.");
+        if (profile.id === currentUserId && newStatus !== "approved") {
+            setError("Action interdite : Vous ne pouvez pas bloquer, refuser ou désapprouver votre propre compte.");
             return;
         }
 
@@ -158,7 +211,7 @@ export default function AdminUsersPage() {
             isOpen: true,
             title,
             description,
-            onConfirm: () => updateProfile(profile.id, profile.role, nextApproved),
+            onConfirm: () => updateProfile(profile.id, profile.role, newStatus),
         });
     }
 
@@ -171,11 +224,13 @@ export default function AdminUsersPage() {
             return;
         }
 
+        const itemStatus = profile.status || (profile.approved ? "approved" : "pending");
+
         setModalConfig({
             isOpen: true,
             title,
             description,
-            onConfirm: () => updateProfile(profile.id, newRole, profile.approved),
+            onConfirm: () => updateProfile(profile.id, newRole, itemStatus),
         });
     }
 
@@ -185,17 +240,18 @@ export default function AdminUsersPage() {
             (p.full_name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
             (p.email || "").toLowerCase().includes(searchTerm.toLowerCase());
 
-        const matchesStatus =
-            statusFilter === "all" ||
-            (statusFilter === "approved" && p.approved) ||
-            (statusFilter === "pending" && !p.approved);
+        const itemStatus = p.status || (p.approved ? "approved" : "pending");
+        const matchesStatus = statusFilter === "all" || itemStatus === statusFilter;
 
         const matchesRole = roleFilter === "all" || p.role === roleFilter;
 
         return matchesSearch && matchesStatus && matchesRole;
     });
 
-    const pendingCount = profiles.filter((p) => !p.approved).length;
+    const pendingCount = profiles.filter((p) => {
+        const itemStatus = p.status || (p.approved ? "approved" : "pending");
+        return itemStatus === "pending";
+    }).length;
 
     return (
         <div className="w-full max-w-4xl mx-auto space-y-6">
@@ -317,6 +373,8 @@ export default function AdminUsersPage() {
                         <option value="all">Tous les statuts</option>
                         <option value="pending">En attente d'approbation</option>
                         <option value="approved">Approuvés</option>
+                        <option value="rejected">Refusés</option>
+                        <option value="blocked">Bloqués</option>
                     </select>
                 </div>
                 <div className="sm:col-span-3">
@@ -404,10 +462,11 @@ export default function AdminUsersPage() {
                                     <th scope="col" className="px-6 py-4 text-right">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-200/80 dark:divide-slate-800/80">
+                            <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
                                 {filteredProfiles.map((profile) => {
                                     const isSelf = profile.id === currentUserId;
                                     const isUpdating = submittingId === profile.id;
+                                    const itemStatus = profile.status || (profile.approved ? "approved" : "pending");
 
                                     return (
                                         <tr key={profile.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-950/20 transition-colors">
@@ -425,21 +484,7 @@ export default function AdminUsersPage() {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                {profile.approved ? (
-                                                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 border border-emerald-500/10">
-                                                        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                                                        </svg>
-                                                        Approuvé
-                                                    </span>
-                                                ) : (
-                                                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-600 dark:text-amber-400 border border-amber-500/10">
-                                                        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                        </svg>
-                                                        En attente
-                                                    </span>
-                                                )}
+                                                {renderStatusBadge(itemStatus)}
                                             </td>
                                             <td className="px-6 py-4">
                                                 <select
@@ -483,25 +528,48 @@ export default function AdminUsersPage() {
                                                 )}
                                             </td>
                                             <td className="px-6 py-4 text-right">
-                                                {profile.approved ? (
-                                                    <button
-                                                        type="button"
-                                                        disabled={isSelf || isUpdating}
-                                                        onClick={() => handleToggleApproval(profile)}
-                                                        className="inline-flex min-h-9 items-center justify-center rounded-lg border border-red-500/20 px-3.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-500/10 active:bg-red-500/20 disabled:opacity-40 disabled:hover:bg-transparent transition-all cursor-pointer"
-                                                    >
-                                                        {isUpdating ? "Mise à jour..." : "Bloquer"}
-                                                    </button>
-                                                ) : (
-                                                    <button
-                                                        type="button"
-                                                        disabled={isUpdating}
-                                                        onClick={() => handleToggleApproval(profile)}
-                                                        className="inline-flex min-h-9 items-center justify-center rounded-lg bg-emerald-600 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-emerald-500 active:bg-emerald-700 transition-all cursor-pointer shadow-xs"
-                                                    >
-                                                        {isUpdating ? "Mise à jour..." : "Approuver"}
-                                                    </button>
-                                                )}
+                                                <div className="flex justify-end gap-2">
+                                                    {(itemStatus === "pending") && (
+                                                        <>
+                                                            <button
+                                                                type="button"
+                                                                disabled={isUpdating}
+                                                                onClick={() => handleStatusChange(profile, "approved")}
+                                                                className="inline-flex min-h-9 items-center justify-center rounded-lg bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-white active:scale-98 transition-all cursor-pointer shadow-xs"
+                                                            >
+                                                                Approuver
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                disabled={isUpdating}
+                                                                onClick={() => handleStatusChange(profile, "rejected")}
+                                                                className="inline-flex min-h-9 items-center justify-center rounded-lg border border-red-500/20 px-3 py-1.5 text-xs font-semibold text-red-650 dark:text-red-400 hover:bg-red-500/10 active:scale-98 transition-all cursor-pointer"
+                                                            >
+                                                                Refuser
+                                                            </button>
+                                                        </>
+                                                    )}
+                                                    {itemStatus === "approved" && (
+                                                        <button
+                                                            type="button"
+                                                            disabled={isSelf || isUpdating}
+                                                            onClick={() => handleStatusChange(profile, "blocked")}
+                                                            className="inline-flex min-h-9 items-center justify-center rounded-lg border border-slate-350 dark:border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-slate-800/60 active:scale-98 transition-all cursor-pointer"
+                                                        >
+                                                            Bloquer
+                                                        </button>
+                                                    )}
+                                                    {(itemStatus === "blocked" || itemStatus === "rejected") && (
+                                                        <button
+                                                            type="button"
+                                                            disabled={isSelf || isUpdating}
+                                                            onClick={() => handleStatusChange(profile, "approved")}
+                                                            className="inline-flex min-h-9 items-center justify-center rounded-lg bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-white active:scale-98 transition-all cursor-pointer"
+                                                        >
+                                                            Débloquer
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </td>
                                         </tr>
                                     );
@@ -515,7 +583,8 @@ export default function AdminUsersPage() {
                         {filteredProfiles.map((profile) => {
                             const isSelf = profile.id === currentUserId;
                             const isUpdating = submittingId === profile.id;
-
+                            const itemStatus = profile.status || (profile.approved ? "approved" : "pending");
+ 
                             return (
                                 <div key={profile.id} className="p-4 space-y-3.5 hover:bg-slate-50/50 dark:hover:bg-slate-950/20 transition-colors">
                                     <div className="flex items-start justify-between">
@@ -531,18 +600,10 @@ export default function AdminUsersPage() {
                                             <span className="text-xs text-slate-500 dark:text-slate-400">{profile.email}</span>
                                         </div>
                                         <div>
-                                            {profile.approved ? (
-                                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 border border-emerald-500/10">
-                                                    Approuvé
-                                                </span>
-                                            ) : (
-                                                <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-600 dark:text-amber-400 border border-amber-500/10">
-                                                    En attente
-                                                </span>
-                                            )}
+                                            {renderStatusBadge(itemStatus)}
                                         </div>
                                     </div>
-
+ 
                                     <div className="grid grid-cols-2 gap-2 text-xs text-slate-500 dark:text-slate-400">
                                         <div>
                                             <p className="text-[10px] uppercase font-bold text-slate-400">Rôle</p>
@@ -572,7 +633,7 @@ export default function AdminUsersPage() {
                                             </p>
                                         </div>
                                     </div>
-
+ 
                                     {profile.approved_at && (
                                         <div className="text-[11px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-950/40 p-2 rounded-lg border border-slate-200/50 dark:border-slate-800/50">
                                             Approuvé le{" "}
@@ -585,25 +646,46 @@ export default function AdminUsersPage() {
                                             })}
                                         </div>
                                     )}
-
-                                    <div className="flex justify-end pt-1 border-t border-slate-100 dark:border-slate-800/50">
-                                        {profile.approved ? (
+ 
+                                    <div className="flex flex-wrap justify-end gap-2 pt-2.5 border-t border-slate-100 dark:border-slate-800/50">
+                                        {(itemStatus === "pending") && (
+                                            <>
+                                                <button
+                                                    type="button"
+                                                    disabled={isUpdating}
+                                                    onClick={() => handleStatusChange(profile, "approved")}
+                                                    className="flex-1 inline-flex min-h-9 items-center justify-center rounded-lg bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-white active:scale-98 transition-all cursor-pointer"
+                                                >
+                                                    Approuver
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    disabled={isUpdating}
+                                                    onClick={() => handleStatusChange(profile, "rejected")}
+                                                    className="flex-1 inline-flex min-h-9 items-center justify-center rounded-lg border border-red-500/20 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-500/10 active:scale-98 transition-all cursor-pointer"
+                                                >
+                                                    Refuser
+                                                </button>
+                                            </>
+                                        )}
+                                        {itemStatus === "approved" && (
                                             <button
                                                 type="button"
                                                 disabled={isSelf || isUpdating}
-                                                onClick={() => handleToggleApproval(profile)}
-                                                className="w-full inline-flex min-h-9 items-center justify-center rounded-lg border border-red-500/20 px-3.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-500/10 active:bg-red-500/20 disabled:opacity-40 disabled:hover:bg-transparent transition-all cursor-pointer"
+                                                onClick={() => handleStatusChange(profile, "blocked")}
+                                                className="w-full inline-flex min-h-9 items-center justify-center rounded-lg border border-slate-350 dark:border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-slate-800/60 active:scale-98 transition-all cursor-pointer"
                                             >
-                                                {isUpdating ? "Mise à jour..." : "Bloquer le compte"}
+                                                Bloquer le compte
                                             </button>
-                                        ) : (
+                                        )}
+                                        {(itemStatus === "blocked" || itemStatus === "rejected") && (
                                             <button
                                                 type="button"
-                                                disabled={isUpdating}
-                                                onClick={() => handleToggleApproval(profile)}
-                                                className="w-full inline-flex min-h-9 items-center justify-center rounded-lg bg-emerald-600 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-emerald-500 active:bg-emerald-700 transition-all cursor-pointer shadow-xs"
+                                                disabled={isSelf || isUpdating}
+                                                onClick={() => handleStatusChange(profile, "approved")}
+                                                className="w-full inline-flex min-h-9 items-center justify-center rounded-lg bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-white active:scale-98 transition-all cursor-pointer"
                                             >
-                                                {isUpdating ? "Mise à jour..." : "Approuver le compte"}
+                                                Débloquer & Approuver
                                             </button>
                                         )}
                                     </div>

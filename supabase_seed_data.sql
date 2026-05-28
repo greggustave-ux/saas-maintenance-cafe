@@ -16,6 +16,7 @@ DO $$
 DECLARE
   new_call_id integer;
   i integer;
+  creator_id uuid;
   
   -- Pools de données
   clients text[] := ARRAY[
@@ -38,12 +39,7 @@ DECLARE
     '75 Grande Allée E, Québec'
   ];
   
-  techs text[] := ARRAY[
-    'Jean Dupuis',
-    'Marc Lavoie',
-    'Sophie Morin',
-    'Antoine Bouchard'
-  ];
+  techs text[];
   
   serials text[] := ARRAY[
     'MC-1010-XYZ',
@@ -108,8 +104,33 @@ DECLARE
   rand_notes_idx integer;
   rand_status text;
   rand_date timestamp with time zone;
+  
 BEGIN
-  -- 1. Nettoyage des anciennes données de test injectées pour éviter l'accumulation
+  -- 1. S'assurer qu'au moins un technicien approuvé existe dans la base de données
+  SELECT ARRAY(
+    SELECT full_name 
+    FROM public.profiles 
+    WHERE role = 'technician' AND approved = true AND status = 'approved'
+  ) INTO techs;
+
+  IF array_length(techs, 1) IS NULL OR array_length(techs, 1) = 0 THEN
+    RAISE EXCEPTION 'Créer ou approuver au moins un technicien avant de lancer le seed.';
+  END IF;
+
+  -- Sélectionner un utilisateur créateur valide (admin ou dispatcher approuvé)
+  SELECT id INTO creator_id
+  FROM public.profiles
+  WHERE approved = true
+    AND status = 'approved'
+    AND role IN ('admin', 'dispatcher')
+  ORDER BY (role = 'admin') DESC
+  LIMIT 1;
+
+  IF creator_id IS NULL THEN
+    RAISE EXCEPTION 'Créer ou approuver au moins un admin ou dispatcher avant de lancer le seed.';
+  END IF;
+
+  -- 2. Nettoyage des anciennes données de test injectées pour éviter l'accumulation
   DELETE FROM public.service_call_parts WHERE service_call_id IN (SELECT id FROM public.service_calls WHERE issue_description LIKE '%[TEST-DATA]%');
   DELETE FROM public.service_calls WHERE issue_description LIKE '%[TEST-DATA]%';
 
@@ -121,29 +142,29 @@ BEGIN
   -- 4 interventions sur 90 jours (dont 2 en 30 jours), pièces répétées, mots-clés de pannes, pas de photo ni signature.
   
   -- Intervention 1.1 (il y a 85 jours)
-  INSERT INTO public.service_calls (client_name, address, machine_serial, issue_description, status, technician_name, technician_notes, created_at)
-  VALUES ('Restaurant Le Gourmet', '75 Grande Allée E, Québec', 'mc-7003-problem', 'Problème de pression d''eau [TEST-DATA]', 'Terminé', 'Jean Dupuis', 'Remplacement filtre et nettoyage de la ligne d''eau', now() - interval '85 days')
+  INSERT INTO public.service_calls (client_name, address, machine_serial, issue_description, status, technician_name, technician_notes, created_by, created_at)
+  VALUES ('Restaurant Le Gourmet', '75 Grande Allée E, Québec', 'mc-7003-problem', 'Problème de pression d''eau [TEST-DATA]', 'Terminé', techs[1 + (0 % array_length(techs, 1))], 'Remplacement filtre et nettoyage de la ligne d''eau', creator_id, now() - interval '85 days')
   RETURNING id INTO new_call_id;
   INSERT INTO public.service_call_parts (service_call_id, part_name, quantity, unit_price)
   VALUES (new_call_id, 'Filtre d''admission', 1, 65.00);
 
   -- Intervention 1.2 (il y a 60 jours)
-  INSERT INTO public.service_calls (client_name, address, machine_serial, issue_description, status, technician_name, technician_notes, created_at)
-  VALUES ('Restaurant Le Gourmet', '75 Grande Allée E, Québec', 'mc-7003-problem', 'Fuite de liquide constatée [TEST-DATA]', 'Terminé', 'Marc Lavoie', 'Fuite d''huile détectée et remplacement joint d''étanchéité', now() - interval '60 days')
+  INSERT INTO public.service_calls (client_name, address, machine_serial, issue_description, status, technician_name, technician_notes, created_by, created_at)
+  VALUES ('Restaurant Le Gourmet', '75 Grande Allée E, Québec', 'mc-7003-problem', 'Fuite de liquide constatée [TEST-DATA]', 'Terminé', techs[1 + (1 % array_length(techs, 1))], 'Fuite d''huile détectée et remplacement joint d''étanchéité', creator_id, now() - interval '60 days')
   RETURNING id INTO new_call_id;
   INSERT INTO public.service_call_parts (service_call_id, part_name, quantity, unit_price)
   VALUES (new_call_id, 'Joint torique', 2, 45.00);
 
   -- Intervention 1.3 (il y a 20 jours)
-  INSERT INTO public.service_calls (client_name, address, machine_serial, issue_description, status, technician_name, technician_notes, created_at)
-  VALUES ('Restaurant Le Gourmet', '75 Grande Allée E, Québec', 'mc-7003-problem', 'Nouvelle fuite sous le bac [TEST-DATA]', 'Terminé', 'Jean Dupuis', 'Nouvelle fuite de liquide, joint défectueux à remplacer', now() - interval '20 days')
+  INSERT INTO public.service_calls (client_name, address, machine_serial, issue_description, status, technician_name, technician_notes, created_by, created_at)
+  VALUES ('Restaurant Le Gourmet', '75 Grande Allée E, Québec', 'mc-7003-problem', 'Nouvelle fuite sous le bac [TEST-DATA]', 'Terminé', techs[1 + (0 % array_length(techs, 1))], 'Nouvelle fuite de liquide, joint défectueux à remplacer', creator_id, now() - interval '20 days')
   RETURNING id INTO new_call_id;
   INSERT INTO public.service_call_parts (service_call_id, part_name, quantity, unit_price)
   VALUES (new_call_id, 'Joint torique', 2, 45.00); -- Pièce répétée !
 
   -- Intervention 1.4 (il y a 5 jours)
-  INSERT INTO public.service_calls (client_name, address, machine_serial, issue_description, status, technician_name, technician_notes, created_at)
-  VALUES ('Restaurant Le Gourmet', '75 Grande Allée E, Québec', 'mc-7003-problem', 'Erreur de pression d''eau et blocage [TEST-DATA]', 'Terminé', 'Sophie Morin', 'Erreur de pression et blocage pompe, remplacement effectué', now() - interval '5 days')
+  INSERT INTO public.service_calls (client_name, address, machine_serial, issue_description, status, technician_name, technician_notes, created_by, created_at)
+  VALUES ('Restaurant Le Gourmet', '75 Grande Allée E, Québec', 'mc-7003-problem', 'Erreur de pression d''eau et blocage [TEST-DATA]', 'Terminé', techs[1 + (2 % array_length(techs, 1))], 'Erreur de pression et blocage pompe, remplacement effectué', creator_id, now() - interval '5 days')
   RETURNING id INTO new_call_id;
   INSERT INTO public.service_call_parts (service_call_id, part_name, quantity, unit_price)
   VALUES (new_call_id, 'Pompe à eau', 1, 320.00);
@@ -153,15 +174,15 @@ BEGIN
   -- 2 interventions dans les 30 jours, mots-clés présents, pas de photo ni signature.
   
   -- Intervention 2.1 (il y a 25 jours)
-  INSERT INTO public.service_calls (client_name, address, machine_serial, issue_description, status, technician_name, technician_notes, created_at)
-  VALUES ('Boulangerie Le Bon Pain', '120 Rue Saint-Jean, Québec', 'mc-8002-monitor', 'Problème de température élevée [TEST-DATA]', 'Terminé', 'Sophie Morin', 'Problème température élevée, calibration sonde effectuée', now() - interval '25 days')
+  INSERT INTO public.service_calls (client_name, address, machine_serial, issue_description, status, technician_name, technician_notes, created_by, created_at)
+  VALUES ('Boulangerie Le Bon Pain', '120 Rue Saint-Jean, Québec', 'mc-8002-monitor', 'Problème de température élevée [TEST-DATA]', 'Terminé', techs[1 + (2 % array_length(techs, 1))], 'Problème température élevée, calibration sonde effectuée', creator_id, now() - interval '25 days')
   RETURNING id INTO new_call_id;
   INSERT INTO public.service_call_parts (service_call_id, part_name, quantity, unit_price)
   VALUES (new_call_id, 'Sonde température', 1, 115.00);
 
   -- Intervention 2.2 (il y a 10 jours)
-  INSERT INTO public.service_calls (client_name, address, machine_serial, issue_description, status, technician_name, technician_notes, created_at)
-  VALUES ('Boulangerie Le Bon Pain', '120 Rue Saint-Jean, Québec', 'mc-8002-monitor', 'Erreur blocage électrovanne [TEST-DATA]', 'Terminé', 'Antoine Bouchard', 'Erreur blocage electrovanne, nettoyage et test de cycle', now() - interval '10 days')
+  INSERT INTO public.service_calls (client_name, address, machine_serial, issue_description, status, technician_name, technician_notes, created_by, created_at)
+  VALUES ('Boulangerie Le Bon Pain', '120 Rue Saint-Jean, Québec', 'mc-8002-monitor', 'Erreur blocage électrovanne [TEST-DATA]', 'Terminé', techs[1 + (3 % array_length(techs, 1))], 'Erreur blocage electrovanne, nettoyage et test de cycle', creator_id, now() - interval '10 days')
   RETURNING id INTO new_call_id;
   INSERT INTO public.service_call_parts (service_call_id, part_name, quantity, unit_price)
   VALUES (new_call_id, 'Electrovanne', 1, 145.00);
@@ -171,8 +192,8 @@ BEGIN
   -- 1 seule intervention lointaine (80 jours), pas de mot-clé critique.
   
   -- Intervention 3.1 (il y a 80 jours)
-  INSERT INTO public.service_calls (client_name, address, machine_serial, issue_description, status, technician_name, technician_notes, created_at)
-  VALUES ('Café des Arts', '45 Rue Garneau, Québec', 'mc-9001-stable', 'Remplacement filtre périodique [TEST-DATA]', 'Terminé', 'Antoine Bouchard', 'Entretien préventif standard et remplacement filtre d''admission', now() - interval '80 days')
+  INSERT INTO public.service_calls (client_name, address, machine_serial, issue_description, status, technician_name, technician_notes, created_by, created_at)
+  VALUES ('Café des Arts', '45 Rue Garneau, Québec', 'mc-9001-stable', 'Remplacement filtre périodique [TEST-DATA]', 'Terminé', techs[1 + (3 % array_length(techs, 1))], 'Entretien préventif standard et remplacement filtre d''admission', creator_id, now() - interval '80 days')
   RETURNING id INTO new_call_id;
   INSERT INTO public.service_call_parts (service_call_id, part_name, quantity, unit_price)
   VALUES (new_call_id, 'Filtre d''admission', 1, 65.00);
@@ -182,8 +203,8 @@ BEGIN
   -- 1 intervention créée aujourd'hui, statut "En attente" pour simuler une urgence sur le dashboard.
   
   -- Intervention 4.1 (Aujourd'hui)
-  INSERT INTO public.service_calls (client_name, address, machine_serial, issue_description, status, technician_name, technician_notes, created_at)
-  VALUES ('Usine Métal-Tech', '2200 Boulevard Wilfrid-Hamel, Québec', 'mc-6004-urgent', 'Erreur broyeur bloqué et fuite de liquide [TEST-DATA]', 'En attente', 'Jean Dupuis', NULL, now())
+  INSERT INTO public.service_calls (client_name, address, machine_serial, issue_description, status, technician_name, technician_notes, created_by, created_at)
+  VALUES ('Usine Métal-Tech', '2200 Boulevard Wilfrid-Hamel, Québec', 'mc-6004-urgent', 'Erreur broyeur bloqué et fuite de liquide [TEST-DATA]', 'En attente', techs[1 + (0 % array_length(techs, 1))], NULL, creator_id, now())
   RETURNING id INTO new_call_id;
   INSERT INTO public.service_call_parts (service_call_id, part_name, quantity, unit_price)
   VALUES (new_call_id, 'Moteur de rechange', 1, 480.00);
@@ -230,6 +251,7 @@ BEGIN
       status,
       technician_name,
       technician_notes,
+      created_by,
       created_at
     ) VALUES (
       clients[rand_client_idx],
@@ -239,6 +261,7 @@ BEGIN
       rand_status,
       techs[rand_tech_idx],
       CASE WHEN rand_status = 'Terminé' THEN notes_pool[rand_notes_idx] ELSE NULL END,
+      creator_id,
       rand_date
     ) RETURNING id INTO new_call_id;
     
