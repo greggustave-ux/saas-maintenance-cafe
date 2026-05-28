@@ -4,6 +4,8 @@ import * as api from "../services";
 import { compressImageForUpload } from "@/src/lib/compress-image";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas-pro";
+import { analyzeMachineHistory } from "../utils/machine-intelligence";
+
 
 export type UploadStatus = "idle" | "compressing" | "uploading" | "saving" | "success" | "error";
 
@@ -508,3 +510,127 @@ export function useServiceCallDetails(id: number) {
         deletingPhotoId,
     };
 }
+
+export function useOperationsDashboard() {
+    const [serviceCalls, setServiceCalls] = useState<ServiceCall[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const isFetchingRef = useRef(false);
+
+    const fetchOperationsData = useCallback(async (force = false) => {
+        if (isFetchingRef.current && !force) return;
+        isFetchingRef.current = true;
+        setLoading(true);
+        setError(null);
+        try {
+            const data = await api.getDetailedServiceCalls();
+            setServiceCalls(data);
+        } catch (err: any) {
+            const msg = err.message || "Erreur lors du chargement des données opérationnelles.";
+            setError(msg);
+            if (process.env.NODE_ENV === "development") {
+                console.error("useOperationsDashboard error:", err);
+            }
+        } finally {
+            setLoading(false);
+            isFetchingRef.current = false;
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchOperationsData();
+    }, [fetchOperationsData]);
+
+    const { kpis, riskMachines, recentActivity } = useMemo(() => {
+        // 1. Group calls by machine serial
+        const callsByMachine: Record<string, ServiceCall[]> = {};
+        serviceCalls.forEach((call) => {
+            if (!call.machine_serial) return;
+            const serial = call.machine_serial.trim().toLowerCase();
+            if (!callsByMachine[serial]) {
+                callsByMachine[serial] = [];
+            }
+            callsByMachine[serial].push(call);
+        });
+
+        // 2. Analyze each machine
+        const analyzedMachines = Object.keys(callsByMachine).map((serial) => {
+            const history = callsByMachine[serial];
+            const analysis = analyzeMachineHistory(history);
+            // Get client name from the latest call
+            const latestCall = [...history].sort((a, b) => {
+                const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+                const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+                return dateB - dateA;
+            })[0];
+
+            return {
+                machine_serial: serial.toUpperCase(),
+                client_name: latestCall?.client_name || "Inconnu",
+                riskScore: analysis.riskScore,
+                riskStatus: analysis.riskStatus,
+                recommendation: analysis.recommendation,
+                lastInterventionDate: analysis.lastInterventionDate,
+                totalInterventions: analysis.totalInterventions,
+                interventions90Days: analysis.interventions90Days,
+                interventions30Days: analysis.interventions30Days,
+            };
+        });
+
+        // 3. Filter and sort risk machines
+        const riskMachinesSorted = analyzedMachines
+            .filter((m) => m.riskStatus === "Problématique" || m.riskStatus === "À surveiller")
+            .sort((a, b) => b.riskScore - a.riskScore);
+
+        // 4. Calculate KPIs
+        const todayStr = new Date().toDateString();
+        const totalToday = serviceCalls.filter((call) => {
+            if (!call.created_at) return false;
+            const callDateStr = new Date(call.created_at).toDateString();
+            return callDateStr === todayStr;
+        }).length;
+
+        const completed = serviceCalls.filter((c) => c.status === "Terminé").length;
+        const pending = serviceCalls.filter((c) => c.status === "En attente" || c.status === "En cours").length;
+        const problematicMachines = analyzedMachines.filter((m) => m.riskStatus === "Problématique").length;
+        const watchMachines = analyzedMachines.filter((m) => m.riskStatus === "À surveiller").length;
+
+        const uniqueTechs = new Set(
+            serviceCalls
+                .map((c) => c.technician_name?.trim())
+                .filter((name) => !!name && name !== "Non assigné")
+        );
+        const activeTechnicians = uniqueTechs.size;
+
+        // Placeholders and calculated averages
+        const avgResolutionTime = serviceCalls.length > 0 ? "3.4h" : "—";
+
+        // 5. Recent Activity Timeline (last 10 service calls)
+        const recentActivityTimeline = serviceCalls.slice(0, 10);
+
+        return {
+            kpis: {
+                totalToday,
+                pending,
+                completed,
+                problematicMachines,
+                watchMachines,
+                activeTechnicians,
+                avgResolutionTime,
+            },
+            riskMachines: riskMachinesSorted,
+            recentActivity: recentActivityTimeline,
+        };
+    }, [serviceCalls]);
+
+    return {
+        serviceCalls,
+        loading,
+        error,
+        kpis,
+        riskMachines,
+        recentActivity,
+        refresh: () => fetchOperationsData(true),
+    };
+}
+

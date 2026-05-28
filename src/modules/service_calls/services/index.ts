@@ -12,6 +12,18 @@ export async function getServiceCalls(): Promise<ServiceCall[]> {
     return data as ServiceCall[] || [];
 }
 
+// Fetch all service calls with full details for Operations analysis
+export async function getDetailedServiceCalls(): Promise<ServiceCall[]> {
+    const { data, error } = await supabase
+        .from("service_calls")
+        .select("id, client_name, address, machine_serial, issue_description, status, technician_name, technician_notes, photo_url, signature_url, created_at")
+        .order("id", { ascending: false });
+
+    if (error) throw error;
+    return data as ServiceCall[] || [];
+}
+
+
 // 2. Fetch single service call by ID
 export async function getServiceCallById(id: number): Promise<ServiceCall> {
     const { data, error } = await supabase

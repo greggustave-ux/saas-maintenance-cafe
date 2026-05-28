@@ -60,6 +60,7 @@ export default function DashboardShell({
 }) {
     const [menuOpen, setMenuOpen] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
+    const [userRole, setUserRole] = useState<string | null>(null);
     const pathname = usePathname();
 
     useEffect(() => {
@@ -75,6 +76,7 @@ export default function DashboardShell({
                     if (profile?.role === "admin") {
                         setIsAdmin(true);
                     }
+                    setUserRole(profile?.role || null);
                 }
             } catch (error) {
                 console.error("Error loading user profile:", error);
@@ -98,9 +100,27 @@ export default function DashboardShell({
         setMenuOpen(false);
     }
 
+    const showOperations = userRole === "admin" || userRole === "dispatcher";
+
+    const baseLinks = showOperations 
+        ? [
+              navLinks[0], // Dashboard link
+              {
+                  href: "/dashboard/operations",
+                  label: "Opérations",
+                  icon: (
+                      <svg className="h-5.5 w-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      </svg>
+                  ),
+              },
+              ...navLinks.slice(1)
+          ]
+        : navLinks;
+
     const links = isAdmin
         ? [
-              ...navLinks,
+              ...baseLinks,
               {
                   href: "/admin/users",
                   label: "Utilisateurs",
@@ -111,7 +131,8 @@ export default function DashboardShell({
                   ),
               },
           ]
-        : navLinks;
+        : baseLinks;
+
 
     return (
         <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
