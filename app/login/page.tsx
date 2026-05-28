@@ -53,9 +53,16 @@ export default function LoginPage() {
         setLoading(true);
         setMessage("");
 
-        const { error } = await supabase.auth.signUp({
+        const fullName = email.split("@")[0];
+
+        const { data, error } = await supabase.auth.signUp({
             email,
             password,
+            options: {
+                data: {
+                    full_name: fullName,
+                }
+            }
         });
 
         if (error) {
@@ -64,7 +71,23 @@ export default function LoginPage() {
             return;
         }
 
-        setMessage("Compte créé avec succès. Vérifiez vos emails !");
+        try {
+            await fetch("/api/notify-signup", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    email,
+                    fullName,
+                    role: "technician",
+                }),
+            });
+        } catch (err) {
+            console.error("Erreur de notification admin:", err);
+        }
+
+        setMessage("Votre compte est en attente d’approbation par un administrateur.");
         setLoading(false);
     }
 

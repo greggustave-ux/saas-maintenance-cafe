@@ -3,22 +3,54 @@ import { ServiceCall, ServiceCallPart, ServiceCallPhoto } from "../types";
 
 // 1. Fetch all service calls
 export async function getServiceCalls(): Promise<ServiceCall[]> {
-    const { data, error } = await supabase
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
+
+    const { data: profile } = await supabase
+        .from("profiles")
+        .select("role, full_name")
+        .eq("id", user.id)
+        .single();
+
+    if (!profile) return [];
+
+    let query = supabase
         .from("service_calls")
         .select("id, client_name, address, machine_serial, issue_description, status, technician_name")
         .order("id", { ascending: false });
 
+    if (profile.role === "technician") {
+        query = query.eq("technician_name", profile.full_name);
+    }
+
+    const { data, error } = await query;
     if (error) throw error;
     return data as ServiceCall[] || [];
 }
 
 // Fetch all service calls with full details for Operations analysis
 export async function getDetailedServiceCalls(): Promise<ServiceCall[]> {
-    const { data, error } = await supabase
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
+
+    const { data: profile } = await supabase
+        .from("profiles")
+        .select("role, full_name")
+        .eq("id", user.id)
+        .single();
+
+    if (!profile) return [];
+
+    let query = supabase
         .from("service_calls")
         .select("id, client_name, address, machine_serial, issue_description, status, technician_name, technician_notes, photo_url, signature_url, created_at")
         .order("id", { ascending: false });
 
+    if (profile.role === "technician") {
+        query = query.eq("technician_name", profile.full_name);
+    }
+
+    const { data, error } = await query;
     if (error) throw error;
     return data as ServiceCall[] || [];
 }
@@ -26,6 +58,17 @@ export async function getDetailedServiceCalls(): Promise<ServiceCall[]> {
 
 // 2. Fetch single service call by ID
 export async function getServiceCallById(id: number): Promise<ServiceCall> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Utilisateur non connecté.");
+
+    const { data: profile } = await supabase
+        .from("profiles")
+        .select("role, full_name")
+        .eq("id", user.id)
+        .single();
+
+    if (!profile) throw new Error("Profil utilisateur introuvable.");
+
     const { data, error } = await supabase
         .from("service_calls")
         .select("id, client_name, address, machine_serial, issue_description, status, technician_name, technician_notes, photo_url, signature_url")
@@ -33,8 +76,15 @@ export async function getServiceCallById(id: number): Promise<ServiceCall> {
         .single();
 
     if (error) throw error;
+    if (!data) throw new Error("Intervention introuvable.");
+
+    if (profile.role === "technician" && data.technician_name !== profile.full_name) {
+        throw new Error("Accès non autorisé : Cette intervention ne vous est pas assignée.");
+    }
+
     return data as ServiceCall;
 }
+
 
 // 3. Create a new service call
 export async function createServiceCall(call: {
@@ -219,12 +269,29 @@ export async function getServiceCallsByMachineSerial(
 ): Promise<ServiceCall[]> {
     if (!machineSerial) return [];
     const normalizedSerial = machineSerial.trim().toLowerCase();
-    const { data, error } = await supabase
+    
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
+
+    const { data: profile } = await supabase
+        .from("profiles")
+        .select("role, full_name")
+        .eq("id", user.id)
+        .single();
+
+    if (!profile) return [];
+
+    let query = supabase
         .from("service_calls")
         .select("id, client_name, address, machine_serial, issue_description, status, technician_name, technician_notes, created_at")
         .ilike("machine_serial", normalizedSerial)
         .order("id", { ascending: false });
 
+    if (profile.role === "technician") {
+        query = query.eq("technician_name", profile.full_name);
+    }
+
+    const { data, error } = await query;
     if (error) throw error;
     return data as ServiceCall[] || [];
 }

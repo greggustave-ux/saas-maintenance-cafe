@@ -93,6 +93,14 @@ export async function middleware(request: NextRequest) {
         }
     }
 
+    // 6. Restrict /dashboard/operations routes to admin and dispatcher only
+    if (pathname.startsWith("/dashboard/operations")) {
+        const isAllowed = profile?.role === "admin" || profile?.role === "dispatcher";
+        if (!isAllowed) {
+            return redirectWithCookies("/dashboard");
+        }
+    }
+
     return supabaseResponse;
 }
 
