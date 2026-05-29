@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { ServiceCall, ServiceCallPart, ServiceCallPhoto } from "../types";
+import { ServiceCall, ServiceCallPart, ServiceCallPhoto, Machine } from "../types";
 import * as api from "../services";
 import { compressImageForUpload } from "@/src/lib/compress-image";
 import jsPDF from "jspdf";
@@ -59,13 +59,15 @@ export function useServiceCalls() {
     useEffect(() => {
         async function loadUserRoleAndTechs() {
             try {
-                const { data: { user } } = await supabase.auth.getUser();
+                const { data: { user }, error: authError } = await supabase.auth.getUser();
+                if (authError) throw authError;
                 if (user) {
-                    const { data: profile } = await supabase
+                    const { data: profile, error: profileError } = await supabase
                         .from("profiles")
                         .select("role")
                         .eq("id", user.id)
                         .single();
+                    if (profileError) throw profileError;
                     if (profile) {
                         setUserRole(profile.role);
                         if (profile.role === "admin" || profile.role === "dispatcher") {
@@ -74,8 +76,16 @@ export function useServiceCalls() {
                         }
                     }
                 }
-            } catch (err) {
-                console.error("Failed to load user profile or technicians in useServiceCalls:", err);
+            } catch (err: any) {
+                console.error("Service Calls Hook Error Details:", {
+                    message: err?.message,
+                    code: err?.code,
+                    details: err?.details,
+                    hint: err?.hint,
+                    raw: JSON.stringify(err, null, 2),
+                });
+                console.error("Service Calls Hook Error JSON:", JSON.stringify(err, null, 2));
+                setError(`Hook Error (useServiceCalls): ${err?.message || String(err)} - Code: ${err?.code || 'none'} - Details: ${err?.details || 'none'}`);
             }
         }
         loadUserRoleAndTechs();
@@ -231,6 +241,10 @@ export function useServiceCallDetails(id: number) {
     const [machineHistoryLoading, setMachineHistoryLoading] = useState(false);
     const [machineHistoryError, setMachineHistoryError] = useState<string | null>(null);
 
+    const [machines, setMachines] = useState<Machine[]>([]);
+    const [machinesLoading, setMachinesLoading] = useState(false);
+    const [machinesError, setMachinesError] = useState<string | null>(null);
+
     const isFetchingRef = useRef(false);
 
     const refreshParts = useCallback(async () => {
@@ -288,6 +302,23 @@ export function useServiceCallDetails(id: number) {
                 setMachineHistory([]);
                 setMachineHistoryError(null);
             }
+
+            // Récupérer les machines liées au client
+            if (details.client_name) {
+                setMachinesLoading(true);
+                try {
+                    const machinesData = await api.getMachinesByClientId(details.client_name);
+                    setMachines(machinesData);
+                    setMachinesError(null);
+                } catch (mErr: any) {
+                    setMachinesError(mErr.message || String(mErr));
+                } finally {
+                    setMachinesLoading(false);
+                }
+            } else {
+                setMachines([]);
+                setMachinesError(null);
+            }
         } catch (err: any) {
             const msg = err.message || "Erreur lors de la récupération des détails de l'intervention.";
             setError(msg);
@@ -307,13 +338,15 @@ export function useServiceCallDetails(id: number) {
     useEffect(() => {
         async function loadUserRoleAndTechs() {
             try {
-                const { data: { user } } = await supabase.auth.getUser();
+                const { data: { user }, error: authError } = await supabase.auth.getUser();
+                if (authError) throw authError;
                 if (user) {
-                    const { data: profile } = await supabase
+                    const { data: profile, error: profileError } = await supabase
                         .from("profiles")
                         .select("role")
                         .eq("id", user.id)
                         .single();
+                    if (profileError) throw profileError;
                     if (profile) {
                         setUserRole(profile.role);
                         if (profile.role === "admin" || profile.role === "dispatcher") {
@@ -322,8 +355,16 @@ export function useServiceCallDetails(id: number) {
                         }
                     }
                 }
-            } catch (err) {
-                console.error("Failed to load user profile or technicians in useServiceCallDetails:", err);
+            } catch (err: any) {
+                console.error("Service Calls Hook Error Details:", {
+                    message: err?.message,
+                    code: err?.code,
+                    details: err?.details,
+                    hint: err?.hint,
+                    raw: JSON.stringify(err, null, 2),
+                });
+                console.error("Service Calls Hook Error JSON:", JSON.stringify(err, null, 2));
+                setError(`Hook Error (useServiceCallDetails): ${err?.message || String(err)} - Code: ${err?.code || 'none'} - Details: ${err?.details || 'none'}`);
             }
         }
         loadUserRoleAndTechs();
@@ -581,6 +622,9 @@ export function useServiceCallDetails(id: number) {
         machineHistory,
         machineHistoryLoading,
         machineHistoryError,
+        machines,
+        machinesLoading,
+        machinesError,
         savingNotes,
         addingPart,
         deletingPhotoId,

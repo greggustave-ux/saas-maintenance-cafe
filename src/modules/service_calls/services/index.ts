@@ -1,5 +1,5 @@
 import { supabase } from "@/src/lib/supabase-client";
-import { ServiceCall, ServiceCallPart, ServiceCallPhoto } from "../types";
+import { ServiceCall, ServiceCallPart, ServiceCallPhoto, Machine } from "../types";
 
 // 1. Fetch all service calls
 export async function getServiceCalls(): Promise<ServiceCall[]> {
@@ -311,5 +311,40 @@ export async function updateServiceCallTechnician(id: number, technicianName: st
         .eq("id", id);
 
     if (error) throw error;
+}
+
+// 16. Get machines by client name
+// TODO: client_id est basé temporairement sur le nom du client (MVP). À remplacer par une clé relationnelle plus tard.
+export async function getMachinesByClientId(clientId: string): Promise<Machine[]> {
+    const { data: sessionData } = await supabase.auth.getSession();
+    console.log("SUPABASE SESSION:", sessionData);
+    console.log("SUPABASE USER:", sessionData?.session?.user);
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
+
+    const { data, error } = await supabase
+        .from("machines")
+        .select("*")
+        .eq("client_id", clientId)
+        .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    const machines = data as Machine[] || [];
+
+    // Récupérer le dernier appel de service pour chaque machine
+    for (const machine of machines) {
+        const { data: callData } = await supabase
+            .from("service_calls")
+            .select("id, status, created_at")
+            .ilike("machine_serial", machine.serial_number.trim().toLowerCase())
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+        machine.last_service_call = callData || null;
+    }
+
+    return machines;
 }
 

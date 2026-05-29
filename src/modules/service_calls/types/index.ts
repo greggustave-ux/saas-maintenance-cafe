@@ -24,3 +24,22 @@ export type ServiceCallPhoto = {
     id: number;
     photo_url: string;
 };
+
+export type Machine = {
+    id: number;
+    client_id: string; // Nom du client pour le MVP (TODO: Remplacer par un client_id numérique lié à une table clients dans le futur)
+    model: string;
+    serial_number: string;
+    status: "active" | "inactive" | "in_repair" | "replaced";
+    ownership_type: "purchased" | "rented" | "unknown";
+    location_details: string | null;
+    installed_at: string | null;
+    created_at?: string;
+    updated_at?: string;
+    last_service_call?: {
+        id: number;
+        status: string;
+        created_at: string;
+    } | null;
+};
+

@@ -143,6 +143,9 @@ export default function ServiceCallDetailsPage() {
         machineHistory,
         machineHistoryLoading,
         machineHistoryError,
+        machines,
+        machinesLoading,
+        machinesError,
         savingNotes,
         addingPart,
         deletingPhotoId,
@@ -268,6 +271,119 @@ export default function ServiceCallDetailsPage() {
                                 </div>
                             </dl>
                         </div>
+                    </section>
+
+                    {/* Machines sur place Section */}
+                    <section className={sectionCardClass}>
+                        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-3">
+                            <h2 className="text-base font-bold text-slate-900 dark:text-white tracking-tight">
+                                Machines sur place
+                            </h2>
+                            <span className="inline-flex items-center rounded-full bg-indigo-500/10 px-2.5 py-0.5 text-xs font-semibold text-indigo-600 dark:text-indigo-400 border border-indigo-500/10">
+                                {machines.length} machine{machines.length > 1 ? "s" : ""}
+                            </span>
+                        </div>
+
+                        {machinesLoading ? (
+                            <div className="py-4 text-center text-sm text-slate-500 dark:text-slate-400">
+                                <div className="inline-block mr-2 h-4 w-4 animate-spin rounded-full border-2 border-slate-350 border-t-indigo-600 dark:border-slate-700 dark:border-t-indigo-400" />
+                                Chargement des machines...
+                            </div>
+                        ) : machinesError ? (
+                            <div className="text-xs text-red-500 py-2">
+                                {machinesError}
+                            </div>
+                        ) : machines.length === 0 ? (
+                            <div className="py-4 text-center text-sm text-slate-500 dark:text-slate-400 bg-slate-50/50 dark:bg-slate-950/20 rounded-xl border border-slate-100 dark:border-slate-850">
+                                Aucune machine enregistrée pour ce client.
+                            </div>
+                        ) : (
+                            <div className="space-y-4 pt-1">
+                                {machines.map((machine) => {
+                                    let statusColor = "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-350";
+                                    let statusLabel: string = machine.status;
+                                    if (machine.status === "active") {
+                                        statusColor = "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/10";
+                                        statusLabel = "Active";
+                                    } else if (machine.status === "inactive") {
+                                        statusColor = "bg-slate-500/10 text-slate-650 dark:text-slate-400 border border-slate-500/10";
+                                        statusLabel = "Inactive";
+                                    } else if (machine.status === "in_repair") {
+                                        statusColor = "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/10";
+                                        statusLabel = "En réparation";
+                                    } else if (machine.status === "replaced") {
+                                        statusColor = "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/10";
+                                        statusLabel = "Remplacée";
+                                    }
+
+                                    let ownershipLabel = "Inconnu";
+                                    if (machine.ownership_type === "purchased") ownershipLabel = "Achetée";
+                                    else if (machine.ownership_type === "rented") ownershipLabel = "Louée";
+
+                                    return (
+                                        <div key={machine.id} className="p-3 bg-slate-50/50 dark:bg-slate-950/30 rounded-xl border border-slate-200/60 dark:border-slate-800/80 space-y-2">
+                                            <div className="flex items-start justify-between gap-2">
+                                                <div>
+                                                    <h4 className="font-bold text-slate-900 dark:text-white text-sm leading-snug break-words">
+                                                        {machine.model}
+                                                    </h4>
+                                                    <span className="text-[10px] text-slate-450 dark:text-slate-500 font-semibold uppercase">
+                                                        Type : {ownershipLabel}
+                                                    </span>
+                                                </div>
+                                                <span className={`inline-flex shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${statusColor}`}>
+                                                    {statusLabel}
+                                                </span>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 gap-1 text-xs pt-1 border-t border-slate-100 dark:border-slate-850/60">
+                                                <div className="flex justify-between gap-2">
+                                                    <span className="text-slate-450 dark:text-slate-500">N° de série :</span>
+                                                    <span className="font-semibold text-slate-800 dark:text-slate-200 break-all">{machine.serial_number}</span>
+                                                </div>
+                                                {machine.location_details && (
+                                                    <div className="flex justify-between gap-2">
+                                                        <span className="text-slate-450 dark:text-slate-500 shrink-0">Emplacement :</span>
+                                                        <span className="text-slate-700 dark:text-slate-300 text-right font-medium break-words">{machine.location_details}</span>
+                                                    </div>
+                                                )}
+                                                {machine.installed_at && (
+                                                    <div className="flex justify-between gap-2">
+                                                        <span className="text-slate-450 dark:text-slate-500">Installation :</span>
+                                                        <span className="text-slate-750 dark:text-slate-350">
+                                                            {new Date(machine.installed_at).toLocaleDateString("fr-FR", {
+                                                                day: "numeric",
+                                                                month: "short",
+                                                                year: "numeric"
+                                                            })}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                                {machine.last_service_call ? (
+                                                    <div className="flex justify-between items-center gap-2 pt-1 mt-1 border-t border-dashed border-slate-200 dark:border-slate-800/80">
+                                                        <span className="text-slate-450 dark:text-slate-550">Dernier appel :</span>
+                                                        <a 
+                                                            href={`/dashboard/service-calls/${machine.last_service_call.id}`}
+                                                            className="inline-flex items-center gap-1 font-bold text-cyan-600 dark:text-cyan-400 hover:underline"
+                                                        >
+                                                            #{machine.last_service_call.id}
+                                                            <span className="text-[10px] font-normal text-slate-400">
+                                                                ({machine.last_service_call.status})
+                                                            </span>
+                                                        </a>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex justify-between gap-2 pt-1 mt-1 border-t border-dashed border-slate-200 dark:border-slate-800/80">
+                                                        <span className="text-slate-450 dark:text-slate-550">Dernier appel :</span>
+                                                        <span className="italic text-slate-400">Aucun</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </section>
 
                     <MachineHistorySection
