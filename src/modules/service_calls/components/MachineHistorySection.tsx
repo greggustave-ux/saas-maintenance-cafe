@@ -37,7 +37,7 @@ export default function MachineHistorySection({
     const analysis = analyzeMachineHistory(machineHistory);
 
     return (
-        <section className="w-full rounded-2xl border border-slate-250/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-xs sm:p-6 space-y-6 min-w-0 overflow-hidden">
+        <section className="w-full rounded-2xl border border-slate-250/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 sm:p-6 shadow-xs space-y-6 min-w-0 overflow-hidden">
             {/* Header section */}
             <div className="flex flex-col gap-2 pb-4 border-b border-slate-100 dark:border-slate-800/80">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -45,11 +45,11 @@ export default function MachineHistorySection({
                         <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
                             Historique de la machine
                         </h2>
-                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 whitespace-normal break-words">
                             Suivi des interventions et analyse prédictive sur ce numéro de série
                         </p>
                     </div>
-                    <span className="inline-flex items-center self-start sm:self-auto rounded-full bg-cyan-500/10 px-3 py-1 text-xs font-semibold text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">
+                    <span className="inline-flex items-center self-start sm:self-auto rounded-full bg-cyan-500/10 px-3 py-1 text-xs font-semibold text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 shrink-0">
                         {otherInterventions.length} précédente{otherInterventions.length > 1 ? "s" : ""}
                     </span>
                 </div>
@@ -134,40 +134,40 @@ export default function MachineHistorySection({
                                 <h3 className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                                     Statistiques clés
                                 </h3>
-                                <div className="grid grid-cols-2 gap-3.5">
-                                    <div className="bg-slate-50/50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800/50">
-                                        <span className="text-[10px] text-slate-400 font-semibold block">Total Interventions</span>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                                    <div className="bg-slate-50/50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800/50 min-w-0 w-full">
+                                        <span className="text-[10px] text-slate-400 font-semibold block whitespace-normal break-words">Total Interventions</span>
                                         <span className="text-base font-bold text-slate-900 dark:text-white mt-0.5 block">{analysis.totalInterventions}</span>
                                     </div>
-                                    <div className="bg-slate-50/50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800/50">
-                                        <span className="text-[10px] text-slate-400 font-semibold block">Dernier Passage</span>
-                                        <span className="text-xs font-bold text-slate-900 dark:text-white mt-1 block truncate">
+                                    <div className="bg-slate-50/50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800/50 min-w-0 w-full">
+                                        <span className="text-[10px] text-slate-400 font-semibold block whitespace-normal break-words">Dernier Passage</span>
+                                        <span className="text-xs font-bold text-slate-900 dark:text-white mt-1 block whitespace-normal break-words">
                                             {analysis.lastInterventionDate || "N/A"}
                                         </span>
                                     </div>
-                                    <div className="bg-slate-50/50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800/50">
-                                        <span className="text-[10px] text-slate-400 font-semibold block">Fréquence moy.</span>
-                                        <span className="text-xs font-bold text-slate-900 dark:text-white mt-1 block">
+                                    <div className="bg-slate-50/50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800/50 min-w-0 w-full">
+                                        <span className="text-[10px] text-slate-400 font-semibold block whitespace-normal break-words">Fréquence moy.</span>
+                                        <span className="text-xs font-bold text-slate-900 dark:text-white mt-1 block whitespace-normal break-words">
                                             {analysis.averageInterventionFrequency || "N/A"}
                                         </span>
                                     </div>
-                                    <div className="bg-slate-50/50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800/50">
-                                        <span className="text-[10px] text-slate-400 font-semibold block">Dernier Tech.</span>
-                                        <span className="text-xs font-bold text-slate-900 dark:text-white mt-1 block truncate">
+                                    <div className="bg-slate-50/50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800/50 min-w-0 w-full">
+                                        <span className="text-[10px] text-slate-400 font-semibold block whitespace-normal break-words">Dernier Tech.</span>
+                                        <span className="text-xs font-bold text-slate-900 dark:text-white mt-1 block whitespace-normal break-words">
                                             {analysis.lastTechnician || "N/A"}
                                         </span>
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-2 gap-4 pt-3 text-xs border-t border-slate-100 dark:border-slate-800/60">
-                                    <div>
-                                        <span className="text-[10px] font-semibold text-slate-400 block">Récence (30j / 90j)</span>
-                                        <p className="font-bold text-slate-700 dark:text-slate-300 mt-1">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 text-xs border-t border-slate-100 dark:border-slate-800/60 min-w-0">
+                                    <div className="min-w-0">
+                                        <span className="text-[10px] font-semibold text-slate-400 block whitespace-normal break-words">Récence (30j / 90j)</span>
+                                        <p className="font-bold text-slate-700 dark:text-slate-300 mt-1 whitespace-normal break-words">
                                             {analysis.interventions30Days} passage{analysis.interventions30Days > 1 ? "s" : ""} / {analysis.interventions90Days}
                                         </p>
                                     </div>
-                                    <div>
-                                        <span className="text-[10px] font-semibold text-slate-400 block">Qualité des Rapports</span>
-                                        <p className="font-bold text-slate-700 dark:text-slate-300 mt-1 flex items-center gap-1.5">
+                                    <div className="min-w-0">
+                                        <span className="text-[10px] font-semibold text-slate-400 block whitespace-normal break-words">Qualité des Rapports</span>
+                                        <p className="font-bold text-slate-700 dark:text-slate-300 mt-1 flex items-center flex-wrap gap-1.5 whitespace-normal break-words">
                                             <span>📸 {analysis.hasPhotosCount}</span>
                                             <span className="text-slate-300 dark:text-slate-750">|</span>
                                             <span>✍️ {analysis.hasSignaturesCount}</span>
@@ -177,18 +177,18 @@ export default function MachineHistorySection({
                             </div>
 
                             {/* Cost & Operational Card */}
-                            <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-950 p-4.5 space-y-3.5">
+                            <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-950 p-4.5 space-y-3.5 min-w-0 overflow-hidden">
                                 <h3 className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                                     Coût & Impact Opérationnel
                                 </h3>
                                 <div className="space-y-2 text-xs">
-                                    <div className="flex items-center justify-between py-1.5 border-b border-slate-100 dark:border-slate-800/50">
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 py-1.5 border-b border-slate-100 dark:border-slate-800/50">
                                         <span className="text-slate-500 dark:text-slate-400 font-medium">Coût estimé maintenance</span>
                                         <span className="font-bold text-slate-900 dark:text-white">${analysis.estimatedMaintenanceCost}</span>
                                     </div>
-                                    <div className="flex items-center justify-between py-1.5 border-b border-slate-100 dark:border-slate-800/50">
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 py-1.5 border-b border-slate-100 dark:border-slate-800/50">
                                         <span className="text-slate-500 dark:text-slate-400 font-medium">Risque d'indisponibilité</span>
-                                        <span className={`font-semibold px-2 py-0.5 rounded-full text-[10px] border ${
+                                        <span className={`font-semibold px-2 py-0.5 rounded-full text-[10px] border self-start sm:self-auto ${
                                             analysis.downtimeRisk === "Élevé"
                                                 ? "bg-red-500/10 text-red-650 dark:text-red-400 border-red-500/20"
                                                 : analysis.downtimeRisk === "Moyen"
@@ -196,7 +196,7 @@ export default function MachineHistorySection({
                                                 : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
                                         }`}>{analysis.downtimeRisk}</span>
                                     </div>
-                                    <div className="flex items-center justify-between py-1.5">
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 py-1.5">
                                         <span className="text-slate-500 dark:text-slate-400 font-medium">Préconisation</span>
                                         <span className="font-bold text-slate-700 dark:text-slate-350">{analysis.replacementRecommendation}</span>
                                     </div>
@@ -227,8 +227,8 @@ export default function MachineHistorySection({
                         </div>
 
                         {/* Column Right (Timeline) */}
-                        <div className="lg:col-span-7 space-y-4">
-                            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 pl-4">
+                        <div className="lg:col-span-7 space-y-4 min-w-0">
+                            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 pl-0 sm:pl-4">
                                 Chronologie des interventions
                             </h3>
                             {otherInterventions.length === 0 ? (
@@ -236,7 +236,7 @@ export default function MachineHistorySection({
                                     Aucune intervention précédente à afficher dans la timeline.
                                 </div>
                             ) : (
-                                <div className="relative border-l-2 border-slate-200 dark:border-slate-850 ml-4 pl-6 space-y-5 max-h-[660px] overflow-y-auto pr-3 min-w-0 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
+                                <div className="relative border-l-0 sm:border-l-2 border-slate-200 dark:border-slate-850 ml-0 sm:ml-4 pl-0 sm:pl-6 space-y-5 max-h-[660px] overflow-y-auto pr-0 sm:pr-3 min-w-0 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
                                     {otherInterventions.map((item) => {
                                         const dateStr = item.created_at
                                             ? new Date(item.created_at).toLocaleDateString("fr-FR", {
@@ -251,12 +251,12 @@ export default function MachineHistorySection({
                                         return (
                                             <div key={item.id} className="relative group min-w-0">
                                                 {/* Timeline bullet dot */}
-                                                <div className="absolute -left-[32px] mt-2.5 h-3.5 w-3.5 rounded-full border-2 border-white dark:border-slate-900 bg-cyan-500 dark:bg-cyan-400 group-hover:scale-125 transition-all shadow-xs" />
+                                                <div className="hidden sm:block absolute -left-[32px] mt-2.5 h-3.5 w-3.5 rounded-full border-2 border-white dark:border-slate-900 bg-cyan-500 dark:bg-cyan-400 group-hover:scale-125 transition-all shadow-xs" />
 
                                                 <div className="bg-slate-50/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/60 rounded-xl p-4 transition-all hover:border-slate-350 dark:hover:hover:border-slate-750 hover:bg-slate-50/80 dark:hover:bg-slate-900/60 space-y-3 min-w-0">
                                                     {/* Header info & Buttons */}
                                                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 min-w-0">
-                                                        <div className="flex items-center gap-2.5 min-w-0">
+                                                        <div className="flex items-center gap-2.5 min-w-0 flex-wrap">
                                                             <span className="text-sm font-bold text-slate-900 dark:text-white shrink-0">
                                                                 {dateStr}
                                                             </span>
@@ -264,11 +264,11 @@ export default function MachineHistorySection({
                                                                 {item.status}
                                                             </span>
                                                         </div>
-                                                        <div className="flex items-center gap-2 shrink-0">
+                                                        <div className="flex items-center gap-2 w-full sm:w-auto mt-1 sm:mt-0">
                                                             <button
                                                                 type="button"
                                                                 onClick={() => toggleExpand(item.id)}
-                                                                className="text-xs font-semibold text-slate-650 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 inline-flex items-center gap-1 h-8 px-2.5 rounded-lg bg-white dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800/80 active:scale-98 transition-all cursor-pointer shadow-2xs"
+                                                                className="flex-1 sm:flex-initial text-xs font-semibold text-slate-650 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 inline-flex items-center justify-center gap-1 h-8 px-2.5 rounded-lg bg-white dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800/80 active:scale-98 transition-all cursor-pointer shadow-2xs"
                                                             >
                                                                 {isExpanded ? "Masquer" : "Détails"}
                                                                 <svg className={`h-3 w-3 transition-transform ${isExpanded ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -277,7 +277,7 @@ export default function MachineHistorySection({
                                                             </button>
                                                             <a
                                                                 href={`/dashboard/service-calls/${item.id}`}
-                                                                className="text-xs font-semibold text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 inline-flex items-center gap-0.5 h-8 px-2.5 rounded-lg bg-white dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800/80 active:scale-98 transition-all shrink-0 shadow-2xs"
+                                                                className="flex-1 sm:flex-initial text-xs font-semibold text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 inline-flex items-center justify-center gap-0.5 h-8 px-2.5 rounded-lg bg-white dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800/80 active:scale-98 transition-all shadow-2xs"
                                                             >
                                                                 Ouvrir
                                                                 <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -299,7 +299,7 @@ export default function MachineHistorySection({
                                                     </div>
 
                                                     {/* Issue/Notes Preview Box */}
-                                                    <div className="rounded-lg bg-white dark:bg-slate-950 p-3 border border-slate-200/50 dark:border-slate-800/40 text-xs text-slate-600 dark:text-slate-350 leading-relaxed max-w-full min-w-0 break-words shadow-2xs">
+                                                    <div className="rounded-lg bg-white dark:bg-slate-950 p-3 border border-slate-200/50 dark:border-slate-800/40 text-xs text-slate-650 dark:text-slate-350 leading-relaxed max-w-full min-w-0 break-words shadow-2xs">
                                                         <span className="font-bold text-[9px] uppercase text-slate-400 tracking-wider block mb-1">Rapport & notes</span>
                                                         <p className="line-clamp-2">
                                                             {item.technician_notes || item.issue_description}
@@ -308,9 +308,9 @@ export default function MachineHistorySection({
 
                                                     {/* Expandable Details Area */}
                                                     {isExpanded && (
-                                                        <div className="mt-3.5 space-y-4 rounded-lg bg-white dark:bg-slate-950 p-4 border border-slate-250/60 dark:border-slate-800/50 text-xs animate-fadeIn">
+                                                        <div className="mt-3.5 space-y-4 rounded-lg bg-white dark:bg-slate-950 p-3 sm:p-4 border border-slate-250/60 dark:border-slate-800/50 text-xs animate-fadeIn min-w-0">
                                                             {/* Tech & Status info */}
-                                                            <div className="grid grid-cols-2 gap-4 pb-3 border-b border-slate-100 dark:border-slate-800/60">
+                                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-3 border-b border-slate-100 dark:border-slate-800/60">
                                                                 <div>
                                                                     <span className="text-[10px] uppercase font-bold text-slate-400">Technicien</span>
                                                                     <p className="font-bold text-slate-800 dark:text-slate-200 mt-0.5">
@@ -359,7 +359,7 @@ export default function MachineHistorySection({
                                                                 </div>
                                                                 <div>
                                                                     <span className="text-[10px] uppercase font-bold text-slate-400 block mb-2">Signature client</span>
-                                                                    <div className="h-14 w-full rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1 flex items-center justify-center shadow-2xs">
+                                                                    <div className="h-14 w-full rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200/85 p-1 flex items-center justify-center shadow-2xs">
                                                                         {item.signature_url ? (
                                                                             <img
                                                                                 src={item.signature_url}
@@ -409,7 +409,7 @@ export default function MachineHistorySection({
                         {analysis.riskStatus !== "Stable" && (
                             <button
                                 type="button"
-                                className={`shrink-0 text-xs font-bold px-4 py-2.5 rounded-xl border shadow-md transition-all active:scale-98 cursor-pointer ${
+                                className={`shrink-0 text-xs font-bold px-4 py-2.5 rounded-xl border shadow-md transition-all active:scale-98 cursor-pointer w-full sm:w-auto text-center justify-center ${
                                     analysis.riskStatus === "Problématique"
                                         ? "bg-red-650 text-white hover:bg-red-700 border-red-600 shadow-red-500/10"
                                         : "bg-amber-600 text-white hover:bg-amber-700 border-amber-600 shadow-amber-500/10"
