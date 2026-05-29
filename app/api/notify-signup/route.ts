@@ -5,7 +5,7 @@ export async function POST(request: Request) {
     try {
         const payload = await request.json();
         console.log("[SERVER] Received payload:", payload);
-        const { email, fullName, role } = payload;
+        const { email, fullName, company, phone, role } = payload;
 
         // Basic payload validation
         if (!email) {
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
         const targetAdminEmail = adminEmail || "greg.gustave@gmail.com";
         console.log("[SERVER] Target admin email resolved to:", targetAdminEmail);
 
-        console.log(`[SIGNUP NOTIFICATION] User registered: ${fullName} (${email}) at ${dateStr}. Role: ${role}`);
+        console.log(`[SIGNUP NOTIFICATION] User registered: ${fullName} (${email}) from ${company} (Phone: ${phone}) at ${dateStr}. Role: ${role}`);
 
         if (!resendKey) {
             console.warn("[SIGNUP NOTIFICATION] RESEND_API_KEY non configurée. Email de notification simulé.");
@@ -44,8 +44,8 @@ export async function POST(request: Request) {
         const origin = new URL(request.url).origin;
         const adminUsersLink = `${origin}/admin/users`;
 
-        console.log("[SERVER] Calling Resend API...");
-        // Send email via Resend REST API
+        console.log("[SERVER] Calling Resend API for Admin Notification...");
+        // Send email to Administrator via Resend REST API
         const response = await fetch("https://api.resend.com/emails", {
             method: "POST",
             headers: {
@@ -70,6 +70,14 @@ export async function POST(request: Request) {
                                 <tr>
                                     <td style="padding: 6px 0; font-size: 14px; font-weight: bold; color: #64748b;">Adresse Email :</td>
                                     <td style="padding: 6px 0; font-size: 14px; color: #0f172a;">${email}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 6px 0; font-size: 14px; font-weight: bold; color: #64748b;">Entreprise :</td>
+                                    <td style="padding: 6px 0; font-size: 14px; color: #0f172a;">${company || "Non spécifié"}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 6px 0; font-size: 14px; font-weight: bold; color: #64748b;">Téléphone :</td>
+                                    <td style="padding: 6px 0; font-size: 14px; color: #0f172a;">${phone || "Non spécifié"}</td>
                                 </tr>
                                 <tr>
                                     <td style="padding: 6px 0; font-size: 14px; font-weight: bold; color: #64748b;">Date d'inscription :</td>
@@ -101,7 +109,48 @@ export async function POST(request: Request) {
             })
         });
  
-        console.log("[SERVER] Resend API response status:", response.status);
+        console.log("[SERVER] Resend Admin notification response status:", response.status);
+
+        // =========================================================================
+        // TODO / FUTURE EMAIL: EMAIL DE RÉCEPTION DE DEMANDE D'INSCRIPTION À L'UTILISATEUR
+        // =========================================================================
+        // Activer ce bloc pour envoyer un courriel de confirmation à l'utilisateur
+        /*
+        console.log("[SERVER] Sending confirmation receipt to user email:", email);
+        const userReceiptResponse = await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${resendKey}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                from: "Welo Platform <onboarding@resend.dev>",
+                to: email,
+                subject: "Votre demande d'inscription - Plateforme Welo",
+                html: `
+                    <div style="font-family: sans-serif; padding: 24px; color: #334155; line-height: 1.6; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px;">
+                        <h2 style="color: #0891b2; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; margin-top: 0;">Demande reçue !</h2>
+                        <p style="font-size: 15px; color: #475569;">Bonjour ${fullName},</p>
+                        <p style="font-size: 15px; color: #475569;">Nous avons bien reçu votre demande d'inscription pour rejoindre la plateforme Welo.</p>
+                        <p style="font-size: 15px; color: #475569;">Un administrateur va réviser et valider votre accès dans les plus brefs délais. Vous recevrez un courriel automatique dès que votre compte sera activé.</p>
+                        
+                        <div style="background-color: #f8fafc; border: 1px solid #f1f5f9; border-radius: 8px; padding: 16px; margin: 20px 0; font-size: 14px;">
+                            <strong>Détails du compte :</strong><br/>
+                            • Nom complet : ${fullName}<br/>
+                            • Entreprise : ${company}<br/>
+                            • Email : ${email}<br/>
+                            • Statut : En attente d'approbation
+                        </div>
+                        
+                        <p style="font-size: 14px; color: #64748b; margin-top: 20px;">Si vous avez des questions, veuillez contacter le support ou votre administrateur.</p>
+                        <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 30px 0 15px 0;" />
+                        <p style="font-size: 11px; text-align: center; color: #94a3b8; margin: 0;">Plateforme Welo • Notifications Automatiques</p>
+                    </div>
+                `
+            })
+        });
+        console.log("[SERVER] Resend User receipt response status:", userReceiptResponse.status);
+        */
 
         if (!response.ok) {
             const errText = await response.text();

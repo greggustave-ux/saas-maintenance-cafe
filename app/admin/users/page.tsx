@@ -13,6 +13,8 @@ interface Profile {
     approved_by: string | null;
     created_at: string | null;
     email: string | null;
+    company?: string | null;
+    phone?: string | null;
 }
 
 const ROLE_LABELS: Record<string, string> = {
@@ -75,43 +77,7 @@ export default function AdminUsersPage() {
     const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "approved">("all");
     const [roleFilter, setRoleFilter] = useState<string>("all");
 
-    // Temporary test email state
-    const [testEmailStatus, setTestEmailStatus] = useState<{
-        loading: boolean;
-        message: string | null;
-        type: "success" | "error" | null;
-    }>({
-        loading: false,
-        message: null,
-        type: null,
-    });
-
-    async function handleTestEmail() {
-        setTestEmailStatus({ loading: true, message: "Envoi du mail de test...", type: null });
-        try {
-            const res = await fetch("/api/test-email");
-            const data = await res.json();
-            if (res.ok && data.success) {
-                setTestEmailStatus({
-                    loading: false,
-                    message: `Succès! ID de message: ${data.resendResponse?.id || "inconnu"}. Réponse API: ${JSON.stringify(data.resendResponse)}`,
-                    type: "success",
-                });
-            } else {
-                setTestEmailStatus({
-                    loading: false,
-                    message: `Échec! ${data.error || "Erreur inconnue"}. Réponse API: ${JSON.stringify(data)}`,
-                    type: "error",
-                });
-            }
-        } catch (err: any) {
-            setTestEmailStatus({
-                loading: false,
-                message: `Erreur réseau: ${err.message || String(err)}`,
-                type: "error",
-            });
-        }
-    }
+    // Test email states and handlers removed to keep production clean
 
     // Modal state
     const [modalConfig, setModalConfig] = useState<{
@@ -140,10 +106,22 @@ export default function AdminUsersPage() {
             // Fetch all profiles via RPC
             const { data, error: rpcError } = await supabase.rpc("get_all_profiles_for_admin");
             if (rpcError) {
-                console.error("RPC Error:", rpcError);
-                throw new Error(
-                    "Impossible de charger la liste. Assurez-vous d'avoir exécuté le script SQL dans 'supabase_admin_rpc.sql' dans votre console Supabase."
-                );
+                console.error("RPC Error Details:", {
+                    message: rpcError.message,
+                    code: rpcError.code,
+                    details: rpcError.details,
+                    hint: rpcError.hint,
+                    fullError: rpcError
+                });
+                
+                const detailedErrorMsg = `Erreur RPC Supabase :
+- Message: ${rpcError.message}
+- Code: ${rpcError.code}
+- Details: ${rpcError.details || 'aucun'}
+- Hint: ${rpcError.hint || 'aucun'}
+- Brut: ${JSON.stringify(rpcError, null, 2)}`;
+                
+                throw new Error(detailedErrorMsg);
             }
 
             setProfiles(data || []);
@@ -164,6 +142,7 @@ export default function AdminUsersPage() {
         setError(null);
         setSuccess(null);
         try {
+            const profile = profiles.find((p) => p.id === userId);
             const { error: updateError } = await supabase.rpc("admin_update_profile", {
                 target_user_id: userId,
                 new_role: newRole,
@@ -175,6 +154,26 @@ export default function AdminUsersPage() {
             }
 
             setSuccess("Profil mis à jour avec succès.");
+
+            // Envoyer un courriel de confirmation d'approbation à l'utilisateur
+            if (newStatus === "approved" && profile && profile.email) {
+                try {
+                    const res = await fetch("/api/notify-approval", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            email: profile.email,
+                            fullName: profile.full_name || profile.email,
+                        }),
+                    });
+                    console.log("[ADMIN] Envoi de la notification d'approbation. Statut API:", res.status);
+                } catch (emailErr) {
+                    console.error("[ADMIN] Erreur lors de l'envoi de la notification d'approbation:", emailErr);
+                }
+            }
+
             await loadData();
         } catch (err: any) {
             console.error("Update Error:", err);
@@ -266,21 +265,6 @@ export default function AdminUsersPage() {
                     </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
-                    <button
-                        type="button"
-                        onClick={handleTestEmail}
-                        disabled={testEmailStatus.loading}
-                        className="inline-flex min-h-11 items-center justify-center rounded-xl bg-indigo-600 dark:bg-indigo-500 hover:bg-indigo-700 dark:hover:bg-indigo-400 active:scale-98 text-white px-4 py-2.5 text-sm font-semibold transition-all disabled:opacity-50 cursor-pointer shadow-md"
-                    >
-                        {testEmailStatus.loading ? (
-                            <>
-                                <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white inline-block" />
-                                Envoi...
-                            </>
-                        ) : (
-                            "Tester email (Resend)"
-                        )}
-                    </button>
                     {pendingCount > 0 && (
                         <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-600 dark:text-amber-400 border border-amber-500/20 animate-pulse">
                             <span className="h-2 w-2 rounded-full bg-amber-500"></span>
@@ -289,28 +273,6 @@ export default function AdminUsersPage() {
                     )}
                 </div>
             </div>
-
-            {/* Temporary test email status notification */}
-            {testEmailStatus.message && (
-                <div className={`rounded-xl border p-4 text-sm flex items-start gap-3 animate-fade-in ${
-                    testEmailStatus.type === "success" 
-                        ? "border-emerald-500/20 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400" 
-                        : "border-red-500/20 bg-red-500/5 text-red-600 dark:text-red-400"
-                }`}>
-                    <div className="flex-1 break-all">
-                        <p className="font-semibold">{testEmailStatus.type === "success" ? "Notification Resend envoyée" : "Erreur Envoi Resend"}</p>
-                        <p className="mt-0.5">{testEmailStatus.message}</p>
-                    </div>
-                    <button 
-                        onClick={() => setTestEmailStatus(prev => ({ ...prev, message: null }))}
-                        className={testEmailStatus.type === "success" ? "text-emerald-500 hover:text-emerald-700" : "text-red-500 hover:text-red-700"}
-                    >
-                        <svg className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-            )}
 
             {/* Notification messages */}
             {error && (
@@ -455,6 +417,8 @@ export default function AdminUsersPage() {
                             <thead className="bg-slate-50 dark:bg-slate-950/60 text-slate-700 dark:text-slate-300 font-semibold border-b border-slate-200/80 dark:border-slate-800/80">
                                 <tr>
                                     <th scope="col" className="px-6 py-4">Utilisateur</th>
+                                    <th scope="col" className="px-6 py-4">Entreprise</th>
+                                    <th scope="col" className="px-6 py-4">Téléphone</th>
                                     <th scope="col" className="px-6 py-4">Statut</th>
                                     <th scope="col" className="px-6 py-4">Rôle</th>
                                     <th scope="col" className="px-6 py-4">Date d'inscription</th>
@@ -482,6 +446,12 @@ export default function AdminUsersPage() {
                                                     </span>
                                                     <span className="text-xs text-slate-500 dark:text-slate-400">{profile.email}</span>
                                                 </div>
+                                            </td>
+                                            <td className="px-6 py-4 text-sm text-slate-900 dark:text-white font-medium">
+                                                {profile.company || <span className="italic text-slate-400">—</span>}
+                                            </td>
+                                            <td className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">
+                                                {profile.phone || <span className="italic text-slate-400">—</span>}
                                             </td>
                                             <td className="px-6 py-4">
                                                 {renderStatusBadge(itemStatus)}
@@ -604,7 +574,19 @@ export default function AdminUsersPage() {
                                         </div>
                                     </div>
  
-                                    <div className="grid grid-cols-2 gap-2 text-xs text-slate-500 dark:text-slate-400">
+                                    <div className="grid grid-cols-2 gap-2.5 text-xs text-slate-500 dark:text-slate-400">
+                                        <div>
+                                            <p className="text-[10px] uppercase font-bold text-slate-400">Entreprise</p>
+                                            <p className="mt-1 font-semibold text-slate-800 dark:text-white">
+                                                {profile.company || <span className="italic text-slate-400 font-normal">—</span>}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] uppercase font-bold text-slate-400">Téléphone</p>
+                                            <p className="mt-1 font-semibold text-slate-800 dark:text-white">
+                                                {profile.phone || <span className="italic text-slate-400 font-normal">—</span>}
+                                            </p>
+                                        </div>
                                         <div>
                                             <p className="text-[10px] uppercase font-bold text-slate-400">Rôle</p>
                                             <select

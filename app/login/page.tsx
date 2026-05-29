@@ -1,9 +1,5 @@
 "use client";
 
-<div style={{ background: "red", color: "white", padding: 12 }}>
-    VERSION TEST LOGIN 2026-05-25
-</div>
-
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { supabase } from "@/src/lib/supabase-client";
@@ -47,56 +43,6 @@ export default function LoginPage() {
                 setLoading(false);
             }
         }
-    }
-
-    async function handleSignup() {
-        setLoading(true);
-        setMessage("");
-
-        const fullName = email.split("@")[0];
-
-        const { data, error } = await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-                data: {
-                    full_name: fullName,
-                }
-            }
-        });
-
-        if (error) {
-            console.log("[SIGNUP] signup error:", error.message);
-            setMessage(error.message);
-            setLoading(false);
-            return;
-        }
-
-        console.log("[SIGNUP] signup success");
-        console.log("[SIGNUP] calling notify-signup");
-
-        try {
-            const res = await fetch("/api/notify-signup", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    email,
-                    fullName,
-                    role: "technician",
-                }),
-            });
-            console.log("[SIGNUP] notify-signup response status:", res.status);
-            const resData = await res.json();
-            console.log("[SIGNUP] notify-signup response data:", resData);
-        } catch (err) {
-            console.error("[SIGNUP] notify-signup error:", err);
-        }
-
-        console.log("[SIGNUP] notify-signup done");
-
-        router.push("/awaiting-approval");
     }
 
     return (
@@ -150,11 +96,11 @@ export default function LoginPage() {
                 </form>
 
                 <button
-                    onClick={handleSignup}
+                    onClick={() => router.push("/register")}
                     disabled={loading}
                     className="mt-3 w-full min-h-12 rounded-xl border border-slate-800 bg-transparent py-3 text-sm font-semibold text-slate-300 hover:bg-slate-800/40 hover:text-white active:scale-98 transition-all cursor-pointer disabled:opacity-50"
                 >
-                    Créer un compte technicien
+                    S'inscrire
                 </button>
 
                 {message && (
