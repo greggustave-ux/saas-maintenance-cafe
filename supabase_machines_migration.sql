@@ -30,9 +30,9 @@ BEGIN
   VALUES (
     new.id,
     COALESCE(new.raw_user_meta_data->>'full_name', split_part(new.email, '@', 1)),
-    COALESCE(new.raw_user_meta_data->>'role', 'technician'),
-    false,
-    'pending',
+    'technician'::public.app_role, -- Force le rôle de technicien par défaut (protection contre l'élévation de privilèges)
+    false, -- Non approuvé par défaut
+    'pending'::public.app_status, -- Statut en attente
     new.raw_user_meta_data->>'company',
     new.raw_user_meta_data->>'phone'
   );

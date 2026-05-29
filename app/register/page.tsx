@@ -44,7 +44,13 @@ export default function RegisterPage() {
             });
 
             if (error) {
-                setMessage(error.message || "Une erreur est survenue lors de la création du compte.");
+                console.error("[REGISTER] Supabase Auth signUp error details:", {
+                    message: error.message,
+                    status: error.status,
+                    code: error.code,
+                    raw: error,
+                });
+                setMessage(`Échec de l'inscription : ${error.message} (Code: ${error.status || error.code || 'inconnu'})`);
                 setLoading(false);
                 return;
             }
