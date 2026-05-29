@@ -1,4 +1,5 @@
 -- 1. Fonction sécurisée pour lire tous les profils (réservée aux admins)
+DROP FUNCTION IF EXISTS public.get_all_profiles_for_admin();
 CREATE OR REPLACE FUNCTION public.get_all_profiles_for_admin()
 RETURNS TABLE (
   id uuid,
@@ -9,7 +10,9 @@ RETURNS TABLE (
   approved_at timestamp with time zone,
   approved_by uuid,
   created_at timestamp with time zone,
-  email text
+  email text,
+  company text,
+  phone text
 ) AS $$
 BEGIN
   IF NOT EXISTS (
@@ -23,13 +26,15 @@ BEGIN
   SELECT 
     p.id,
     p.full_name,
-    p.role,
+    p.role::text,
     p.approved,
-    p.status,
+    p.status::text,
     p.approved_at,
     p.approved_by,
     p.created_at,
-    u.email::text
+    u.email::text,
+    p.company,
+    p.phone
   FROM public.profiles p
   LEFT JOIN auth.users u ON p.id = u.id
   ORDER BY 
@@ -72,8 +77,8 @@ BEGIN
   -- Mise à jour du profil cible
   UPDATE public.profiles
   SET 
-    role = new_role,
-    status = new_status,
+    role = new_role::public.app_role,
+    status = new_status::public.app_status,
     approved = (new_status = 'approved'),
     approved_at = CASE WHEN new_status = 'approved' THEN now() ELSE approved_at END,
     approved_by = CASE WHEN new_status = 'approved' THEN auth.uid() ELSE approved_by END
@@ -82,6 +87,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- 3. Fonction sécurisée pour récupérer les techniciens approuvés pour l'assignation
+DROP FUNCTION IF EXISTS public.get_approved_technicians_for_assignment();
 CREATE OR REPLACE FUNCTION public.get_approved_technicians_for_assignment()
 RETURNS TABLE (
   id uuid,
@@ -103,10 +109,11 @@ BEGIN
   SELECT 
     p.id,
     p.full_name,
-    p.role
+    p.role::text
   FROM public.profiles p
   WHERE p.approved = true AND p.role = 'technician'
   ORDER BY p.full_name ASC;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
 
