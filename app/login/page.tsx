@@ -100,6 +100,7 @@ export default function LoginPage() {
                     disabled={loading}
                     className="mt-3 w-full min-h-12 rounded-xl border border-slate-800 bg-transparent py-3 text-sm font-semibold text-slate-300 hover:bg-slate-800/40 hover:text-white active:scale-98 transition-all cursor-pointer disabled:opacity-50"
                 >
+                    {/* Redirection vers le flux d'inscription */}
                     S'inscrire
                 </button>
 
