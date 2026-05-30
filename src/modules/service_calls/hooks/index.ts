@@ -431,7 +431,7 @@ export function useServiceCallDetails(id: number) {
             const details = await api.getServiceCallById(id);
             setServiceCall(details);
             setNotes(details.technician_notes || "");
-            
+
             // Fetch associated lists
             const [partsData, photosData] = await Promise.all([
                 api.getServiceCallParts(id),
@@ -630,7 +630,7 @@ export function useServiceCallDetails(id: number) {
             setPartName("");
             setQuantity(1);
             setUnitPrice(0);
-            
+
             setSuccessMessage("Pièce ajoutée avec succès.");
             setTimeout(() => setSuccessMessage(null), 3000);
 
@@ -657,10 +657,10 @@ export function useServiceCallDetails(id: number) {
         try {
             const compressed = await compressImageForUpload(file);
             setUploadStatus("uploading");
-            
+
             await api.uploadInterventionPhoto(id, compressed);
             setUploadStatus("saving");
-            
+
             await refreshPhotos();
             setUploadStatus("success");
             setSuccessMessage("Photo ajoutée avec succès.");
@@ -1082,24 +1082,42 @@ export function useDispatchBoard() {
         const active = activeCalls.filter((c) => ["new", "assigned", "on_the_way", "on_site", "waiting_parts"].includes(c.status)).length;
         const urgent = activeCalls.filter((c) => c.priority === "urgent" && c.status !== "completed" && c.status !== "closed" && c.status !== "cancelled").length;
         const waitingParts = activeCalls.filter((c) => c.status === "waiting_parts").length;
-        
+
         const today = new Date();
         const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
         const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
 
         const dispatchCalls = serviceCalls;
-        const completedToday = dispatchCalls.filter((c) => {
-            if (c.status !== 'completed') return false;
-            if (!c.completed_at) return false;
+        console.log("SERVICE CALLS KPI RAW", serviceCalls.map((c) => ({
+            ref: c.reference_number,
+            status: c.status,
+            completed_at: c.completed_at,
+            created_at: c.created_at,
+        })));
+        const completedToday = serviceCalls.filter((c) => {
+            const status = String(c.status || "").toLowerCase().trim();
 
-            const completedAt = new Date(c.completed_at);
-            const now = new Date();
+            if (status !== "completed") return false;
 
-            return (
-                completedAt.getFullYear() === now.getFullYear() &&
-                completedAt.getMonth() === now.getMonth() &&
-                completedAt.getDate() === now.getDate()
-            );
+            const dateValue = c.completed_at || c.created_at;
+            if (!dateValue) return false;
+
+            const callDate = new Date(dateValue);
+            const today = new Date();
+
+            const callLocalDate = callDate.toLocaleDateString("en-CA");
+            const todayLocalDate = today.toLocaleDateString("en-CA");
+
+            console.log("COMPLETED DATE CHECK", {
+                ref: c.reference_number,
+                status,
+                dateValue,
+                callLocalDate,
+                todayLocalDate,
+                match: callLocalDate === todayLocalDate,
+            });
+
+            return callLocalDate === todayLocalDate;
         }).length;
 
         const uniqueTechs = new Set(
@@ -1119,12 +1137,12 @@ export function useDispatchBoard() {
     }, [serviceCalls]);
 
     console.log("completed calls check", serviceCalls
-      .filter(c => c.status === "completed")
-      .map(c => ({
-        ref: c.reference_number,
-        status: c.status,
-        completed_at: c.completed_at
-      }))
+        .filter(c => c.status === "completed")
+        .map(c => ({
+            ref: c.reference_number,
+            status: c.status,
+            completed_at: c.completed_at
+        }))
     );
 
     return {
