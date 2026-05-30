@@ -9,6 +9,8 @@ interface DispatchCardProps {
     updatePriority: (id: number, priority: string) => Promise<void>;
     updateTechnician: (id: number, technicianName: string) => Promise<void>;
     technicians: { id: string; full_name: string }[];
+    archiveCall: (id: number, archived: boolean) => Promise<void>;
+    userRole: string | null;
 }
 
 export function getCallAge(createdAt?: string): string {
@@ -34,6 +36,8 @@ export default function DispatchCard({
     updatePriority,
     updateTechnician,
     technicians,
+    archiveCall,
+    userRole,
 }: DispatchCardProps) {
     const age = getCallAge(call.created_at);
 
@@ -121,13 +125,22 @@ export default function DispatchCard({
             </div>
 
             {/* Bottom row: Card Actions */}
-            <div className="mt-3 pt-2.5 border-t border-slate-50 dark:border-slate-800/40 flex">
+            <div className="mt-3 pt-2.5 border-t border-slate-50 dark:border-slate-800/40 flex gap-2">
                 <a
                     href={`/dashboard/service-calls/${call.id}`}
-                    className="w-full flex min-h-8.5 items-center justify-center rounded-lg bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/50 dark:border-slate-800 text-[11px] font-bold text-slate-700 dark:text-slate-300 transition-colors shadow-3xs"
+                    className="flex-1 flex min-h-8.5 items-center justify-center rounded-lg bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/50 dark:border-slate-800 text-[11px] font-bold text-slate-700 dark:text-slate-300 transition-colors shadow-3xs"
                 >
                     Ouvrir la fiche
                 </a>
+                {userRole && (userRole === "admin" || userRole === "dispatcher") && (call.status === "completed" || call.status === "closed") && !call.archived && (
+                    <button
+                        type="button"
+                        onClick={() => archiveCall(call.id, true)}
+                        className="flex-1 flex min-h-8.5 items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-955/20 border border-amber-200/50 dark:border-amber-900/30 hover:bg-amber-100 dark:hover:bg-amber-950/30 text-[11px] font-bold text-amber-700 dark:text-amber-400 transition-colors shadow-3xs cursor-pointer"
+                    >
+                        Archiver
+                    </button>
+                )}
             </div>
         </article>
     );

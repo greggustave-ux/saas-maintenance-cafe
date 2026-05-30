@@ -8,6 +8,8 @@ interface ServiceCallCardProps {
     updateStatus: (id: number, status: string) => Promise<void>;
     deleteCall: (id: number) => Promise<void>;
     getStatusColor: (status: string) => string;
+    archiveCall?: (id: number, archived: boolean) => Promise<void>;
+    userRole?: string | null;
 }
 
 export default function ServiceCallCard({
@@ -15,6 +17,8 @@ export default function ServiceCallCard({
     updateStatus,
     deleteCall,
     getStatusColor,
+    archiveCall,
+    userRole,
 }: ServiceCallCardProps) {
     return (
         <article className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-5 shadow-xs transition-all duration-300 hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700">
@@ -105,10 +109,33 @@ export default function ServiceCallCard({
                 >
                     Ouvrir la fiche
                 </a>
+                
+                {archiveCall && userRole && (userRole === "admin" || userRole === "dispatcher") && (
+                    call.archived ? (
+                        <button
+                            type="button"
+                            onClick={() => archiveCall(call.id, false)}
+                            className="flex-1 flex min-h-11 items-center justify-center gap-2 rounded-xl bg-amber-50 dark:bg-amber-955/20 border border-amber-200/50 dark:border-amber-900/40 text-amber-700 dark:text-amber-400 text-sm font-semibold hover:bg-amber-100 dark:hover:bg-amber-950/30 active:scale-98 transition-all cursor-pointer"
+                        >
+                            Désarchiver
+                        </button>
+                    ) : (
+                        (call.status === "completed" || call.status === "closed") && (
+                            <button
+                                type="button"
+                                onClick={() => archiveCall(call.id, true)}
+                                className="flex-1 flex min-h-11 items-center justify-center gap-2 rounded-xl bg-amber-50 dark:bg-amber-955/20 border border-amber-200/50 dark:border-amber-900/40 text-amber-700 dark:text-amber-400 text-sm font-semibold hover:bg-amber-100 dark:hover:bg-amber-950/30 active:scale-98 transition-all cursor-pointer"
+                            >
+                                Archiver
+                            </button>
+                        )
+                    )
+                )}
+
                 <button
                     type="button"
                     onClick={() => deleteCall(call.id)}
-                    className="flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/40 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/50 active:scale-95 transition-all cursor-pointer"
+                    className="flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-red-50 dark:bg-red-955/20 border border-red-100 dark:border-red-900/40 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/50 active:scale-95 transition-all cursor-pointer"
                     aria-label="Supprimer l'appel"
                 >
                     <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

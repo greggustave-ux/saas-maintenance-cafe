@@ -11,6 +11,8 @@ interface DispatchBoardProps {
     updatePriority: (id: number, priority: string) => Promise<void>;
     updateTechnician: (id: number, technicianName: string) => Promise<void>;
     technicians: { id: string; full_name: string }[];
+    archiveCall: (id: number, archived: boolean) => Promise<void>;
+    userRole: string | null;
 }
 
 const inputClass =
@@ -22,6 +24,8 @@ export default function DispatchBoard({
     updatePriority,
     updateTechnician,
     technicians,
+    archiveCall,
+    userRole,
 }: DispatchBoardProps) {
     const [search, setSearch] = useState("");
 
@@ -94,6 +98,8 @@ export default function DispatchBoard({
                         updatePriority={updatePriority}
                         updateTechnician={updateTechnician}
                         technicians={technicians}
+                        archiveCall={archiveCall}
+                        userRole={userRole}
                     />
                 ))}
             </div>

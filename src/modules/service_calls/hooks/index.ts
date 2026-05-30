@@ -169,14 +169,29 @@ export function useServiceCalls() {
         }
     }, []);
 
+    const handleArchiveCall = useCallback(async (id: number, archived: boolean) => {
+        try {
+            await api.archiveServiceCall(id, archived);
+            setServiceCalls((prev) =>
+                prev.map((call) => (call.id === id ? { ...call, archived } : call))
+            );
+            setSuccessMessage(archived ? "Intervention archivée." : "Intervention désarchivée.");
+            setTimeout(() => setSuccessMessage(null), 3000);
+        } catch (err: any) {
+            setError(err.message || "Erreur de modification de l'archivage.");
+        }
+    }, []);
+
     const filteredCalls = useMemo(() => {
         const term = search.toLowerCase();
-        return serviceCalls.filter((call) =>
-            call.client_name.toLowerCase().includes(term) ||
-            (call.machine_serial && call.machine_serial.toLowerCase().includes(term)) ||
-            call.address.toLowerCase().includes(term) ||
-            (call.reference_number && call.reference_number.toLowerCase().includes(term))
-        );
+        return serviceCalls
+            .filter((call) => !call.archived)
+            .filter((call) =>
+                call.client_name.toLowerCase().includes(term) ||
+                (call.machine_serial && call.machine_serial.toLowerCase().includes(term)) ||
+                call.address.toLowerCase().includes(term) ||
+                (call.reference_number && call.reference_number.toLowerCase().includes(term))
+            );
     }, [serviceCalls, search]);
 
     return {
@@ -207,6 +222,7 @@ export function useServiceCalls() {
         handleCreateServiceCall,
         handleUpdateStatus,
         handleDeleteServiceCall,
+        handleArchiveCall,
         filteredCalls,
         refresh: fetchServiceCalls,
         userRole,
@@ -302,14 +318,29 @@ export function useArchivedServiceCalls() {
         }
     }, []);
 
+    const handleArchiveCall = useCallback(async (id: number, archived: boolean) => {
+        try {
+            await api.archiveServiceCall(id, archived);
+            setServiceCalls((prev) =>
+                prev.map((call) => (call.id === id ? { ...call, archived } : call))
+            );
+            setSuccessMessage(archived ? "Intervention archivée." : "Intervention désarchivée.");
+            setTimeout(() => setSuccessMessage(null), 3000);
+        } catch (err: any) {
+            setError(err.message || "Erreur de modification de l'archivage.");
+        }
+    }, []);
+
     const filteredCalls = useMemo(() => {
         const term = search.toLowerCase();
-        return serviceCalls.filter((call) =>
-            call.client_name.toLowerCase().includes(term) ||
-            (call.machine_serial && call.machine_serial.toLowerCase().includes(term)) ||
-            call.address.toLowerCase().includes(term) ||
-            (call.reference_number && call.reference_number.toLowerCase().includes(term))
-        );
+        return serviceCalls
+            .filter((call) => call.archived)
+            .filter((call) =>
+                call.client_name.toLowerCase().includes(term) ||
+                (call.machine_serial && call.machine_serial.toLowerCase().includes(term)) ||
+                call.address.toLowerCase().includes(term) ||
+                (call.reference_number && call.reference_number.toLowerCase().includes(term))
+            );
     }, [serviceCalls, search]);
 
     return {
@@ -323,6 +354,7 @@ export function useArchivedServiceCalls() {
         setSuccessMessage,
         handleUpdateStatus,
         handleDeleteServiceCall,
+        handleArchiveCall,
         filteredCalls,
         refresh: fetchArchivedCalls,
         userRole,
@@ -1032,23 +1064,37 @@ export function useDispatchBoard() {
         }
     }, []);
 
+    const handleArchiveCall = useCallback(async (id: number, archived: boolean) => {
+        try {
+            await api.archiveServiceCall(id, archived);
+            setServiceCalls((prev) =>
+                prev.map((call) => (call.id === id ? { ...call, archived } : call))
+            );
+            setSuccessMessage(archived ? "Intervention archivée." : "Intervention désarchivée.");
+            setTimeout(() => setSuccessMessage(null), 3000);
+        } catch (err: any) {
+            setError(err.message || "Erreur de modification de l'archivage.");
+        }
+    }, []);
+
     const kpis = useMemo(() => {
-        const active = serviceCalls.filter((c) => ["new", "assigned", "on_the_way", "on_site", "waiting_parts"].includes(c.status)).length;
-        const urgent = serviceCalls.filter((c) => c.priority === "urgent" && c.status !== "completed" && c.status !== "closed" && c.status !== "cancelled").length;
-        const waitingParts = serviceCalls.filter((c) => c.status === "waiting_parts").length;
+        const activeCalls = serviceCalls.filter((c) => !c.archived);
+        const active = activeCalls.filter((c) => ["new", "assigned", "on_the_way", "on_site", "waiting_parts"].includes(c.status)).length;
+        const urgent = activeCalls.filter((c) => c.priority === "urgent" && c.status !== "completed" && c.status !== "closed" && c.status !== "cancelled").length;
+        const waitingParts = activeCalls.filter((c) => c.status === "waiting_parts").length;
         
         const today = new Date();
         const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
         const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
 
-        const completedToday = serviceCalls.filter((c) => {
+        const completedToday = activeCalls.filter((c) => {
             if (c.status !== 'completed' || !c.completed_at) return false;
             const completedAt = new Date(c.completed_at);
             return completedAt >= startOfDay && completedAt < endOfDay;
         }).length;
 
         const uniqueTechs = new Set(
-            serviceCalls
+            activeCalls
                 .map((c) => c.technician_name?.trim())
                 .filter((name) => !!name && name !== "Non assigné")
         );
@@ -1075,6 +1121,7 @@ export function useDispatchBoard() {
         updateStatus: handleUpdateStatus,
         updatePriority: handleUpdatePriority,
         updateTechnician: handleUpdateTechnician,
+        archiveCall: handleArchiveCall,
         refresh: () => fetchDispatchData(true),
     };
 }
