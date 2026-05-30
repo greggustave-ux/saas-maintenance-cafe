@@ -109,9 +109,25 @@ export async function createServiceCall(call: {
 
 // 4. Update service call status
 export async function updateServiceCallStatus(id: number, status: string): Promise<{ completed_at: string | null; closed_at: string | null }> {
+    const updatePayload: any = {
+        status,
+    };
+
+    if (status === "completed") {
+        updatePayload.completed_at = new Date().toISOString();
+    } else {
+        updatePayload.completed_at = null;
+    }
+
+    if (status === "closed") {
+        updatePayload.closed_at = new Date().toISOString();
+    } else {
+        updatePayload.closed_at = null;
+    }
+
     const { data, error } = await supabase
         .from("service_calls")
-        .update({ status })
+        .update(updatePayload)
         .eq("id", id)
         .select("completed_at, closed_at")
         .single();

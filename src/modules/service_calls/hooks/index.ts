@@ -1118,6 +1118,15 @@ export function useDispatchBoard() {
         };
     }, [serviceCalls]);
 
+    console.log("completed calls check", serviceCalls
+      .filter(c => c.status === "completed")
+      .map(c => ({
+        ref: c.reference_number,
+        status: c.status,
+        completed_at: c.completed_at
+      }))
+    );
+
     return {
         serviceCalls,
         loading,
