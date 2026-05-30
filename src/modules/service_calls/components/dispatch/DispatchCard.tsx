@@ -7,6 +7,8 @@ interface DispatchCardProps {
     call: ServiceCall;
     updateStatus: (id: number, status: string) => Promise<void>;
     updatePriority: (id: number, priority: string) => Promise<void>;
+    updateTechnician: (id: number, technicianName: string) => Promise<void>;
+    technicians: { id: string; full_name: string }[];
 }
 
 export function getCallAge(createdAt?: string): string {
@@ -30,6 +32,8 @@ export default function DispatchCard({
     call,
     updateStatus,
     updatePriority,
+    updateTechnician,
+    technicians,
 }: DispatchCardProps) {
     const age = getCallAge(call.created_at);
 
@@ -68,9 +72,18 @@ export default function DispatchCard({
                 </div>
                 <div>
                     <span className="block text-[9px] uppercase tracking-wider text-slate-400 mb-0.5">Technicien</span>
-                    <span className="text-slate-700 dark:text-slate-300 truncate block">
-                        {call.technician_name || "Non assigné"}
-                    </span>
+                    <select
+                        value={call.technician_name || ""}
+                        onChange={(e) => updateTechnician(call.id, e.target.value)}
+                        className="w-full text-slate-700 dark:text-slate-300 truncate block bg-transparent hover:bg-slate-50 dark:hover:bg-slate-800/40 border-0 focus:ring-0 p-0 text-[11px] font-semibold cursor-pointer outline-none [color-scheme:light_dark]"
+                    >
+                        <option value="" className="text-slate-900 dark:text-white bg-white dark:bg-slate-950 font-semibold">Non assigné</option>
+                        {technicians.map((tech) => (
+                            <option key={tech.id} value={tech.full_name} className="text-slate-900 dark:text-white bg-white dark:bg-slate-950 font-semibold">
+                                {tech.full_name}
+                            </option>
+                        ))}
+                    </select>
                 </div>
             </div>
 

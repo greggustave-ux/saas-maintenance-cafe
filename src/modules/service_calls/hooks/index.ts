@@ -519,7 +519,17 @@ export function useServiceCallDetails(id: number) {
         setSuccessMessage(null);
         try {
             await api.updateServiceCallTechnician(id, technicianName);
-            setServiceCall((prev) => (prev ? { ...prev, technician_name: technicianName } : null));
+            setServiceCall((prev) => {
+                if (!prev) return null;
+                const isTechDefined = technicianName && technicianName.trim() !== "" && technicianName !== "Non assigné";
+                let nextStatus = prev.status;
+                if (isTechDefined && prev.status === "new") {
+                    nextStatus = "assigned";
+                } else if (!isTechDefined && prev.status === "assigned") {
+                    nextStatus = "new";
+                }
+                return { ...prev, technician_name: technicianName, status: nextStatus };
+            });
             setSuccessMessage("Technicien mis à jour.");
             setTimeout(() => setSuccessMessage(null), 3000);
             return true;
@@ -999,6 +1009,29 @@ export function useDispatchBoard() {
         }
     }, []);
 
+    const handleUpdateTechnician = useCallback(async (id: number, technicianName: string) => {
+        try {
+            await api.updateServiceCallTechnician(id, technicianName);
+            setServiceCalls((prev) =>
+                prev.map((call) => {
+                    if (call.id !== id) return call;
+                    const isTechDefined = technicianName && technicianName.trim() !== "" && technicianName !== "Non assigné";
+                    let nextStatus = call.status;
+                    if (isTechDefined && call.status === "new") {
+                        nextStatus = "assigned";
+                    } else if (!isTechDefined && call.status === "assigned") {
+                        nextStatus = "new";
+                    }
+                    return { ...call, technician_name: technicianName, status: nextStatus };
+                })
+            );
+            setSuccessMessage("Technicien mis à jour.");
+            setTimeout(() => setSuccessMessage(null), 3000);
+        } catch (err: any) {
+            setError(err.message || "Erreur de mise à jour.");
+        }
+    }, []);
+
     const kpis = useMemo(() => {
         const active = serviceCalls.filter((c) => ["new", "assigned", "on_the_way", "on_site", "waiting_parts"].includes(c.status)).length;
         const urgent = serviceCalls.filter((c) => c.priority === "urgent" && c.status !== "completed" && c.status !== "closed" && c.status !== "cancelled").length;
@@ -1039,6 +1072,7 @@ export function useDispatchBoard() {
         technicians,
         updateStatus: handleUpdateStatus,
         updatePriority: handleUpdatePriority,
+        updateTechnician: handleUpdateTechnician,
         refresh: () => fetchDispatchData(true),
     };
 }

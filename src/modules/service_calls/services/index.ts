@@ -309,9 +309,28 @@ export async function getApprovedTechnicians(): Promise<{ id: string; full_name:
 
 // 15. Update service call assigned technician
 export async function updateServiceCallTechnician(id: number, technicianName: string): Promise<void> {
+    // Fetch current status
+    const { data: call, error: fetchError } = await supabase
+        .from("service_calls")
+        .select("status")
+        .eq("id", id)
+        .single();
+        
+    if (fetchError) throw fetchError;
+    if (!call) throw new Error("Appel de service introuvable.");
+
+    const updatePayload: Record<string, any> = { technician_name: technicianName };
+    const isTechDefined = technicianName && technicianName.trim() !== "" && technicianName !== "Non assigné";
+
+    if (isTechDefined && call.status === "new") {
+        updatePayload.status = "assigned";
+    } else if (!isTechDefined && call.status === "assigned") {
+        updatePayload.status = "new";
+    }
+
     const { error } = await supabase
         .from("service_calls")
-        .update({ technician_name: technicianName })
+        .update(updatePayload)
         .eq("id", id);
 
     if (error) throw error;

@@ -9,6 +9,8 @@ interface DispatchBoardProps {
     serviceCalls: ServiceCall[];
     updateStatus: (id: number, status: string) => Promise<void>;
     updatePriority: (id: number, priority: string) => Promise<void>;
+    updateTechnician: (id: number, technicianName: string) => Promise<void>;
+    technicians: { id: string; full_name: string }[];
 }
 
 const inputClass =
@@ -18,6 +20,8 @@ export default function DispatchBoard({
     serviceCalls,
     updateStatus,
     updatePriority,
+    updateTechnician,
+    technicians,
 }: DispatchBoardProps) {
     const [search, setSearch] = useState("");
 
@@ -88,6 +92,8 @@ export default function DispatchBoard({
                         calls={callsByStatus[status] || []}
                         updateStatus={updateStatus}
                         updatePriority={updatePriority}
+                        updateTechnician={updateTechnician}
+                        technicians={technicians}
                     />
                 ))}
             </div>
