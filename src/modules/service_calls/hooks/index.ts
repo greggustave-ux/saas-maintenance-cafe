@@ -1089,9 +1089,17 @@ export function useDispatchBoard() {
 
         const dispatchCalls = serviceCalls;
         const completedToday = dispatchCalls.filter((c) => {
-            if (c.status !== 'completed' || !c.completed_at) return false;
+            if (c.status !== 'completed') return false;
+            if (!c.completed_at) return false;
+
             const completedAt = new Date(c.completed_at);
-            return completedAt >= startOfDay && completedAt < endOfDay;
+            const now = new Date();
+
+            return (
+                completedAt.getFullYear() === now.getFullYear() &&
+                completedAt.getMonth() === now.getMonth() &&
+                completedAt.getDate() === now.getDate()
+            );
         }).length;
 
         const uniqueTechs = new Set(
@@ -1113,6 +1121,17 @@ export function useDispatchBoard() {
     const dispatchCalls = serviceCalls;
     console.log("dispatchCalls", dispatchCalls);
     console.log("completedCalls", dispatchCalls.filter(c => c.status === "completed"));
+    console.log("completed KPI debug", {
+        now: new Date(),
+        completed: dispatchCalls
+            .filter(c => c.status === "completed")
+            .map(c => ({
+                ref: c.reference_number,
+                raw: c.completed_at,
+                parsed: c.completed_at ? new Date(c.completed_at) : null,
+                localDate: c.completed_at ? new Date(c.completed_at).toLocaleDateString() : ""
+            }))
+    });
 
     return {
         serviceCalls,
