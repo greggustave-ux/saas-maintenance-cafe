@@ -1118,21 +1118,6 @@ export function useDispatchBoard() {
         };
     }, [serviceCalls]);
 
-    const dispatchCalls = serviceCalls;
-    console.log("dispatchCalls", dispatchCalls);
-    console.log("completedCalls", dispatchCalls.filter(c => c.status === "completed"));
-    console.log("completed KPI debug", {
-        now: new Date(),
-        completed: dispatchCalls
-            .filter(c => c.status === "completed")
-            .map(c => ({
-                ref: c.reference_number,
-                raw: c.completed_at,
-                parsed: c.completed_at ? new Date(c.completed_at) : null,
-                localDate: c.completed_at ? new Date(c.completed_at).toLocaleDateString() : ""
-            }))
-    });
-
     return {
         serviceCalls,
         loading,

@@ -42,9 +42,6 @@ export default function DispatchBoard({
         );
     }, [serviceCalls, search]);
 
-    console.log("dispatchCalls", serviceCalls);
-    console.log("completedCalls", serviceCalls.filter((c) => c.status === "completed"));
-
     return (
         <div className="space-y-5 w-full">
             {/* Quick search input */}
