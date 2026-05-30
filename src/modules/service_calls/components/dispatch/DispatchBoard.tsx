@@ -59,6 +59,9 @@ export default function DispatchBoard({
         return groups;
     }, [filteredCalls]);
 
+    console.log("dispatchCalls (serviceCalls):", serviceCalls);
+    console.log("completedCalls:", callsByStatus["completed"]);
+
     return (
         <div className="space-y-5 w-full">
             {/* Quick search input */}
