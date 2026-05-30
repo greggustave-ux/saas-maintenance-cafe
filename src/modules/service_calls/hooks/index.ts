@@ -101,7 +101,7 @@ export function useServiceCalls() {
                 address,
                 machine_serial: machineSerial,
                 issue_description: issueDescription,
-                status: "En attente",
+                status: "new",
                 technician_name: technicianName,
             });
 
@@ -171,7 +171,8 @@ export function useServiceCalls() {
         return serviceCalls.filter((call) =>
             call.client_name.toLowerCase().includes(term) ||
             (call.machine_serial && call.machine_serial.toLowerCase().includes(term)) ||
-            call.address.toLowerCase().includes(term)
+            call.address.toLowerCase().includes(term) ||
+            (call.reference_number && call.reference_number.toLowerCase().includes(term))
         );
     }, [serviceCalls, search]);
 
@@ -205,6 +206,121 @@ export function useServiceCalls() {
         refresh: fetchServiceCalls,
         userRole,
         technicians,
+    };
+}
+
+// ==========================================
+// 1b. Hook for Archived Service Calls Page
+// ==========================================
+export function useArchivedServiceCalls() {
+    const [serviceCalls, setServiceCalls] = useState<ServiceCall[]>([]);
+    const [search, setSearch] = useState("");
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [userRole, setUserRole] = useState<string | null>(null);
+
+    const isFetchingRef = useRef(false);
+
+    const fetchArchivedCalls = useCallback(async (force = false) => {
+        if (isFetchingRef.current && !force) return;
+        isFetchingRef.current = true;
+        setLoading(true);
+        setError(null);
+        try {
+            const data = await api.getArchivedServiceCalls();
+            setServiceCalls(data);
+        } catch (err: any) {
+            const msg = err.message || "Erreur lors du chargement des archives.";
+            setError(msg);
+        } finally {
+            setLoading(false);
+            isFetchingRef.current = false;
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchArchivedCalls();
+    }, [fetchArchivedCalls]);
+
+    useEffect(() => {
+        async function loadUserRole() {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    const { data: profile } = await supabase
+                        .from("profiles")
+                        .select("role")
+                        .eq("id", user.id)
+                        .single();
+                    if (profile) {
+                        setUserRole(profile.role);
+                    }
+                }
+            } catch (err: any) {
+                console.error("loadUserRole error:", err);
+            }
+        }
+        loadUserRole();
+    }, []);
+
+    const handleUpdateStatus = useCallback(async (id: number, status: string) => {
+        setError(null);
+        setSuccessMessage(null);
+        try {
+            await api.updateServiceCallStatus(id, status);
+            setServiceCalls((prev) =>
+                prev.map((call) => (call.id === id ? { ...call, status } : call))
+            );
+            setSuccessMessage("Statut mis à jour.");
+            setTimeout(() => setSuccessMessage(null), 3000);
+        } catch (err: any) {
+            const msg = err.message || "Erreur lors de la mise à jour du statut.";
+            setError(msg);
+        }
+    }, []);
+
+    const handleDeleteServiceCall = useCallback(async (id: number) => {
+        const confirmDelete = window.confirm("Supprimer définitivement cet appel de service ?");
+        if (!confirmDelete) return;
+
+        setError(null);
+        setSuccessMessage(null);
+        try {
+            await api.deleteServiceCall(id);
+            setServiceCalls((prev) => prev.filter((call) => call.id !== id));
+            setSuccessMessage("Intervention supprimée.");
+            setTimeout(() => setSuccessMessage(null), 3000);
+        } catch (err: any) {
+            const msg = err.message || "Erreur lors de la suppression de l'appel.";
+            setError(msg);
+        }
+    }, []);
+
+    const filteredCalls = useMemo(() => {
+        const term = search.toLowerCase();
+        return serviceCalls.filter((call) =>
+            call.client_name.toLowerCase().includes(term) ||
+            (call.machine_serial && call.machine_serial.toLowerCase().includes(term)) ||
+            call.address.toLowerCase().includes(term) ||
+            (call.reference_number && call.reference_number.toLowerCase().includes(term))
+        );
+    }, [serviceCalls, search]);
+
+    return {
+        serviceCalls,
+        search,
+        setSearch,
+        loading,
+        error,
+        setError,
+        successMessage,
+        setSuccessMessage,
+        handleUpdateStatus,
+        handleDeleteServiceCall,
+        filteredCalls,
+        refresh: fetchArchivedCalls,
+        userRole,
     };
 }
 
@@ -412,6 +528,25 @@ export function useServiceCallDetails(id: number) {
         }
     }, [id]);
 
+    const handleArchiveCall = useCallback(async (archived: boolean) => {
+        setError(null);
+        setSuccessMessage(null);
+        try {
+            await api.archiveServiceCall(id, archived);
+            setServiceCall((prev) => (prev ? { ...prev, archived } : null));
+            setSuccessMessage(archived ? "Intervention archivée." : "Intervention désarchivée.");
+            setTimeout(() => setSuccessMessage(null), 3000);
+            return true;
+        } catch (err: any) {
+            const msg = err.message || "Erreur lors de la modification de l'archivage.";
+            setError(msg);
+            if (process.env.NODE_ENV === "development") {
+                console.error("archiveCall error:", err);
+            }
+            return false;
+        }
+    }, [id]);
+
     const handleAddPart = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
         if (addingPart) return;
@@ -569,7 +704,7 @@ export function useServiceCallDetails(id: number) {
                 heightLeft -= pageHeight;
             }
 
-            pdf.save(`rapport-intervention-${serviceCall.id}.pdf`);
+            pdf.save(`rapport-intervention-${serviceCall.reference_number || serviceCall.id}.pdf`);
         } catch (err: any) {
             const msg = "Impossible de générer le PDF. Les images n'ont peut-être pas des permissions CORS valides.";
             setError(msg);
@@ -631,6 +766,7 @@ export function useServiceCallDetails(id: number) {
         userRole,
         technicians,
         handleUpdateTechnician,
+        handleArchiveCall,
     };
 }
 
@@ -713,8 +849,8 @@ export function useOperationsDashboard() {
             return callDateStr === todayStr;
         }).length;
 
-        const completed = serviceCalls.filter((c) => c.status === "Terminé").length;
-        const pending = serviceCalls.filter((c) => c.status === "En attente" || c.status === "En cours").length;
+        const completed = serviceCalls.filter((c) => c.status === "completed" || c.status === "closed").length;
+        const pending = serviceCalls.filter((c) => ["new", "assigned", "on_the_way", "on_site", "waiting_parts"].includes(c.status)).length;
         const problematicMachines = analyzedMachines.filter((m) => m.riskStatus === "Problématique").length;
         const watchMachines = analyzedMachines.filter((m) => m.riskStatus === "À surveiller").length;
 

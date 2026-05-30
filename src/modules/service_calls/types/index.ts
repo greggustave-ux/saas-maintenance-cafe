@@ -10,6 +10,12 @@ export type ServiceCall = {
     photo_url: string | null;
     signature_url: string | null;
     created_at?: string;
+    archived?: boolean;
+    archived_at?: string | null;
+    archived_by?: string | null;
+    completed_at?: string | null;
+    closed_at?: string | null;
+    reference_number?: string;
 };
 
 export type ServiceCallPart = {
@@ -40,6 +46,7 @@ export type Machine = {
         id: number;
         status: string;
         created_at: string;
+        reference_number?: string;
     } | null;
 };
 

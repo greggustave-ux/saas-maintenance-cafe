@@ -16,7 +16,8 @@ export async function getServiceCalls(): Promise<ServiceCall[]> {
 
     let query = supabase
         .from("service_calls")
-        .select("id, client_name, address, machine_serial, issue_description, status, technician_name")
+        .select("id, client_name, address, machine_serial, issue_description, status, technician_name, archived, archived_at, archived_by, completed_at, closed_at, reference_number")
+        .eq("archived", false)
         .order("id", { ascending: false });
 
     if (profile.role === "technician") {
@@ -43,7 +44,8 @@ export async function getDetailedServiceCalls(): Promise<ServiceCall[]> {
 
     let query = supabase
         .from("service_calls")
-        .select("id, client_name, address, machine_serial, issue_description, status, technician_name, technician_notes, photo_url, signature_url, created_at")
+        .select("id, client_name, address, machine_serial, issue_description, status, technician_name, technician_notes, photo_url, signature_url, created_at, archived, archived_at, archived_by, completed_at, closed_at, reference_number")
+        .eq("archived", false)
         .order("id", { ascending: false });
 
     if (profile.role === "technician") {
@@ -71,7 +73,7 @@ export async function getServiceCallById(id: number): Promise<ServiceCall> {
 
     const { data, error } = await supabase
         .from("service_calls")
-        .select("id, client_name, address, machine_serial, issue_description, status, technician_name, technician_notes, photo_url, signature_url")
+        .select("id, client_name, address, machine_serial, issue_description, status, technician_name, technician_notes, photo_url, signature_url, archived, archived_at, archived_by, completed_at, closed_at, reference_number")
         .eq("id", id)
         .single();
 
@@ -283,7 +285,7 @@ export async function getServiceCallsByMachineSerial(
 
     let query = supabase
         .from("service_calls")
-        .select("id, client_name, address, machine_serial, issue_description, status, technician_name, technician_notes, created_at")
+        .select("id, client_name, address, machine_serial, issue_description, status, technician_name, technician_notes, created_at, archived, reference_number")
         .ilike("machine_serial", normalizedSerial)
         .order("id", { ascending: false });
 
@@ -313,6 +315,41 @@ export async function updateServiceCallTechnician(id: number, technicianName: st
     if (error) throw error;
 }
 
+// 15b. Fetch archived service calls (for admin & dispatcher)
+export async function getArchivedServiceCalls(): Promise<ServiceCall[]> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
+
+    const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+
+    if (!profile || (profile.role !== "admin" && profile.role !== "dispatcher")) {
+        return [];
+    }
+
+    const { data, error } = await supabase
+        .from("service_calls")
+        .select("id, client_name, address, machine_serial, issue_description, status, technician_name, archived, archived_at, archived_by, completed_at, closed_at, reference_number")
+        .eq("archived", true)
+        .order("id", { ascending: false });
+
+    if (error) throw error;
+    return data as ServiceCall[] || [];
+}
+
+// 15c. Toggle service call archiving state
+export async function archiveServiceCall(id: number, archived: boolean): Promise<void> {
+    const { error } = await supabase
+        .from("service_calls")
+        .update({ archived })
+        .eq("id", id);
+
+    if (error) throw error;
+}
+
 // 16. Get machines by client name
 // TODO: client_id est basé temporairement sur le nom du client (MVP). À remplacer par une clé relationnelle plus tard.
 export async function getMachinesByClientId(clientId: string): Promise<Machine[]> {
@@ -336,7 +373,7 @@ export async function getMachinesByClientId(clientId: string): Promise<Machine[]
     for (const machine of machines) {
         const { data: callData } = await supabase
             .from("service_calls")
-            .select("id, status, created_at")
+            .select("id, status, created_at, reference_number")
             .ilike("machine_serial", machine.serial_number.trim().toLowerCase())
             .order("created_at", { ascending: false })
             .limit(1)

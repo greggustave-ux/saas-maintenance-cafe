@@ -19,12 +19,19 @@ export default function ServiceCallCard({
         <article className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-5 shadow-xs transition-all duration-300 hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700">
             <div className="space-y-4">
                 <div className="flex items-start justify-between gap-3">
-                    <a
-                        href={`/dashboard/service-calls/${call.id}`}
-                        className="text-lg font-bold tracking-tight text-slate-900 dark:text-white hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors leading-snug"
-                    >
-                        {call.client_name}
-                    </a>
+                    <div className="flex flex-col gap-1 min-w-0">
+                        {call.reference_number && (
+                            <span className="text-xs font-bold font-mono tracking-wider text-cyan-600 dark:text-cyan-400 uppercase">
+                                {call.reference_number}
+                            </span>
+                        )}
+                        <a
+                            href={`/dashboard/service-calls/${call.id}`}
+                            className="text-lg font-bold tracking-tight text-slate-900 dark:text-white hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors leading-snug break-words"
+                        >
+                            {call.client_name}
+                        </a>
+                    </div>
                     
                     <div className="shrink-0">
                         <select
@@ -33,11 +40,16 @@ export default function ServiceCallCard({
                                 updateStatus(call.id, e.target.value)
                             }
                             aria-label={`Statut pour ${call.client_name}`}
-                            className={`min-h-9 rounded-lg px-2.5 py-1 text-xs font-semibold ${getStatusColor(call.status)} cursor-pointer focus:ring-0`}
+                            className={`min-h-9 rounded-lg px-2.5 py-1 text-xs font-semibold ${getStatusColor(call.status)} cursor-pointer focus:ring-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800`}
                         >
-                            <option>En attente</option>
-                            <option>En cours</option>
-                            <option>Terminé</option>
+                            <option value="new">Nouveau</option>
+                            <option value="assigned">Assigné</option>
+                            <option value="on_the_way">En route</option>
+                            <option value="on_site">Sur place</option>
+                            <option value="waiting_parts">En attente de pièces</option>
+                            <option value="completed">Terminé</option>
+                            <option value="closed">Clos</option>
+                            <option value="cancelled">Annulé</option>
                         </select>
                     </div>
                 </div>

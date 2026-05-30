@@ -114,7 +114,17 @@ export default function DashboardShell({
                       </svg>
                   ),
               },
-              ...navLinks.slice(1)
+              navLinks[1], // Appels de service
+              {
+                  href: "/dashboard/service-calls/archives",
+                  label: "Archives",
+                  icon: (
+                      <svg className="h-5.5 w-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                      </svg>
+                  ),
+              },
+              ...navLinks.slice(2)
           ]
         : navLinks;
 

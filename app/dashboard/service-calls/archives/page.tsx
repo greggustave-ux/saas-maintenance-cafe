@@ -1,22 +1,11 @@
 "use client";
 
-import { useServiceCalls } from "@/src/modules/service_calls/hooks";
+import { useArchivedServiceCalls } from "@/src/modules/service_calls/hooks";
 import ServiceCallCard, { ServiceCallCardSkeleton } from "@/src/modules/service_calls/components/ServiceCallCard";
-import NewServiceCallForm from "@/src/modules/service_calls/components/NewServiceCallForm";
+import { STATUS_LABELS } from "../page";
 
 const inputClass =
     "w-full min-h-12 rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 px-4 py-3 text-base text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15";
-
-export const STATUS_LABELS: Record<string, string> = {
-    new: "Nouveau",
-    assigned: "Assigné",
-    on_the_way: "En route",
-    on_site: "Sur place",
-    waiting_parts: "En attente de pièces",
-    completed: "Terminé",
-    closed: "Clos",
-    cancelled: "Annulé",
-};
 
 function getStatusColor(status: string) {
     switch (status) {
@@ -41,61 +30,56 @@ function getStatusColor(status: string) {
     }
 }
 
-export default function ServiceCallsPage() {
+export default function ArchivedServiceCallsPage() {
     const {
         search,
         setSearch,
-        isFormOpen,
-        setIsFormOpen,
         loading,
         error,
         successMessage,
-        form,
-        handleCreateServiceCall,
         handleUpdateStatus,
         handleDeleteServiceCall,
         filteredCalls,
         userRole,
-        technicians,
-    } = useServiceCalls();
+    } = useArchivedServiceCalls();
+
+    if (!loading && userRole === "technician") {
+        return (
+            <div className="flex min-h-[50vh] flex-col items-center justify-center space-y-4 text-center p-4">
+                <div className="rounded-full bg-red-100 dark:bg-red-955/20 p-3.5 text-red-600 dark:text-red-400">
+                    <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m0-8v6m0 5h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white">Accès non autorisé</h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400 max-w-md">
+                    Cette section est réservée exclusivement aux administrateurs et répartiteurs pour la gestion des archives.
+                </p>
+                <a href="/dashboard/service-calls" className="text-sm font-semibold text-cyan-600 dark:text-cyan-400 hover:underline">
+                    Retour aux appels de service
+                </a>
+            </div>
+        );
+    }
 
     return (
         <div className="w-full max-w-3xl mx-auto space-y-6 md:max-w-4xl">
-            <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
-                        Appels de service
-                    </h1>
-                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                        Gérez et suivez les interventions terrain en temps réel
-                    </p>
-                </div>
-
-                <div className="flex items-center gap-3 flex-wrap">
-                    {userRole && (userRole === "admin" || userRole === "dispatcher") && (
-                        <a
-                            href="/dashboard/service-calls/archives"
-                            className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-350 hover:bg-slate-200 dark:hover:bg-slate-750 px-5 py-3 text-base font-semibold border border-slate-200 dark:border-slate-700/80 active:scale-98 transition-all cursor-pointer shadow-2xs"
-                        >
-                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-                            </svg>
-                            Archives
-                        </a>
-                    )}
-
-                    {userRole && userRole !== "technician" && (
-                        <button
-                            type="button"
-                            onClick={() => setIsFormOpen(!isFormOpen)}
-                            className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-cyan-600 dark:bg-cyan-500 px-5 py-3 text-base font-semibold text-white hover:bg-cyan-700 dark:hover:bg-cyan-400 active:scale-98 transition-all cursor-pointer shadow-xs"
-                        >
-                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d={isFormOpen ? "M18 12H6" : "M12 6v12M6 12h12"} />
-                            </svg>
-                            {isFormOpen ? "Fermer" : "Nouvel appel"}
-                        </button>
-                    )}
+            <header className="space-y-3">
+                <a href="/dashboard/service-calls" className="inline-flex items-center gap-1.5 text-sm font-semibold text-cyan-600 dark:text-cyan-400 hover:underline">
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Retour aux appels
+                </a>
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
+                            Archives des interventions
+                        </h1>
+                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                            Consultez l'historique complet des interventions archivées
+                        </p>
+                    </div>
                 </div>
             </header>
 
@@ -109,15 +93,6 @@ export default function ServiceCallsPage() {
                 <div className="rounded-xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30 p-4 text-sm text-emerald-600 dark:text-emerald-400 animate-fadeIn" role="alert">
                     {successMessage}
                 </div>
-            )}
-
-            {isFormOpen && (
-                <NewServiceCallForm
-                    form={form}
-                    onSubmit={handleCreateServiceCall}
-                    onCancel={() => setIsFormOpen(false)}
-                    technicians={technicians}
-                />
             )}
 
             <div className="relative">
@@ -145,7 +120,7 @@ export default function ServiceCallsPage() {
                 <div className="grid gap-4 sm:grid-cols-2">
                     {filteredCalls.length === 0 ? (
                         <div className="col-span-full py-12 text-center rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
-                            <p className="text-slate-500 dark:text-slate-400">Aucun appel de service trouvé.</p>
+                            <p className="text-slate-500 dark:text-slate-400">Aucun appel de service archivé trouvé.</p>
                         </div>
                     ) : (
                         filteredCalls.map((call) => (

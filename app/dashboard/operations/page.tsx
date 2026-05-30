@@ -3,14 +3,35 @@
 import { useOperationsDashboard } from "@/src/modules/service_calls/hooks";
 import { useState } from "react";
 
+const STATUS_LABELS: Record<string, string> = {
+    new: "Nouveau",
+    assigned: "Assigné",
+    on_the_way: "En route",
+    on_site: "Sur place",
+    waiting_parts: "En attente de pièces",
+    completed: "Terminé",
+    closed: "Clos",
+    cancelled: "Annulé",
+};
+
 function getStatusColor(status: string) {
     switch (status) {
-        case "En attente":
+        case "new":
+            return "border border-sky-200 dark:border-sky-900/30 bg-sky-50/70 dark:bg-sky-950/20 text-sky-700 dark:text-sky-400";
+        case "assigned":
+            return "border border-indigo-200 dark:border-indigo-900/30 bg-indigo-50/70 dark:bg-indigo-950/20 text-indigo-700 dark:text-indigo-400";
+        case "on_the_way":
             return "border border-amber-200 dark:border-amber-900/30 bg-amber-50/70 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400";
-        case "En cours":
+        case "on_site":
             return "border border-blue-200 dark:border-blue-900/30 bg-blue-50/70 dark:bg-blue-950/20 text-blue-700 dark:text-blue-400";
-        case "Terminé":
+        case "waiting_parts":
+            return "border border-purple-200 dark:border-purple-900/30 bg-purple-50/70 dark:bg-purple-950/20 text-purple-700 dark:text-purple-400";
+        case "completed":
             return "border border-emerald-200 dark:border-emerald-900/30 bg-emerald-50/70 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400";
+        case "closed":
+            return "border border-slate-355 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-350";
+        case "cancelled":
+            return "border border-red-200 dark:border-red-900/30 bg-red-50/70 dark:bg-red-950/20 text-red-700 dark:text-red-400";
         default:
             return "border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-400";
     }
@@ -151,7 +172,7 @@ export default function OperationsDashboardPage() {
                                 {recentActivity.map((item) => {
                                     const hasPhoto = !!item.photo_url;
                                     const hasSignature = !!item.signature_url;
-                                    const isUrgent = item.status === "En attente"; // Pending means waiting to be addressed
+                                    const isUrgent = item.status === "new"; // Pending means waiting to be addressed
 
                                     return (
                                         <div
@@ -163,8 +184,8 @@ export default function OperationsDashboardPage() {
                                                     <span className="text-sm font-semibold text-slate-900 dark:text-white shrink-0">
                                                         #{item.id} — {item.client_name}
                                                     </span>
-                                                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${getStatusColor(item.status)}`}>
-                                                        {item.status}
+                                                    <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${getStatusColor(item.status)}`}>
+                                                        {STATUS_LABELS[item.status] || item.status}
                                                     </span>
                                                     {isUrgent && (
                                                         <span className="inline-flex items-center rounded-md px-1.5 py-0.5 text-[9px] font-semibold bg-red-150 dark:bg-red-950/40 text-red-650 dark:text-red-400 border border-red-500/10">

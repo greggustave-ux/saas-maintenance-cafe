@@ -8,16 +8,37 @@ interface MachineHistorySectionProps {
     machineHistoryLoading: boolean;
 }
 
+const STATUS_LABELS: Record<string, string> = {
+    new: "Nouveau",
+    assigned: "Assigné",
+    on_the_way: "En route",
+    on_site: "Sur place",
+    waiting_parts: "En attente de pièces",
+    completed: "Terminé",
+    closed: "Clos",
+    cancelled: "Annulé",
+};
+
 function getStatusBadgeClass(status: string) {
     switch (status) {
-        case "En attente":
+        case "new":
+            return "bg-sky-500/10 text-sky-700 dark:text-sky-400 border border-sky-500/25";
+        case "assigned":
+            return "bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-500/25";
+        case "on_the_way":
             return "bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/25";
-        case "En cours":
+        case "on_site":
             return "bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-500/25";
-        case "Terminé":
+        case "waiting_parts":
+            return "bg-purple-500/10 text-purple-700 dark:text-purple-400 border border-purple-500/25";
+        case "completed":
             return "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25";
+        case "closed":
+            return "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-450 border border-slate-200/30";
+        case "cancelled":
+            return "bg-red-500/10 text-red-750 dark:text-red-400 border border-red-500/25";
         default:
-            return "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/30";
+            return "bg-slate-100 dark:bg-slate-800 text-slate-650 dark:text-slate-400 border border-slate-200/30";
     }
 }
 
@@ -27,8 +48,13 @@ export default function MachineHistorySection({
     machineHistoryLoading,
 }: MachineHistorySectionProps) {
     const [expandedIds, setExpandedIds] = useState<Record<number, boolean>>({});
+    const [includeArchived, setIncludeArchived] = useState(false);
 
-    const otherInterventions = machineHistory.filter((item) => item.id !== currentCallId);
+    const otherInterventions = machineHistory.filter((item) => {
+        if (item.id === currentCallId) return false;
+        if (!includeArchived && item.archived) return false;
+        return true;
+    });
 
     function toggleExpand(id: number) {
         setExpandedIds((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -49,9 +75,20 @@ export default function MachineHistorySection({
                             Suivi des interventions et analyse prédictive sur ce numéro de série
                         </p>
                     </div>
-                    <span className="inline-flex items-center self-start sm:self-auto rounded-full bg-cyan-500/10 px-3 py-1 text-xs font-semibold text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 shrink-0">
-                        {otherInterventions.length} précédente{otherInterventions.length > 1 ? "s" : ""}
-                    </span>
+                    <div className="flex items-center gap-3 self-start sm:self-auto shrink-0 flex-wrap">
+                        <label className="inline-flex items-center gap-2 text-xs font-semibold text-slate-650 dark:text-slate-400 cursor-pointer hover:text-slate-800 dark:hover:text-slate-200 transition-colors">
+                            <input
+                                type="checkbox"
+                                checked={includeArchived}
+                                onChange={(e) => setIncludeArchived(e.target.checked)}
+                                className="h-4 w-4 rounded-sm border-slate-350 dark:border-slate-800 text-cyan-600 focus:ring-cyan-500 bg-white dark:bg-slate-950 transition-colors cursor-pointer"
+                            />
+                            Inclure les archives
+                        </label>
+                        <span className="inline-flex items-center rounded-full bg-cyan-500/10 px-3 py-1 text-xs font-semibold text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 shrink-0">
+                            {otherInterventions.length} précédente{otherInterventions.length > 1 ? "s" : ""}
+                        </span>
+                    </div>
                 </div>
             </div>
 
@@ -257,12 +294,25 @@ export default function MachineHistorySection({
                                                     {/* Header info & Buttons */}
                                                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 min-w-0">
                                                         <div className="flex items-center gap-2.5 min-w-0 flex-wrap">
-                                                            <span className="text-sm font-bold text-slate-900 dark:text-white shrink-0">
-                                                                {dateStr}
-                                                            </span>
+                                                            {item.reference_number ? (
+                                                                <span className="text-sm font-bold text-slate-900 dark:text-white shrink-0">
+                                                                    <span className="text-cyan-600 dark:text-cyan-400 font-mono mr-1.5">{item.reference_number}</span>
+                                                                    <span className="text-slate-300 dark:text-slate-700 font-normal mr-1.5">—</span>
+                                                                    {dateStr}
+                                                                </span>
+                                                            ) : (
+                                                                <span className="text-sm font-bold text-slate-900 dark:text-white shrink-0">
+                                                                    {dateStr}
+                                                                </span>
+                                                            )}
                                                             <span className={`rounded-full px-2.5 py-0.5 text-[9px] font-bold tracking-wide shrink-0 ${getStatusBadgeClass(item.status)}`}>
-                                                                {item.status}
+                                                                {STATUS_LABELS[item.status] || item.status}
                                                             </span>
+                                                            {item.archived && (
+                                                                <span className="rounded-full bg-slate-150 dark:bg-slate-805 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider shrink-0">
+                                                                    Archivé
+                                                                </span>
+                                                            )}
                                                         </div>
                                                         <div className="flex items-center gap-2 w-full sm:w-auto mt-1 sm:mt-0">
                                                             <button
@@ -320,7 +370,7 @@ export default function MachineHistorySection({
                                                                 <div>
                                                                     <span className="text-[10px] uppercase font-bold text-slate-400">Statut Machine</span>
                                                                     <p className="font-bold text-slate-800 dark:text-slate-200 mt-0.5">
-                                                                        {item.status === "Terminé" ? "🟢 Opérationnel" : "🟡 En maintenance"}
+                                                                        {item.status === "completed" || item.status === "closed" ? "🟢 Opérationnel" : "🟡 En maintenance"}
                                                                     </p>
                                                                 </div>
                                                             </div>

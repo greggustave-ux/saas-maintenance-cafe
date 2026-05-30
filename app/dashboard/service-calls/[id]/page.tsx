@@ -6,6 +6,7 @@ import PartsSection from "@/src/modules/service_calls/components/PartsSection";
 import SignatureSection from "@/src/modules/service_calls/components/SignatureSection";
 import PhotosSection from "@/src/modules/service_calls/components/PhotosSection";
 import MachineHistorySection from "@/src/modules/service_calls/components/MachineHistorySection";
+import { STATUS_LABELS } from "../page";
 
 const inputClass =
     "w-full min-h-12 rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 px-4 py-3 text-base text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15";
@@ -152,6 +153,7 @@ export default function ServiceCallDetailsPage() {
         userRole,
         technicians,
         handleUpdateTechnician,
+        handleArchiveCall,
     } = useServiceCallDetails(id);
 
     if (loading) {
@@ -187,30 +189,61 @@ export default function ServiceCallDetailsPage() {
                         Retour aux appels
                     </a>
                     <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
-                        Intervention #{serviceCall.id}
+                        {serviceCall.reference_number || `Intervention #${serviceCall.id}`}
                     </h1>
                 </div>
 
-                <button
-                    type="button"
-                    disabled={generatingPdf}
-                    onClick={() => handleDownloadPdf("pdf-print-template")}
-                    className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-cyan-600 dark:bg-cyan-500 px-6 py-3 text-base font-semibold text-white hover:bg-cyan-700 dark:hover:bg-cyan-400 active:scale-98 transition-all md:w-auto shadow-xs cursor-pointer disabled:opacity-50"
-                >
-                    {generatingPdf ? (
-                        <>
-                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                            Génération...
-                        </>
-                    ) : (
-                        <>
-                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            Télécharger le PDF
-                        </>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center w-full sm:w-auto">
+                    {userRole && (userRole === "admin" || userRole === "dispatcher") && 
+                     (serviceCall.status === "completed" || serviceCall.status === "closed") && (
+                        <button
+                            type="button"
+                            onClick={() => handleArchiveCall(!serviceCall.archived)}
+                            className={`flex min-h-12 w-full items-center justify-center gap-2 rounded-xl px-6 py-3 text-base font-semibold active:scale-98 transition-all md:w-auto shadow-xs cursor-pointer ${
+                                serviceCall.archived
+                                    ? "bg-amber-600 dark:bg-amber-500 text-white hover:bg-amber-700 dark:hover:bg-amber-400"
+                                    : "bg-slate-905 dark:bg-white text-white dark:text-slate-950 hover:bg-slate-800 dark:hover:bg-slate-100 border border-slate-200 dark:border-transparent"
+                            }`}
+                        >
+                            {serviceCall.archived ? (
+                                <>
+                                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    Désarchiver
+                                </>
+                            ) : (
+                                <>
+                                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                                    </svg>
+                                    Archiver
+                                </>
+                            )}
+                        </button>
                     )}
-                </button>
+
+                    <button
+                        type="button"
+                        disabled={generatingPdf}
+                        onClick={() => handleDownloadPdf("pdf-print-template")}
+                        className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-cyan-600 dark:bg-cyan-500 px-6 py-3 text-base font-semibold text-white hover:bg-cyan-700 dark:hover:bg-cyan-400 active:scale-98 transition-all md:w-auto shadow-xs cursor-pointer disabled:opacity-50"
+                    >
+                        {generatingPdf ? (
+                            <>
+                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                                Génération...
+                            </>
+                        ) : (
+                            <>
+                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Télécharger le PDF
+                            </>
+                        )}
+                    </button>
+                </div>
             </div>
 
             {successMessage && (
@@ -227,7 +260,7 @@ export default function ServiceCallDetailsPage() {
                         <div className="flex items-center justify-between">
                             <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-400">Client</h2>
                             <span className="inline-flex rounded-full bg-cyan-100 dark:bg-cyan-950/40 px-2.5 py-0.5 text-xs font-semibold text-cyan-800 dark:text-cyan-400 border border-cyan-200/30">
-                                {serviceCall.status}
+                                {STATUS_LABELS[serviceCall.status] || serviceCall.status}
                             </span>
                         </div>
 
@@ -269,6 +302,48 @@ export default function ServiceCallDetailsPage() {
                                     <dt className="text-xs font-semibold uppercase tracking-wider text-slate-400">Description du problème</dt>
                                     <dd className="mt-1 text-slate-600 dark:text-slate-350 leading-relaxed break-words">{serviceCall.issue_description}</dd>
                                 </div>
+                                {serviceCall.completed_at && (
+                                    <div>
+                                        <dt className="text-xs font-semibold uppercase tracking-wider text-slate-400">Complété le</dt>
+                                        <dd className="mt-0.5 font-semibold text-slate-800 dark:text-slate-200">
+                                            {new Date(serviceCall.completed_at).toLocaleDateString("fr-FR", {
+                                                day: "numeric",
+                                                month: "short",
+                                                year: "numeric",
+                                                hour: "2-digit",
+                                                minute: "2-digit",
+                                            })}
+                                        </dd>
+                                    </div>
+                                )}
+                                {serviceCall.closed_at && (
+                                    <div>
+                                        <dt className="text-xs font-semibold uppercase tracking-wider text-slate-400">Clos le</dt>
+                                        <dd className="mt-0.5 font-semibold text-slate-800 dark:text-slate-200">
+                                            {new Date(serviceCall.closed_at).toLocaleDateString("fr-FR", {
+                                                day: "numeric",
+                                                month: "short",
+                                                year: "numeric",
+                                                hour: "2-digit",
+                                                minute: "2-digit",
+                                            })}
+                                        </dd>
+                                    </div>
+                                )}
+                                {serviceCall.archived && serviceCall.archived_at && (
+                                    <div className="p-2.5 bg-amber-500/10 rounded-xl border border-amber-500/20">
+                                        <dt className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-450">Intervention Archivée</dt>
+                                        <dd className="mt-0.5 text-xs text-amber-800 dark:text-amber-300 font-bold">
+                                            Le {new Date(serviceCall.archived_at).toLocaleDateString("fr-FR", {
+                                                day: "numeric",
+                                                month: "short",
+                                                year: "numeric",
+                                                hour: "2-digit",
+                                                minute: "2-digit",
+                                            })}
+                                        </dd>
+                                    </div>
+                                )}
                             </dl>
                         </div>
                     </section>
@@ -364,9 +439,9 @@ export default function ServiceCallDetailsPage() {
                                                         <span className="text-slate-450 dark:text-slate-550">Dernier appel :</span>
                                                         <a 
                                                             href={`/dashboard/service-calls/${machine.last_service_call.id}`}
-                                                            className="inline-flex items-center gap-1 font-bold text-cyan-600 dark:text-cyan-400 hover:underline"
+                                                            className="inline-flex items-center gap-1 font-bold text-cyan-600 dark:text-cyan-400 hover:underline font-mono"
                                                         >
-                                                            #{machine.last_service_call.id}
+                                                            {machine.last_service_call.reference_number || `#${machine.last_service_call.id}`}
                                                             <span className="text-[10px] font-normal text-slate-400">
                                                                 ({machine.last_service_call.status})
                                                             </span>
@@ -496,7 +571,7 @@ export default function ServiceCallDetailsPage() {
                             <p style={{ fontSize: "14px", color: "#64748b", marginTop: "4px", marginBottom: 0 }}>Plateforme Welo • SME Field Operations</p>
                         </div>
                         <div style={{ textAlign: "right" }}>
-                            <span style={{ fontSize: "16px", fontWeight: "bold", color: "#0f172a" }}>Fiche #00{serviceCall.id}</span>
+                            <span style={{ fontSize: "16px", fontWeight: "bold", color: "#0f172a" }}>{serviceCall.reference_number || `Fiche #00${serviceCall.id}`}</span>
                             <p style={{ fontSize: "12px", color: "#64748b", margin: "4px 0 0 0" }}>Statut: {serviceCall.status}</p>
                         </div>
                     </div>
