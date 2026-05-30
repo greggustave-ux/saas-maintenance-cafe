@@ -7,6 +7,7 @@ import SignatureSection from "@/src/modules/service_calls/components/SignatureSe
 import PhotosSection from "@/src/modules/service_calls/components/PhotosSection";
 import MachineHistorySection from "@/src/modules/service_calls/components/MachineHistorySection";
 import { STATUS_LABELS } from "../page";
+import { priorityColors, priorityLabels } from "@/src/modules/service_calls/components/dispatch/constants";
 
 const inputClass =
     "w-full min-h-12 rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 px-4 py-3 text-base text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15";
@@ -154,6 +155,7 @@ export default function ServiceCallDetailsPage() {
         technicians,
         handleUpdateTechnician,
         handleArchiveCall,
+        handleUpdatePriority,
     } = useServiceCallDetails(id);
 
     if (loading) {
@@ -296,6 +298,27 @@ export default function ServiceCallDetailsPage() {
                                         </select>
                                     ) : (
                                         <dd className="mt-0.5 font-semibold text-slate-800 dark:text-slate-200">{serviceCall.technician_name || "Non assigné"}</dd>
+                                    )}
+                                </div>
+                                <div>
+                                    <dt className="text-xs font-semibold uppercase tracking-wider text-slate-400">Priorité d'intervention</dt>
+                                    {userRole === "admin" || userRole === "dispatcher" ? (
+                                        <select
+                                            className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-850 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-semibold text-slate-800 dark:text-slate-200 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15 focus:outline-none"
+                                            value={serviceCall.priority || "medium"}
+                                            onChange={(e) => handleUpdatePriority(e.target.value)}
+                                        >
+                                            <option value="low">Faible</option>
+                                            <option value="medium">Moyenne</option>
+                                            <option value="high">Élevée</option>
+                                            <option value="urgent">Urgente</option>
+                                        </select>
+                                    ) : (
+                                        <dd className="mt-1.5">
+                                            <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-bold border ${priorityColors[serviceCall.priority || "medium"]}`}>
+                                                {priorityLabels[serviceCall.priority || "medium"]}
+                                            </span>
+                                        </dd>
                                     )}
                                 </div>
                                 <div>

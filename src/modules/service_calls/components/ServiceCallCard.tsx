@@ -1,6 +1,7 @@
 "use client";
 
 import { ServiceCall } from "../types";
+import { priorityColors, priorityLabels } from "./dispatch/constants";
 
 interface ServiceCallCardProps {
     call: ServiceCall;
@@ -19,12 +20,19 @@ export default function ServiceCallCard({
         <article className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-5 shadow-xs transition-all duration-300 hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700">
             <div className="space-y-4">
                 <div className="flex items-start justify-between gap-3">
-                    <div className="flex flex-col gap-1 min-w-0">
-                        {call.reference_number && (
-                            <span className="text-xs font-bold font-mono tracking-wider text-cyan-600 dark:text-cyan-400 uppercase">
-                                {call.reference_number}
-                            </span>
-                        )}
+                    <div className="flex flex-col gap-1.5 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                            {call.reference_number && (
+                                <span className="text-xs font-bold font-mono tracking-wider text-cyan-600 dark:text-cyan-400 uppercase">
+                                    {call.reference_number}
+                                </span>
+                            )}
+                            {call.priority && (
+                                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-bold border ${priorityColors[call.priority] || ""}`}>
+                                    {priorityLabels[call.priority] || call.priority}
+                                </span>
+                            )}
+                        </div>
                         <a
                             href={`/dashboard/service-calls/${call.id}`}
                             className="text-lg font-bold tracking-tight text-slate-900 dark:text-white hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors leading-snug break-words"

@@ -552,6 +552,25 @@ export function useServiceCallDetails(id: number) {
         }
     }, [id]);
 
+    const handleUpdatePriority = useCallback(async (priority: string) => {
+        setError(null);
+        setSuccessMessage(null);
+        try {
+            await api.updateServiceCallPriority(id, priority);
+            setServiceCall((prev) => (prev ? { ...prev, priority: priority as any } : null));
+            setSuccessMessage("Priorité mise à jour.");
+            setTimeout(() => setSuccessMessage(null), 3000);
+            return true;
+        } catch (err: any) {
+            const msg = err.message || "Erreur lors de la mise à jour de la priorité.";
+            setError(msg);
+            if (process.env.NODE_ENV === "development") {
+                console.error("updatePriority error:", err);
+            }
+            return false;
+        }
+    }, [id]);
+
     const handleAddPart = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
         if (addingPart) return;
@@ -772,6 +791,7 @@ export function useServiceCallDetails(id: number) {
         technicians,
         handleUpdateTechnician,
         handleArchiveCall,
+        handleUpdatePriority,
     };
 }
 
