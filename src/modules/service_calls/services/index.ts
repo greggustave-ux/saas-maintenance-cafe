@@ -108,13 +108,16 @@ export async function createServiceCall(call: {
 }
 
 // 4. Update service call status
-export async function updateServiceCallStatus(id: number, status: string): Promise<void> {
-    const { error } = await supabase
+export async function updateServiceCallStatus(id: number, status: string): Promise<{ completed_at: string | null; closed_at: string | null }> {
+    const { data, error } = await supabase
         .from("service_calls")
         .update({ status })
-        .eq("id", id);
+        .eq("id", id)
+        .select("completed_at, closed_at")
+        .single();
 
     if (error) throw error;
+    return data || { completed_at: null, closed_at: null };
 }
 
 // 5. Delete service call
@@ -423,7 +426,7 @@ export async function getDispatchBoard(): Promise<ServiceCall[]> {
 
     const { data, error } = await supabase
         .from("service_calls")
-        .select("id, client_name, address, machine_serial, issue_description, status, technician_name, created_at, archived, reference_number, priority")
+        .select("id, client_name, address, machine_serial, issue_description, status, technician_name, created_at, completed_at, closed_at, archived, reference_number, priority")
         .eq("archived", false);
 
     if (error) throw error;

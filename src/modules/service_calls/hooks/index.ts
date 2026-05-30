@@ -134,9 +134,9 @@ export function useServiceCalls() {
         setError(null);
         setSuccessMessage(null);
         try {
-            await api.updateServiceCallStatus(id, status);
+            const { completed_at, closed_at } = await api.updateServiceCallStatus(id, status);
             setServiceCalls((prev) =>
-                prev.map((call) => (call.id === id ? { ...call, status } : call))
+                prev.map((call) => (call.id === id ? { ...call, status, completed_at, closed_at } : call))
             );
             setSuccessMessage("Statut mis à jour.");
             setTimeout(() => setSuccessMessage(null), 3000);
@@ -273,9 +273,9 @@ export function useArchivedServiceCalls() {
         setError(null);
         setSuccessMessage(null);
         try {
-            await api.updateServiceCallStatus(id, status);
+            const { completed_at, closed_at } = await api.updateServiceCallStatus(id, status);
             setServiceCalls((prev) =>
-                prev.map((call) => (call.id === id ? { ...call, status } : call))
+                prev.map((call) => (call.id === id ? { ...call, status, completed_at, closed_at } : call))
             );
             setSuccessMessage("Statut mis à jour.");
             setTimeout(() => setSuccessMessage(null), 3000);
@@ -985,9 +985,9 @@ export function useDispatchBoard() {
 
     const handleUpdateStatus = useCallback(async (id: number, status: string) => {
         try {
-            await api.updateServiceCallStatus(id, status);
+            const { completed_at, closed_at } = await api.updateServiceCallStatus(id, status);
             setServiceCalls((prev) =>
-                prev.map((call) => (call.id === id ? { ...call, status } : call))
+                prev.map((call) => (call.id === id ? { ...call, status, completed_at, closed_at } : call))
             );
             setSuccessMessage("Statut mis à jour.");
             setTimeout(() => setSuccessMessage(null), 3000);
@@ -1037,12 +1037,14 @@ export function useDispatchBoard() {
         const urgent = serviceCalls.filter((c) => c.priority === "urgent" && c.status !== "completed" && c.status !== "closed" && c.status !== "cancelled").length;
         const waitingParts = serviceCalls.filter((c) => c.status === "waiting_parts").length;
         
-        const todayStr = new Date().toDateString();
+        const today = new Date();
+        const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+
         const completedToday = serviceCalls.filter((c) => {
-            if (c.status !== "completed" && c.status !== "closed") return false;
-            const dateStr = c.completed_at || c.closed_at || c.created_at;
-            if (!dateStr) return false;
-            return new Date(dateStr).toDateString() === todayStr;
+            if (c.status !== 'completed' || !c.completed_at) return false;
+            const completedAt = new Date(c.completed_at);
+            return completedAt >= startOfDay && completedAt < endOfDay;
         }).length;
 
         const uniqueTechs = new Set(
