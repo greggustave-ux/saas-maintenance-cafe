@@ -21,6 +21,8 @@ interface NewServiceCallFormProps {
         setIssueDescription: (val: string) => void;
         technicianName: string;
         setTechnicianName: (val: string) => void;
+        priority: string;
+        setPriority: (val: string) => void;
     };
     onSubmit: (e: React.FormEvent) => Promise<void>;
     onCancel: () => void;
@@ -42,7 +44,7 @@ export default function NewServiceCallForm({
                 Créer une nouvelle fiche d'intervention
             </h2>
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-3">
                 <div className="space-y-1">
                     <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">Nom du client</label>
                     <input
@@ -68,6 +70,21 @@ export default function NewServiceCallForm({
                                 {tech.full_name}
                             </option>
                         ))}
+                    </select>
+                </div>
+
+                <div className="space-y-1">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">Priorité</label>
+                    <select
+                        className={inputClass}
+                        value={form.priority}
+                        onChange={(e) => form.setPriority(e.target.value)}
+                        required
+                    >
+                        <option value="low">Faible</option>
+                        <option value="medium">Moyenne</option>
+                        <option value="high">Élevée</option>
+                        <option value="urgent">Urgente</option>
                     </select>
                 </div>
             </div>

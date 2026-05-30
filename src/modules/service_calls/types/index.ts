@@ -16,6 +16,7 @@ export type ServiceCall = {
     completed_at?: string | null;
     closed_at?: string | null;
     reference_number?: string;
+    priority?: 'low' | 'medium' | 'high' | 'urgent';
 };
 
 export type ServiceCallPart = {
@@ -47,6 +48,7 @@ export type Machine = {
         status: string;
         created_at: string;
         reference_number?: string;
+        priority?: 'low' | 'medium' | 'high' | 'urgent';
     } | null;
 };
 

@@ -29,6 +29,7 @@ export function useServiceCalls() {
     const [machineSerial, setMachineSerial] = useState("");
     const [issueDescription, setIssueDescription] = useState("");
     const [technicianName, setTechnicianName] = useState("");
+    const [priority, setPriority] = useState("medium");
 
     const isFetchingRef = useRef(false);
 
@@ -103,6 +104,7 @@ export function useServiceCalls() {
                 issue_description: issueDescription,
                 status: "new",
                 technician_name: technicianName,
+                priority,
             });
 
             // Reset form
@@ -111,6 +113,7 @@ export function useServiceCalls() {
             setMachineSerial("");
             setIssueDescription("");
             setTechnicianName("");
+            setPriority("medium");
             setIsFormOpen(false);
 
             setSuccessMessage("Intervention créée avec succès.");
@@ -125,7 +128,7 @@ export function useServiceCalls() {
                 console.error("createServiceCall error:", err);
             }
         }
-    }, [clientName, address, machineSerial, issueDescription, technicianName, fetchServiceCalls]);
+    }, [clientName, address, machineSerial, issueDescription, technicianName, priority, fetchServiceCalls]);
 
     const handleUpdateStatus = useCallback(async (id: number, status: string) => {
         setError(null);
@@ -198,6 +201,8 @@ export function useServiceCalls() {
             setIssueDescription,
             technicianName,
             setTechnicianName,
+            priority,
+            setPriority,
         },
         handleCreateServiceCall,
         handleUpdateStatus,
@@ -890,6 +895,131 @@ export function useOperationsDashboard() {
         riskMachines,
         recentActivity,
         refresh: () => fetchOperationsData(true),
+    };
+}
+
+export function useDispatchBoard() {
+    const [serviceCalls, setServiceCalls] = useState<ServiceCall[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [userRole, setUserRole] = useState<string | null>(null);
+    const [technicians, setTechnicians] = useState<{ id: string; full_name: string }[]>([]);
+
+    const isFetchingRef = useRef(false);
+
+    const fetchDispatchData = useCallback(async (force = false) => {
+        if (isFetchingRef.current && !force) return;
+        isFetchingRef.current = true;
+        setLoading(true);
+        setError(null);
+        try {
+            const data = await api.getDispatchBoard();
+            setServiceCalls(data);
+        } catch (err: any) {
+            setError(err.message || "Erreur lors du chargement du tableau de dispatch.");
+        } finally {
+            setLoading(false);
+            isFetchingRef.current = false;
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchDispatchData();
+    }, [fetchDispatchData]);
+
+    useEffect(() => {
+        async function loadUserRoleAndTechs() {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    const { data: profile } = await supabase
+                        .from("profiles")
+                        .select("role")
+                        .eq("id", user.id)
+                        .single();
+                    if (profile) {
+                        setUserRole(profile.role);
+                        if (profile.role === "admin" || profile.role === "dispatcher") {
+                            const techs = await api.getApprovedTechnicians();
+                            setTechnicians(techs);
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+        loadUserRoleAndTechs();
+    }, []);
+
+    const handleUpdateStatus = useCallback(async (id: number, status: string) => {
+        try {
+            await api.updateServiceCallStatus(id, status);
+            setServiceCalls((prev) =>
+                prev.map((call) => (call.id === id ? { ...call, status } : call))
+            );
+            setSuccessMessage("Statut mis à jour.");
+            setTimeout(() => setSuccessMessage(null), 3000);
+        } catch (err: any) {
+            setError(err.message || "Erreur de mise à jour.");
+        }
+    }, []);
+
+    const handleUpdatePriority = useCallback(async (id: number, priority: string) => {
+        try {
+            await api.updateServiceCallPriority(id, priority);
+            setServiceCalls((prev) =>
+                prev.map((call) => (call.id === id ? { ...call, priority: priority as any } : call))
+            );
+            setSuccessMessage("Priorité mise à jour.");
+            setTimeout(() => setSuccessMessage(null), 3000);
+        } catch (err: any) {
+            setError(err.message || "Erreur de mise à jour.");
+        }
+    }, []);
+
+    const kpis = useMemo(() => {
+        const active = serviceCalls.filter((c) => ["new", "assigned", "on_the_way", "on_site", "waiting_parts"].includes(c.status)).length;
+        const urgent = serviceCalls.filter((c) => c.priority === "urgent" && c.status !== "completed" && c.status !== "closed" && c.status !== "cancelled").length;
+        const waitingParts = serviceCalls.filter((c) => c.status === "waiting_parts").length;
+        
+        const todayStr = new Date().toDateString();
+        const completedToday = serviceCalls.filter((c) => {
+            if (c.status !== "completed" && c.status !== "closed") return false;
+            const dateStr = c.completed_at || c.closed_at || c.created_at;
+            if (!dateStr) return false;
+            return new Date(dateStr).toDateString() === todayStr;
+        }).length;
+
+        const uniqueTechs = new Set(
+            serviceCalls
+                .map((c) => c.technician_name?.trim())
+                .filter((name) => !!name && name !== "Non assigné")
+        );
+        const activeTechs = uniqueTechs.size;
+
+        return {
+            active,
+            urgent,
+            waitingParts,
+            completedToday,
+            activeTechs,
+        };
+    }, [serviceCalls]);
+
+    return {
+        serviceCalls,
+        loading,
+        error,
+        successMessage,
+        setSuccessMessage,
+        kpis,
+        userRole,
+        technicians,
+        updateStatus: handleUpdateStatus,
+        updatePriority: handleUpdatePriority,
+        refresh: () => fetchDispatchData(true),
     };
 }
 

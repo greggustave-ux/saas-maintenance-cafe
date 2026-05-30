@@ -16,7 +16,7 @@ export async function getServiceCalls(): Promise<ServiceCall[]> {
 
     let query = supabase
         .from("service_calls")
-        .select("id, client_name, address, machine_serial, issue_description, status, technician_name, archived, archived_at, archived_by, completed_at, closed_at, reference_number")
+        .select("id, client_name, address, machine_serial, issue_description, status, technician_name, archived, archived_at, archived_by, completed_at, closed_at, reference_number, priority")
         .eq("archived", false)
         .order("id", { ascending: false });
 
@@ -44,7 +44,7 @@ export async function getDetailedServiceCalls(): Promise<ServiceCall[]> {
 
     let query = supabase
         .from("service_calls")
-        .select("id, client_name, address, machine_serial, issue_description, status, technician_name, technician_notes, photo_url, signature_url, created_at, archived, archived_at, archived_by, completed_at, closed_at, reference_number")
+        .select("id, client_name, address, machine_serial, issue_description, status, technician_name, technician_notes, photo_url, signature_url, created_at, archived, archived_at, archived_by, completed_at, closed_at, reference_number, priority")
         .eq("archived", false)
         .order("id", { ascending: false });
 
@@ -73,7 +73,7 @@ export async function getServiceCallById(id: number): Promise<ServiceCall> {
 
     const { data, error } = await supabase
         .from("service_calls")
-        .select("id, client_name, address, machine_serial, issue_description, status, technician_name, technician_notes, photo_url, signature_url, archived, archived_at, archived_by, completed_at, closed_at, reference_number")
+        .select("id, client_name, address, machine_serial, issue_description, status, technician_name, technician_notes, photo_url, signature_url, archived, archived_at, archived_by, completed_at, closed_at, reference_number, priority")
         .eq("id", id)
         .single();
 
@@ -96,10 +96,12 @@ export async function createServiceCall(call: {
     issue_description: string;
     status: string;
     technician_name: string;
+    priority?: string;
 }): Promise<void> {
     const normalizedCall = {
         ...call,
         machine_serial: call.machine_serial ? call.machine_serial.trim().toLowerCase() : "",
+        priority: call.priority || "medium",
     };
     const { error } = await supabase.from("service_calls").insert(normalizedCall);
     if (error) throw error;
@@ -285,7 +287,7 @@ export async function getServiceCallsByMachineSerial(
 
     let query = supabase
         .from("service_calls")
-        .select("id, client_name, address, machine_serial, issue_description, status, technician_name, technician_notes, created_at, archived, reference_number")
+        .select("id, client_name, address, machine_serial, issue_description, status, technician_name, technician_notes, created_at, archived, reference_number, priority")
         .ilike("machine_serial", normalizedSerial)
         .order("id", { ascending: false });
 
@@ -332,7 +334,7 @@ export async function getArchivedServiceCalls(): Promise<ServiceCall[]> {
 
     const { data, error } = await supabase
         .from("service_calls")
-        .select("id, client_name, address, machine_serial, issue_description, status, technician_name, archived, archived_at, archived_by, completed_at, closed_at, reference_number")
+        .select("id, client_name, address, machine_serial, issue_description, status, technician_name, archived, archived_at, archived_by, completed_at, closed_at, reference_number, priority")
         .eq("archived", true)
         .order("id", { ascending: false });
 
@@ -373,7 +375,7 @@ export async function getMachinesByClientId(clientId: string): Promise<Machine[]
     for (const machine of machines) {
         const { data: callData } = await supabase
             .from("service_calls")
-            .select("id, status, created_at, reference_number")
+            .select("id, status, created_at, reference_number, priority")
             .ilike("machine_serial", machine.serial_number.trim().toLowerCase())
             .order("created_at", { ascending: false })
             .limit(1)
@@ -383,5 +385,57 @@ export async function getMachinesByClientId(clientId: string): Promise<Machine[]
     }
 
     return machines;
+}
+
+// 17. Fetch dispatcher board calls (archived = false) sorted by priority and date
+export async function getDispatchBoard(): Promise<ServiceCall[]> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
+
+    const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+
+    if (!profile || (profile.role !== "admin" && profile.role !== "dispatcher")) {
+        return [];
+    }
+
+    const { data, error } = await supabase
+        .from("service_calls")
+        .select("id, client_name, address, machine_serial, issue_description, status, technician_name, created_at, archived, reference_number, priority")
+        .eq("archived", false);
+
+    if (error) throw error;
+    const calls = (data as ServiceCall[] || []);
+
+    const priorityWeight: Record<string, number> = {
+        urgent: 4,
+        high: 3,
+        medium: 2,
+        low: 1,
+    };
+
+    return calls.sort((a, b) => {
+        const weightA = priorityWeight[a.priority || "medium"] || 2;
+        const weightB = priorityWeight[b.priority || "medium"] || 2;
+        if (weightA !== weightB) {
+            return weightB - weightA;
+        }
+        const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+        const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+        return dateB - dateA;
+    });
+}
+
+// 18. Update service call priority
+export async function updateServiceCallPriority(id: number, priority: string): Promise<void> {
+    const { error } = await supabase
+        .from("service_calls")
+        .update({ priority })
+        .eq("id", id);
+
+    if (error) throw error;
 }
 
