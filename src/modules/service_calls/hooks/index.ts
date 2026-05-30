@@ -1087,7 +1087,8 @@ export function useDispatchBoard() {
         const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
         const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
 
-        const completedToday = activeCalls.filter((c) => {
+        const dispatchCalls = serviceCalls;
+        const completedToday = dispatchCalls.filter((c) => {
             if (c.status !== 'completed' || !c.completed_at) return false;
             const completedAt = new Date(c.completed_at);
             return completedAt >= startOfDay && completedAt < endOfDay;
@@ -1108,6 +1109,10 @@ export function useDispatchBoard() {
             activeTechs,
         };
     }, [serviceCalls]);
+
+    const dispatchCalls = serviceCalls;
+    console.log("dispatchCalls", dispatchCalls);
+    console.log("completedCalls", dispatchCalls.filter(c => c.status === "completed"));
 
     return {
         serviceCalls,

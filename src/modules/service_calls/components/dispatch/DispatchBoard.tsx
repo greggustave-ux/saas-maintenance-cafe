@@ -42,25 +42,8 @@ export default function DispatchBoard({
         );
     }, [serviceCalls, search]);
 
-    // Group filtered calls by status
-    const callsByStatus = useMemo(() => {
-        const groups: Record<string, ServiceCall[]> = {};
-        KANBAN_COLUMNS.forEach((status) => {
-            groups[status] = [];
-        });
-
-        filteredCalls.forEach((call) => {
-            const status = call.status;
-            if (groups[status]) {
-                groups[status].push(call);
-            }
-        });
-
-        return groups;
-    }, [filteredCalls]);
-
-    console.log("dispatchCalls (serviceCalls):", serviceCalls);
-    console.log("completedCalls:", callsByStatus["completed"]);
+    console.log("dispatchCalls", serviceCalls);
+    console.log("completedCalls", serviceCalls.filter((c) => c.status === "completed"));
 
     return (
         <div className="space-y-5 w-full">
@@ -92,19 +75,22 @@ export default function DispatchBoard({
 
             {/* Kanban Columns Wrapper - Horizontal scroll on mobile, Grid on desktop */}
             <div className="w-full overflow-x-auto flex flex-nowrap sm:flex-nowrap md:grid md:grid-cols-3 xl:grid-cols-6 gap-4 pb-4 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800 scrollbar-track-transparent">
-                {KANBAN_COLUMNS.map((status) => (
-                    <DispatchColumn
-                        key={status}
-                        status={status}
-                        calls={callsByStatus[status] || []}
-                        updateStatus={updateStatus}
-                        updatePriority={updatePriority}
-                        updateTechnician={updateTechnician}
-                        technicians={technicians}
-                        archiveCall={archiveCall}
-                        userRole={userRole}
-                    />
-                ))}
+                {KANBAN_COLUMNS.map((status) => {
+                    const callsForColumn = filteredCalls.filter((call) => call.status === status);
+                    return (
+                        <DispatchColumn
+                            key={status}
+                            status={status}
+                            calls={callsForColumn}
+                            updateStatus={updateStatus}
+                            updatePriority={updatePriority}
+                            updateTechnician={updateTechnician}
+                            technicians={technicians}
+                            archiveCall={archiveCall}
+                            userRole={userRole}
+                        />
+                    );
+                })}
             </div>
         </div>
     );
