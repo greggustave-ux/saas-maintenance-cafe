@@ -73,3 +73,8 @@ We propose **StatusBadge** and **PriorityBadge** as the first migration candidat
 - **Scope:** Fully refactored `ServiceCallCard` and `ServiceCallCardSkeleton` to consume centralized tokens (spacing, colors, typography, borders, shadows, and touch targets >= 44px).
 - **Workflows:** All dispatch and technician navigation workflows, button interactions, filtering, and database operations were fully preserved without alteration. No Supabase schemas or queries were modified.
 
+### ✅ DispatchKanbanCard (Migrated)
+- **Status:** Migrated as the second operational card.
+- **Scope:** Fully refactored `DispatchCard` to use HSL colors, design-system spacing variables, standardized typography, card margins/paddings, and touch-target minimum dimensions (>= 44px) on all interactive select boxes and buttons.
+- **Workflows:** Renders `<PriorityBadge>` and `<StatusBadge>` statically in the header, while keeping all status, priority, and technician selectors interactive. All dispatch board column sorting, filtering, and mutations remain intact. No Supabase schema, query, or logic was altered.
+

@@ -49,15 +49,18 @@ Tags structure: `[Category] [LifecycleState] [SyncRisk]`
 - **Tags:** `[Desktop/Widget]` `[production-approved]` `[SyncRisk: Medium]`
 - **Purpose:** Inner ticket preview card nested in Kanban columns.
 - **Props:**
-  - `cardId: string`
-  - `title: string`
-  - `priority: 'standard' | 'critical'`
-  - `technicianName?: string`
+  - `call: ServiceCall`
+  - `updateStatus: (id: number, status: string) => Promise<void>`
+  - `updatePriority: (id: number, priority: string) => Promise<void>`
+  - `updateTechnician: (id: number, technicianName: string) => Promise<void>`
+  - `technicians: { id: string; full_name: string }[]`
+  - `archiveCall: (id: number, archived: boolean) => Promise<void>`
+  - `userRole: string | null`
 - **States:** Default, Hover, Dragging, Selected.
-- **Mobile Behavior:** Drag disabled on screen widths under 768px (fallback to tap menu).
-- **Accessibility:** Focus-visible ring, key press listener for move selections.
+- **Mobile Behavior:** Drag disabled on screen widths under 768px (fallback to interactive selects). Responsive vertical structure.
+- **Accessibility:** Semantic structure `<article>`, `:focus-visible` ring, appropriate `aria-label` tags for selectors.
 - **Loading & Offline:** Shimmer preview; read-only tag.
-- **Token References:** `--radius-md`, `--shadow-sm`, `--space-sm`.
+- **Token References:** `--radius-lg`, `--shadow-sm`, `--space-md`, `--space-xs`, `--font-size-sm`, `--font-size-md`, `--touch-target-min`.
 
 ### 4. MachineHistoryTimeline
 - **Tags:** `[Unified/Timeline]` `[validated]` `[SyncRisk: Low]`
