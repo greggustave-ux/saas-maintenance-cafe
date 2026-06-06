@@ -78,3 +78,8 @@ We propose **StatusBadge** and **PriorityBadge** as the first migration candidat
 - **Scope:** Fully refactored `DispatchCard` to use HSL colors, design-system spacing variables, standardized typography, card margins/paddings, and touch-target minimum dimensions (>= 44px) on all interactive select boxes and buttons.
 - **Workflows:** Renders `<PriorityBadge>` and `<StatusBadge>` statically in the header, while keeping all status, priority, and technician selectors interactive. All dispatch board column sorting, filtering, and mutations remain intact. No Supabase schema, query, or logic was altered.
 
+### ✅ ServiceCallCreateEditForm (Migrated)
+- **Status:** Migrated as the first operational form.
+- **Scope:** Fully refactored `NewServiceCallForm` to use standard design-system primitives (`DSInput`, `DSTextarea`, `DSSelect`, `DSLabel`, `DSFormSection`).
+- **Workflows:** Preserved all client name, priority, technician, address, machine serial, and description inputs. Enforced `min-h-[var(--touch-target-min)]` (44px) on all field inputs. Retained existing HTML validation tags, button interactions, state tracking, and onSubmit database hooks. No Supabase operations or schemas were modified.
+
