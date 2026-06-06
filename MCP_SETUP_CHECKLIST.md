@@ -124,4 +124,5 @@ Refer to these architectural documents for specific implementation details:
 - **Component Registry:** [docs/COMPONENT_REGISTRY.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/COMPONENT_REGISTRY.md)
 - **Component Versioning Rules:** [docs/COMPONENT_VERSIONING_RULES.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/COMPONENT_VERSIONING_RULES.md)
 - **Operational UI Patterns:** [docs/OPERATIONAL_UI_PATTERNS.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/OPERATIONAL_UI_PATTERNS.md)
+- **Technical Design System Implementation:** [docs/TECHNICAL_DESIGN_SYSTEM_IMPLEMENTATION.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/TECHNICAL_DESIGN_SYSTEM_IMPLEMENTATION.md)
 
