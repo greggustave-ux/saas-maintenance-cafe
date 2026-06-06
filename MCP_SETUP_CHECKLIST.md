@@ -118,4 +118,7 @@ Refer to these architectural documents for specific implementation details:
 - **Figma Integration Strategy:** [docs/MCP_FIGMA_SETUP.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/MCP_FIGMA_SETUP.md)
 - **Security Rules & Boundaries:** [docs/MCP_SECURITY_RULES.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/MCP_SECURITY_RULES.md)
 - **Staging Environment Strategy:** [docs/STAGING_ENVIRONMENT_STRATEGY.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/STAGING_ENVIRONMENT_STRATEGY.md)
+- **Design Token Strategy:** [docs/DESIGN_TOKEN_STRATEGY.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/DESIGN_TOKEN_STRATEGY.md)
+- **Mobile Component Guidelines:** [docs/MOBILE_COMPONENT_GUIDELINES.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/MOBILE_COMPONENT_GUIDELINES.md)
+- **UI Synchronization Rules:** [docs/UI_SYNCHRONIZATION_RULES.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/UI_SYNCHRONIZATION_RULES.md)
 
