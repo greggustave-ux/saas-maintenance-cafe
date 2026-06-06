@@ -62,3 +62,9 @@ We propose **StatusBadge** and **PriorityBadge** as the first migration candidat
 - **Logic:** No business logic or state machines were modified.
 - **Database:** No Supabase schema, query, or RLS changes were introduced.
 
+### ✅ PriorityBadge (Migrated)
+- **Status:** Migrated as the second safe candidate.
+- **Scope:** Replaced static priority badges in ServiceCallCard listings and service call details views.
+- **Logic:** No business logic, filters, or sorting rules were altered.
+- **Database:** No Supabase schema or query modifications were introduced. Existing production status naming has been fully preserved.
+

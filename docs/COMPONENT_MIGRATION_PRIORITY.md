@@ -50,4 +50,5 @@ To minimize technical risk, components are grouped into three priority rollout t
 ## 📝 Completed Migrations Log
 
 - **StatusBadge (v1.0.0):** Migrated as first safe candidate. Hardcoded status elements in `MachineHistorySection`, `OperationsDashboard`, and `ServiceCallDetails` have been replaced by the standardized `<StatusBadge>` component. No business logic or database interactions were altered.
+- **PriorityBadge (v1.0.0):** Migrated as second safe candidate. Replaced static priority indicator spans in `ServiceCallCard` lists and `ServiceCallDetails` header cards with the standardized `<PriorityBadge>` component. No business logic or query structures were modified, and existing production status naming is fully preserved.
 

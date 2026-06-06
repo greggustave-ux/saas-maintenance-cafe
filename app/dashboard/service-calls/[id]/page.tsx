@@ -9,6 +9,7 @@ import MachineHistorySection from "@/src/modules/service_calls/components/Machin
 import { STATUS_LABELS } from "../page";
 import { priorityColors, priorityLabels } from "@/src/modules/service_calls/components/dispatch/constants";
 import { StatusBadge } from "@/src/design-system/components/StatusBadge";
+import { PriorityBadge } from "@/src/design-system/components/PriorityBadge";
 
 const inputClass =
     "w-full min-h-12 rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 px-4 py-3 text-base text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15";
@@ -314,9 +315,7 @@ export default function ServiceCallDetailsPage() {
                                         </select>
                                     ) : (
                                         <dd className="mt-1.5">
-                                            <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-bold border ${priorityColors[serviceCall.priority || "medium"]}`}>
-                                                {priorityLabels[serviceCall.priority || "medium"]}
-                                            </span>
+                                            <PriorityBadge priority={serviceCall.priority || "medium"} className="text-xs" />
                                         </dd>
                                     )}
                                 </div>

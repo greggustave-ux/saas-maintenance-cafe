@@ -2,6 +2,7 @@
 
 import { ServiceCall } from "../types";
 import { priorityColors, priorityLabels } from "./dispatch/constants";
+import { PriorityBadge } from "@/src/design-system/components/PriorityBadge";
 
 interface ServiceCallCardProps {
     call: ServiceCall;
@@ -32,9 +33,7 @@ export default function ServiceCallCard({
                                 </span>
                             )}
                             {call.priority && (
-                                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-bold border ${priorityColors[call.priority] || ""}`}>
-                                    {priorityLabels[call.priority] || call.priority}
-                                </span>
+                                <PriorityBadge priority={call.priority} className="text-[9px]" />
                             )}
                         </div>
                         <a
