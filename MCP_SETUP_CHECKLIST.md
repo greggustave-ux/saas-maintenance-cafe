@@ -121,4 +121,7 @@ Refer to these architectural documents for specific implementation details:
 - **Design Token Strategy:** [docs/DESIGN_TOKEN_STRATEGY.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/DESIGN_TOKEN_STRATEGY.md)
 - **Mobile Component Guidelines:** [docs/MOBILE_COMPONENT_GUIDELINES.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/MOBILE_COMPONENT_GUIDELINES.md)
 - **UI Synchronization Rules:** [docs/UI_SYNCHRONIZATION_RULES.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/UI_SYNCHRONIZATION_RULES.md)
+- **Component Registry:** [docs/COMPONENT_REGISTRY.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/COMPONENT_REGISTRY.md)
+- **Component Versioning Rules:** [docs/COMPONENT_VERSIONING_RULES.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/COMPONENT_VERSIONING_RULES.md)
+- **Operational UI Patterns:** [docs/OPERATIONAL_UI_PATTERNS.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/OPERATIONAL_UI_PATTERNS.md)
 
