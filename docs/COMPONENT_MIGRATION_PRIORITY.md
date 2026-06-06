@@ -44,3 +44,10 @@ To minimize technical risk, components are grouped into three priority rollout t
 - **Components:** Chart wrappers, dispatcher Kanban board grid layout, report previews, and billing administration screens.
 - **Rationale:** Data-rich complex components containing multiple layout grids, aggregations, and high screen widths.
 - **Timeline:** Long-term roadmap.
+
+---
+
+## 📝 Completed Migrations Log
+
+- **StatusBadge (v1.0.0):** Migrated as first safe candidate. Hardcoded status elements in `MachineHistorySection`, `OperationsDashboard`, and `ServiceCallDetails` have been replaced by the standardized `<StatusBadge>` component. No business logic or database interactions were altered.
+

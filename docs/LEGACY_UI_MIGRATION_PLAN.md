@@ -51,3 +51,14 @@ We propose **StatusBadge** and **PriorityBadge** as the first migration candidat
   2. Replace inline markers with the new `<StatusBadge status={...} />` component.
   3. Validate contrast ratios and focus outlines locally.
   4. Submit an atomic pull request containing only these badge substitutions.
+
+---
+
+## 📝 Migration Progress & Notes
+
+### ✅ StatusBadge (Migrated)
+- **Status:** Migrated as the first safe candidate.
+- **Scope:** Replaced static status markers in service call details, operations dashboard, and machine history timeline.
+- **Logic:** No business logic or state machines were modified.
+- **Database:** No Supabase schema, query, or RLS changes were introduced.
+

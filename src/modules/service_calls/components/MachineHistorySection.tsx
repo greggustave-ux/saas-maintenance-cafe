@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ServiceCall } from "../types";
 import { analyzeMachineHistory } from "../utils/machine-intelligence";
+import { StatusBadge } from "@/src/design-system/components/StatusBadge";
 
 interface MachineHistorySectionProps {
     machineHistory: ServiceCall[];
@@ -305,9 +306,7 @@ export default function MachineHistorySection({
                                                                     {dateStr}
                                                                 </span>
                                                             )}
-                                                            <span className={`rounded-full px-2.5 py-0.5 text-[9px] font-bold tracking-wide shrink-0 ${getStatusBadgeClass(item.status)}`}>
-                                                                {STATUS_LABELS[item.status] || item.status}
-                                                            </span>
+                                                            <StatusBadge status={item.status} className="shrink-0" />
                                                             {item.archived && (
                                                                 <span className="rounded-full bg-slate-150 dark:bg-slate-805 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider shrink-0">
                                                                     Archivé

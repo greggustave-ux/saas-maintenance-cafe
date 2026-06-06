@@ -2,6 +2,7 @@
 
 import { useOperationsDashboard } from "@/src/modules/service_calls/hooks";
 import { useState } from "react";
+import { StatusBadge } from "@/src/design-system/components/StatusBadge";
 
 const STATUS_LABELS: Record<string, string> = {
     new: "Nouveau",
@@ -184,9 +185,7 @@ export default function OperationsDashboardPage() {
                                                     <span className="text-sm font-semibold text-slate-900 dark:text-white shrink-0">
                                                         #{item.id} — {item.client_name}
                                                     </span>
-                                                    <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${getStatusColor(item.status)}`}>
-                                                        {STATUS_LABELS[item.status] || item.status}
-                                                    </span>
+                                                    <StatusBadge status={item.status} />
                                                     {isUrgent && (
                                                         <span className="inline-flex items-center rounded-md px-1.5 py-0.5 text-[9px] font-semibold bg-red-150 dark:bg-red-950/40 text-red-650 dark:text-red-400 border border-red-500/10">
                                                             Urgent

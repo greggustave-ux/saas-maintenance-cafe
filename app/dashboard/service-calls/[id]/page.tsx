@@ -8,6 +8,7 @@ import PhotosSection from "@/src/modules/service_calls/components/PhotosSection"
 import MachineHistorySection from "@/src/modules/service_calls/components/MachineHistorySection";
 import { STATUS_LABELS } from "../page";
 import { priorityColors, priorityLabels } from "@/src/modules/service_calls/components/dispatch/constants";
+import { StatusBadge } from "@/src/design-system/components/StatusBadge";
 
 const inputClass =
     "w-full min-h-12 rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 px-4 py-3 text-base text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15";
@@ -261,9 +262,7 @@ export default function ServiceCallDetailsPage() {
                     <section className={sectionCardClass}>
                         <div className="flex items-center justify-between">
                             <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-400">Client</h2>
-                            <span className="inline-flex rounded-full bg-cyan-100 dark:bg-cyan-950/40 px-2.5 py-0.5 text-xs font-semibold text-cyan-800 dark:text-cyan-400 border border-cyan-200/30">
-                                {STATUS_LABELS[serviceCall.status] || serviceCall.status}
-                            </span>
+                            <StatusBadge status={serviceCall.status} />
                         </div>
 
                         <div className="space-y-4 pt-1">
