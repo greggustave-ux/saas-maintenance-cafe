@@ -98,6 +98,9 @@ Always test each MCP connection separately before using it in project workflows.
   - Verify that Figma tools (e.g., get file, get nodes) are loaded.
   - Complete the browser OAuth login.
   - Verify that the connection is strictly **Read-Only** (e.g. no comments, no node modifications).
+- [ ] **Local Sandbox Mode**
+  - Confirm that no production or staging secrets/credentials exist in `mcp_config.json`.
+  - Confirm that write capabilities are blocked and only passive read/audit queries run.
 
 ---
 
@@ -132,5 +135,9 @@ Refer to these architectural documents for specific implementation details:
 - **Figma Discovery Layer:** [docs/MCP_FIGMA_DISCOVERY_LAYER.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/MCP_FIGMA_DISCOVERY_LAYER.md)
 - **Figma Node Mapping Strategy:** [docs/FIGMA_NODE_MAPPING_STRATEGY.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/FIGMA_NODE_MAPPING_STRATEGY.md)
 - **Figma Permission Boundaries:** [docs/MCP_FIGMA_PERMISSION_BOUNDARIES.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/MCP_FIGMA_PERMISSION_BOUNDARIES.md)
+- **Local Sandbox Setup:** [docs/MCP_LOCAL_SANDBOX_SETUP.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/MCP_LOCAL_SANDBOX_SETUP.md)
+- **Local Testing Rules:** [docs/MCP_LOCAL_TESTING_RULES.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/MCP_LOCAL_TESTING_RULES.md)
+- **Audit Output Spec:** [docs/MCP_AUDIT_OUTPUT_SPEC.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/MCP_AUDIT_OUTPUT_SPEC.md)
+
 
 
