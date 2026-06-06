@@ -101,6 +101,12 @@ Always test each MCP connection separately before using it in project workflows.
 - [ ] **Local Sandbox Mode**
   - Confirm that no production or staging secrets/credentials exist in `mcp_config.json`.
   - Confirm that write capabilities are blocked and only passive read/audit queries run.
+- [ ] **First Passive Connection Test**
+  - Verify that the local test Figma file key is set to a restricted test node.
+  - Complete the connection ping to Figma API.
+  - Confirm that audit JSON report generates locally without warning flags.
+  - Confirm that any mock write command generates an immediate validation error.
+  - Verify network logs to confirm zero external connections are made.
 
 ---
 
@@ -138,6 +144,6 @@ Refer to these architectural documents for specific implementation details:
 - **Local Sandbox Setup:** [docs/MCP_LOCAL_SANDBOX_SETUP.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/MCP_LOCAL_SANDBOX_SETUP.md)
 - **Local Testing Rules:** [docs/MCP_LOCAL_TESTING_RULES.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/MCP_LOCAL_TESTING_RULES.md)
 - **Audit Output Spec:** [docs/MCP_AUDIT_OUTPUT_SPEC.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/MCP_AUDIT_OUTPUT_SPEC.md)
-
-
-
+- **First Passive Inspection:** [docs/FIRST_PASSIVE_MCP_INSPECTION.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/FIRST_PASSIVE_MCP_INSPECTION.md)
+- **First Connection Checklist:** [docs/MCP_FIRST_CONNECTION_CHECKLIST.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/MCP_FIRST_CONNECTION_CHECKLIST.md)
+- **Inspection Approval Flow:** [docs/MCP_INSPECTION_APPROVAL_FLOW.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/MCP_INSPECTION_APPROVAL_FLOW.md)
