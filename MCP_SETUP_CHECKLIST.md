@@ -97,6 +97,7 @@ Always test each MCP connection separately before using it in project workflows.
 - [ ] **Figma Connection**
   - Verify that Figma tools (e.g., get file, get nodes) are loaded.
   - Complete the browser OAuth login.
+  - Verify that the connection is strictly **Read-Only** (e.g. no comments, no node modifications).
 
 ---
 
@@ -128,4 +129,8 @@ Refer to these architectural documents for specific implementation details:
 - **Legacy UI Migration Plan:** [docs/LEGACY_UI_MIGRATION_PLAN.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/LEGACY_UI_MIGRATION_PLAN.md)
 - **Component Migration Priority:** [docs/COMPONENT_MIGRATION_PRIORITY.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/COMPONENT_MIGRATION_PRIORITY.md)
 - **Operational Regression Prevention:** [docs/OPERATIONAL_REGRESSION_PREVENTION.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/OPERATIONAL_REGRESSION_PREVENTION.md)
+- **Figma Discovery Layer:** [docs/MCP_FIGMA_DISCOVERY_LAYER.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/MCP_FIGMA_DISCOVERY_LAYER.md)
+- **Figma Node Mapping Strategy:** [docs/FIGMA_NODE_MAPPING_STRATEGY.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/FIGMA_NODE_MAPPING_STRATEGY.md)
+- **Figma Permission Boundaries:** [docs/MCP_FIGMA_PERMISSION_BOUNDARIES.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/MCP_FIGMA_PERMISSION_BOUNDARIES.md)
+
 
