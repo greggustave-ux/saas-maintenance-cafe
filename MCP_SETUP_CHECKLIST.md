@@ -109,3 +109,13 @@ Always test each MCP connection separately before using it in project workflows.
 - **Never** store API keys, tokens, or credentials in any file within the workspace repository.
 - **Always** document MCP configuration changes.
 - **Always** test each MCP connection separately before relying on it for automated tasks.
+
+---
+
+## 📂 Reference Integration Guidelines
+
+Refer to these architectural documents for specific implementation details:
+- **Figma Integration Strategy:** [docs/MCP_FIGMA_SETUP.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/MCP_FIGMA_SETUP.md)
+- **Security Rules & Boundaries:** [docs/MCP_SECURITY_RULES.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/MCP_SECURITY_RULES.md)
+- **Staging Environment Strategy:** [docs/STAGING_ENVIRONMENT_STRATEGY.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/STAGING_ENVIRONMENT_STRATEGY.md)
+
