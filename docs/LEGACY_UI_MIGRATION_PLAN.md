@@ -68,3 +68,8 @@ We propose **StatusBadge** and **PriorityBadge** as the first migration candidat
 - **Logic:** No business logic, filters, or sorting rules were altered.
 - **Database:** No Supabase schema or query modifications were introduced. Existing production status naming has been fully preserved.
 
+### ✅ ServiceCallCard (Migrated)
+- **Status:** Migrated as the first operational card.
+- **Scope:** Fully refactored `ServiceCallCard` and `ServiceCallCardSkeleton` to consume centralized tokens (spacing, colors, typography, borders, shadows, and touch targets >= 44px).
+- **Workflows:** All dispatch and technician navigation workflows, button interactions, filtering, and database operations were fully preserved without alteration. No Supabase schemas or queries were modified.
+

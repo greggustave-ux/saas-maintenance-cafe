@@ -47,3 +47,9 @@ Reviewers and developers must execute these six validation checklists on the sta
 - [ ] Interactive elements are fully keyboard-navigable via the `Tab` key.
 - [ ] Screen readers read active elements using appropriate `role` and `aria-label` tags.
 - [ ] Focus outlines utilize `:focus-visible` to prevent visual clutter for mouse users.
+
+---
+
+## 📝 Validated Component Migrations
+
+- **ServiceCallCard (v1.0.0):** Migrated as the first operational card. Fully refactored using design system tokens for spacing, typography, colors, radii, and custom touch targets (>= 44px). Verified visual rendering, touch responsiveness, loading skeleton bounds, and dark mode contrast values. Existing Supabase operations and technician navigation flows remain completely untouched.
