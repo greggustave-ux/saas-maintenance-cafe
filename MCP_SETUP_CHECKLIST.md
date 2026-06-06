@@ -125,4 +125,7 @@ Refer to these architectural documents for specific implementation details:
 - **Component Versioning Rules:** [docs/COMPONENT_VERSIONING_RULES.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/COMPONENT_VERSIONING_RULES.md)
 - **Operational UI Patterns:** [docs/OPERATIONAL_UI_PATTERNS.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/OPERATIONAL_UI_PATTERNS.md)
 - **Technical Design System Implementation:** [docs/TECHNICAL_DESIGN_SYSTEM_IMPLEMENTATION.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/TECHNICAL_DESIGN_SYSTEM_IMPLEMENTATION.md)
+- **Legacy UI Migration Plan:** [docs/LEGACY_UI_MIGRATION_PLAN.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/LEGACY_UI_MIGRATION_PLAN.md)
+- **Component Migration Priority:** [docs/COMPONENT_MIGRATION_PRIORITY.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/COMPONENT_MIGRATION_PRIORITY.md)
+- **Operational Regression Prevention:** [docs/OPERATIONAL_REGRESSION_PREVENTION.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/OPERATIONAL_REGRESSION_PREVENTION.md)
 
