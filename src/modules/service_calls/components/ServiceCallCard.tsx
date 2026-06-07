@@ -2,9 +2,8 @@
 
 import React from 'react';
 import { ServiceCall } from "../types";
-import { priorityLabels } from "./dispatch/constants";
-import { PriorityBadge } from "@/src/design-system/components/PriorityBadge";
-import { StatusBadge } from "@/src/design-system/components/StatusBadge";
+
+import { DSBadge } from "@/src/design-system/components/DSBadge";
 import { COMPONENT_REGISTRY } from "@/src/design-system/registry/component-registry";
 
 interface ServiceCallCardProps {
@@ -44,7 +43,7 @@ export const ServiceCallCard: React.FC<ServiceCallCardProps> & {
                                     {call.reference_number}
                                 </span>
                             )}
-                            <PriorityBadge priority={safePriority} className="text-[9px]" />
+                            <DSBadge category="priority" variant={safePriority} className="text-[9px]" />
                         </div>
                         <a
                             href={`/dashboard/service-calls/${call.id}`}
