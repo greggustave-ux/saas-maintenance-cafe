@@ -24,13 +24,13 @@ An audit of the design system token cascade revealed the following findings:
 
 ### 1. Border Radius Token Gaps
 - **Observation:** `DSBadge` implements standard rounding using `rounded-[var(--radius-sm,4px)]`.
-- **Inheritance Weakness:** An inspection of [globals.css](file:///c:/Users/Dylan/Documents/welo_platform/app/globals.css) shows that `:root` defines `--radius-xl` and `--radius-2xl`, but **`--radius-sm` is undefined**.
-- **Stabilization Result:** The component falls back gracefully to the CSS fallback value `4px`. This prevents styling breakage, but highlights a token cascade gap where the primitive relies on hardcoded fallbacks due to missing global style variables.
+- **Inheritance Status:** **Stabilized.** An inspection of [globals.css](file:///c:/Users/Dylan/Documents/welo_platform/app/globals.css) confirms `--radius-sm: 4px;` is now declared inside `:root` and mapped in `@theme inline`.
+- **Stabilization Result:** The component inherits the border-radius variable directly from the global theme stylesheet, eliminating the token cascade gap.
 
 ### 2. Status Color Variable Gaps
-- **Observation:** `DSBadge` uses Tailwind color-opacity classes (e.g., `bg-sky-50/70 text-sky-700` and `bg-slate-500/10 text-slate-650`) to construct statuses and priorities.
-- **Inheritance Weakness:** There are no global status variables (such as `--status-new` or `--status-completed`) declared inside the CSS theme layers.
-- **Stabilization Result:** Because tailwind classes are loaded correctly by the PostCSS configuration, the badges render with perfect visual fidelity. However, synchronization with a centralized HSL variable sheet remains incomplete, making future dark/light theme color shifts dependent on manual styling reviews.
+- **Observation:** `DSBadge` status colors are mapped to CSS custom variables in [globals.css](file:///c:/Users/Dylan/Documents/welo_platform/app/globals.css).
+- **Inheritance Status:** **Stabilized.** We declared centralized HSL variables for all 8 status states under light mode `:root` and dark mode `@media (prefers-color-scheme: dark)`. These variables are mapped inside `@theme inline` as `--color-status-*` Tailwind v4 variables.
+- **Stabilization Result:** `DSBadge.tsx` successfully consumes these centralized status token variables. This ensures full dark/light theme color responsiveness without manual styling overrides.
 
 ---
 

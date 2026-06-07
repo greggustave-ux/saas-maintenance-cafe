@@ -13,8 +13,42 @@
   --accent: #6366f1;
   --accent-light: rgba(99, 102, 241, 0.1);
   
+  --radius-sm: 4px;
   --radius-xl: 1rem;
   --radius-2xl: 1.5rem;
+
+  /* DSBadge Status HSL variables - Light Mode */
+  --status-new-bg: hsla(204, 100%, 97%, 0.7);
+  --status-new-border: hsl(202, 93%, 88%);
+  --status-new-text: hsl(201, 96%, 32%);
+
+  --status-assigned-bg: hsla(226, 100%, 97%, 0.7);
+  --status-assigned-border: hsl(232, 92%, 84%);
+  --status-assigned-text: hsl(243, 75%, 59%);
+
+  --status-on-the-way-bg: hsla(48, 100%, 96%, 0.7);
+  --status-on-the-way-border: hsl(48, 96%, 89%);
+  --status-on-the-way-text: hsl(35, 92%, 33%);
+
+  --status-on-site-bg: hsla(214, 100%, 97%, 0.7);
+  --status-on-site-border: hsl(214, 95%, 84%);
+  --status-on-site-text: hsl(217, 91%, 60%);
+
+  --status-waiting-parts-bg: hsla(270, 100%, 98%, 0.7);
+  --status-waiting-parts-border: hsl(272, 88%, 85%);
+  --status-waiting-parts-text: hsl(271, 81%, 56%);
+
+  --status-completed-bg: hsla(143, 85%, 96%, 0.7);
+  --status-completed-border: hsl(141, 79%, 85%);
+  --status-completed-text: hsl(161, 94%, 30%);
+
+  --status-closed-bg: hsl(210, 40%, 96%);
+  --status-closed-border: hsl(213, 27%, 84%);
+  --status-closed-text: hsl(215, 25%, 27%);
+
+  --status-cancelled-bg: hsla(0, 100%, 97%, 0.7);
+  --status-cancelled-border: hsl(0, 93%, 89%);
+  --status-cancelled-text: hsl(0, 74%, 42%);
 }
 
 @theme inline {
@@ -27,6 +61,41 @@
   --color-accent: var(--accent);
   --color-accent-light: var(--accent-light);
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  
+  --radius-sm: var(--radius-sm);
+
+  /* DSBadge Color Tokens */
+  --color-status-new-bg: var(--status-new-bg);
+  --color-status-new-border: var(--status-new-border);
+  --color-status-new-text: var(--status-new-text);
+
+  --color-status-assigned-bg: var(--status-assigned-bg);
+  --color-status-assigned-border: var(--status-assigned-border);
+  --color-status-assigned-text: var(--status-assigned-text);
+
+  --color-status-on-the-way-bg: var(--status-on-the-way-bg);
+  --color-status-on-the-way-border: var(--status-on-the-way-border);
+  --color-status-on-the-way-text: var(--status-on-the-way-text);
+
+  --color-status-on-site-bg: var(--status-on-site-bg);
+  --color-status-on-site-border: var(--status-on-site-border);
+  --color-status-on-site-text: var(--status-on-site-text);
+
+  --color-status-waiting-parts-bg: var(--status-waiting-parts-bg);
+  --color-status-waiting-parts-border: var(--status-waiting-parts-border);
+  --color-status-waiting-parts-text: var(--status-waiting-parts-text);
+
+  --color-status-completed-bg: var(--status-completed-bg);
+  --color-status-completed-border: var(--status-completed-border);
+  --color-status-completed-text: var(--status-completed-text);
+
+  --color-status-closed-bg: var(--status-closed-bg);
+  --color-status-closed-border: var(--status-closed-border);
+  --color-status-closed-text: var(--status-closed-text);
+
+  --color-status-cancelled-bg: var(--status-cancelled-bg);
+  --color-status-cancelled-border: var(--status-cancelled-border);
+  --color-status-cancelled-text: var(--status-cancelled-text);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -39,6 +108,39 @@
     
     --primary: #22d3ee;
     --primary-hover: #67e8f9;
+
+    /* DSBadge Status HSL variables - Dark Mode */
+    --status-new-bg: hsla(205, 100%, 7%, 0.2);
+    --status-new-border: hsla(205, 83%, 21%, 0.3);
+    --status-new-text: hsl(203, 89%, 53%);
+
+    --status-assigned-bg: hsla(244, 47%, 12%, 0.2);
+    --status-assigned-border: hsla(244, 55%, 41%, 0.3);
+    --status-assigned-text: hsl(239, 84%, 67%);
+
+    --status-on-the-way-bg: hsla(26, 83%, 13%, 0.2);
+    --status-on-the-way-border: hsla(28, 73%, 26%, 0.3);
+    --status-on-the-way-text: hsl(43, 96%, 56%);
+
+    --status-on-site-bg: hsla(222, 47%, 12%, 0.2);
+    --status-on-site-border: hsla(222, 47%, 31%, 0.3);
+    --status-on-site-text: hsl(219, 96%, 67%);
+
+    --status-waiting-parts-bg: hsla(276, 72%, 16%, 0.2);
+    --status-waiting-parts-border: hsla(273, 67%, 39%, 0.3);
+    --status-waiting-parts-text: hsl(271, 91%, 71%);
+
+    --status-completed-bg: hsla(164, 86%, 16%, 0.2);
+    --status-completed-border: hsla(162, 72%, 24%, 0.3);
+    --status-completed-text: hsl(150, 84%, 53%);
+
+    --status-closed-bg: hsl(215, 28%, 17%);
+    --status-closed-border: hsl(215, 25%, 27%);
+    --status-closed-text: hsl(213, 27%, 84%);
+
+    --status-cancelled-bg: hsla(0, 75%, 15%, 0.2);
+    --status-cancelled-border: hsla(0, 63%, 31%, 0.3);
+    --status-cancelled-text: hsl(0, 84%, 60%);
   }
 }
 

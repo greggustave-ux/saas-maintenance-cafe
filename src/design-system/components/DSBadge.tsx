@@ -58,23 +58,23 @@ export const DSBadge: React.FC<DSBadgeProps> & { metadata: typeof COMPONENT_REGI
     } else if (category === 'status') {
       switch (variant) {
         case 'new':
-          return 'border-sky-200 dark:border-sky-900/30 bg-sky-50/70 dark:bg-sky-950/20 text-sky-700 dark:text-sky-400';
+          return 'border-status-new-border bg-status-new-bg text-status-new-text';
         case 'assigned':
-          return 'border-indigo-200 dark:border-indigo-900/30 bg-indigo-50/70 dark:bg-indigo-950/20 text-indigo-700 dark:text-indigo-400';
+          return 'border-status-assigned-border bg-status-assigned-bg text-status-assigned-text';
         case 'on_the_way':
-          return 'border-amber-200 dark:border-amber-900/30 bg-amber-50/70 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400';
+          return 'border-status-on-the-way-border bg-status-on-the-way-bg text-status-on-the-way-text';
         case 'on_site':
-          return 'border-blue-200 dark:border-blue-900/30 bg-blue-50/70 dark:bg-blue-950/20 text-blue-700 dark:text-blue-400';
+          return 'border-status-on-site-border bg-status-on-site-bg text-status-on-site-text';
         case 'waiting_parts':
-          return 'border-purple-200 dark:border-purple-900/30 bg-purple-50/70 dark:bg-purple-950/20 text-purple-700 dark:text-purple-400';
+          return 'border-status-waiting-parts-border bg-status-waiting-parts-bg text-status-waiting-parts-text';
         case 'completed':
-          return 'border-emerald-200 dark:border-emerald-900/30 bg-emerald-50/70 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400';
+          return 'border-status-completed-border bg-status-completed-bg text-status-completed-text';
         case 'closed':
-          return 'border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300';
+          return 'border-status-closed-border bg-status-closed-bg text-status-closed-text';
         case 'cancelled':
-          return 'border-red-200 dark:border-red-900/30 bg-red-50/70 dark:bg-red-950/20 text-red-700 dark:text-red-400';
+          return 'border-status-cancelled-border bg-status-cancelled-bg text-status-cancelled-text';
         default:
-          return 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-400';
+          return 'border-status-new-border bg-status-new-bg text-status-new-text';
       }
     } else {
       // neutral

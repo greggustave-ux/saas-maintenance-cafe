@@ -38,7 +38,7 @@ Once tokens are consolidated, future migrations must follow this safety-first ro
 ```
 
 ### Phase 1: Global CSS Token Declaration
-- **Action:** Declare `--radius-sm` and HSL status colors inside [globals.css](file:///c:/Users/Dylan/Documents/welo_platform/app/globals.css) to eliminate fallback dependencies.
+- **Status:** **Completed.** `--radius-sm` and HSL status colors are fully declared inside [globals.css](file:///c:/Users/Dylan/Documents/welo_platform/app/globals.css), removing fallback dependencies.
 
 ### Phase 2: Secondary View Lists
 - **Action:** Replace status badges inside the secondary read-only lists:
