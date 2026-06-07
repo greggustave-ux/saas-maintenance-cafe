@@ -1,38 +1,39 @@
 # MCP Inspection Approval Flow & Templates - Welo Platform SaaS
 
-This document establishes the approval gates, human-in-the-loop validation checkpoints, and standardized audit report templates required before design variables can be migrated or synchronized.
+This document establishes the approval gates, human-in-the-loop validation checkpoints, and standardized audit report templates required before design variables can be migrated or synchronized. It defines how approval gates block active operations to maintain code and design system integrity.
 
 ---
 
-## 🚧 Approval Gates for Design System Alignment
+## 🚧 Approval Gates & Active Operation Blockers
 
-Before any discovered design change can be implemented, it must pass five strict review gates:
+Before any discovered design change or token mismatch can be implemented in the codebase, the proposed change must pass five strict review gates. These gates explicitly block any automated synchronizations or direct mutations.
 
 ### 1. Human Review Gate
-- **Requirement:** A developer must inspect the raw JSON output report and confirm the changes are correct and necessary.
-- **Blocker:** No automated merges or git commits.
+- **Requirement:** A developer must inspect the raw JSON output report generated in `/scratch/figma-audit.json`.
+- **Checkpoint:** The developer must manually verify every token mismatch and layout warning.
+- **Active Blocker:** Auto-sync routines and AI-driven codebase writes are strictly blocked. No code changes will be applied without a manually signed-off review form.
 
 ### 2. Audit Validation Gate
-- **Requirement:** The generated audit report must contain zero unexpected anomalies.
-- **Blocker:** Any unknown classifications or syntax errors in the JSON report halt the flow.
+- **Requirement:** The generated audit report must contain zero unexpected anomalies, syntax errors, or unparseable JSON nodes.
+- **Active Blocker:** Any parsing error, missing schema fields, or unknown parameters automatically rejects the audit run, halting the flow.
 
 ### 3. Risk Classification Gate
-- **Requirement:** Review the sync risk category for the target component.
-- **Blocker:** Components flagged as `high` risk (e.g. `DispatchKanbanBoard`, modals) require senior developer sign-off before implementation.
+- **Requirement:** Check the risk rating of the target component (Low, Medium, High).
+- **Active Blocker:** Components flagged as `high` risk (e.g. `DispatchKanbanBoard`, modal components) require senior developer peer-review and sign-off before being manually integrated.
 
 ### 4. Mapping Review Gate
-- **Requirement:** Confirm that the Figma node ID corresponds to a valid element in `docs/COMPONENT_REGISTRY.md`.
-- **Blocker:** Missing mappings must be documented and registered first.
+- **Requirement:** Confirm that the Figma node ID corresponds to a valid element registered in `docs/COMPONENT_REGISTRY.md`.
+- **Active Blocker:** If the Figma node is not mapped or listed, the flow is blocked until the mapping is verified and registered.
 
 ### 5. Mobile Impact Review Gate
-- **Requirement:** Check if the design variable affects responsive elements (viewports <= 640px, touch target bounds).
-- **Blocker:** Any styling change that reduces touch dimensions below **44px** is automatically rejected.
+- **Requirement:** Analyze whether the design change alters responsive layouts or touch target sizes on viewport sizes <= 640px.
+- **Active Blocker:** Any styling change that reduces interactive elements or touch dimensions below the standard minimum threshold of **44px** is automatically blocked and rejected.
 
 ---
 
-## 📋 Audit Log Report Templates
+## 📋 Standardized Audit Report Templates
 
-The following templates represent the standardized JSON blocks generated during passive design system audits:
+The following templates represent the standardized JSON blocks generated during passive design system audits. They define the format for all output reports:
 
 ### 1. Token Mismatch Report Template
 ```json
@@ -94,3 +95,21 @@ The following templates represent the standardized JSON blocks generated during 
   "resolution": "Wrap in responsive flex layout rules for small screens"
 }
 ```
+
+---
+
+## 🚨 Emergency Stop Integration
+If at any point in the approval flow an automated tool attempts to bypass a gate or perform active mutations, the process triggers an immediate halt. Refer to [docs/FIRST_PASSIVE_MCP_INSPECTION.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/FIRST_PASSIVE_MCP_INSPECTION.md#L51-L62) for triggers and procedures.
+
+---
+
+## 📂 Reference Integration Guidelines
+
+Refer to these architectural documents for specific implementation details:
+- **First Passive Inspection:** [docs/FIRST_PASSIVE_MCP_INSPECTION.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/FIRST_PASSIVE_MCP_INSPECTION.md)
+- **First Connection Checklist:** [docs/MCP_FIRST_CONNECTION_CHECKLIST.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/MCP_FIRST_CONNECTION_CHECKLIST.md)
+- **Security Rules & Governance:** [docs/MCP_SECURITY_RULES.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/MCP_SECURITY_RULES.md)
+- **Figma Permission Boundaries:** [docs/MCP_FIGMA_PERMISSION_BOUNDARIES.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/MCP_FIGMA_PERMISSION_BOUNDARIES.md)
+- **Audit Output Spec:** [docs/MCP_AUDIT_OUTPUT_SPEC.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/MCP_AUDIT_OUTPUT_SPEC.md)
+- **Local Sandbox Setup:** [docs/MCP_LOCAL_SANDBOX_SETUP.md](file:///c:/Users/Dylan/Documents/welo_platform/docs/MCP_LOCAL_SANDBOX_SETUP.md)
+- **MCP Setup Checklist:** [MCP_SETUP_CHECKLIST.md](file:///c:/Users/Dylan/Documents/welo_platform/MCP_SETUP_CHECKLIST.md)

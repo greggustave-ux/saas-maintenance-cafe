@@ -52,6 +52,9 @@ To avoid storing the token in plain text inside `mcp_config.json`, store it as a
 ### 2. Supabase MCP Server
 Connects to the official hosted Supabase MCP service to securely inspect schemas, run safe queries, and coordinate with database instances.
 
+> [!WARNING]
+> **Deactivated for First Passive Local Inspection Phase:** To ensure complete safety and isolation, the Supabase MCP server connection is disabled during this phase. Do not configure or log into Supabase.
+
 #### 🔑 Authentication Process
 1. Configured to point to the remote server URL: `https://mcp.supabase.com/mcp`.
 2. No token is stored in the JSON file. 
@@ -69,6 +72,9 @@ Connects to the official hosted Supabase MCP service to securely inspect schemas
 
 ### 3. Figma MCP Server
 Allows inspecting Figma design files, components, and styles directly from Antigravity.
+
+> [!IMPORTANT]
+> **Strictly Read-Only:** Configured with read-only scopes. Write permissions (comments, nodes, etc.) are blocked and forbidden.
 
 #### 🔑 Authentication Process
 1. Configured to point to the official Figma remote server: `https://mcp.figma.com/mcp`.
