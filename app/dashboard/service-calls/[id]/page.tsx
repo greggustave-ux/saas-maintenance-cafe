@@ -6,10 +6,7 @@ import PartsSection from "@/src/modules/service_calls/components/PartsSection";
 import SignatureSection from "@/src/modules/service_calls/components/SignatureSection";
 import PhotosSection from "@/src/modules/service_calls/components/PhotosSection";
 import MachineHistorySection from "@/src/modules/service_calls/components/MachineHistorySection";
-import { STATUS_LABELS } from "../page";
-import { priorityColors, priorityLabels } from "@/src/modules/service_calls/components/dispatch/constants";
-import { StatusBadge } from "@/src/design-system/components/StatusBadge";
-import { PriorityBadge } from "@/src/design-system/components/PriorityBadge";
+import { DSBadge } from "@/src/design-system/components/DSBadge";
 
 const inputClass =
     "w-full min-h-12 rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 px-4 py-3 text-base text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15";
@@ -263,7 +260,7 @@ export default function ServiceCallDetailsPage() {
                     <section className={sectionCardClass}>
                         <div className="flex items-center justify-between">
                             <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-400">Client</h2>
-                            <StatusBadge status={serviceCall.status} />
+                             <DSBadge category="status" variant={serviceCall.status} />
                         </div>
 
                         <div className="space-y-4 pt-1">
@@ -301,7 +298,7 @@ export default function ServiceCallDetailsPage() {
                                     )}
                                 </div>
                                 <div>
-                                    <dt className="text-xs font-semibold uppercase tracking-wider text-slate-400">Priorité d'intervention</dt>
+                                    <dt className="text-xs font-semibold uppercase tracking-wider text-slate-400">Priorité d&apos;intervention</dt>
                                     {userRole === "admin" || userRole === "dispatcher" ? (
                                         <select
                                             className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-850 bg-white dark:bg-slate-900 px-3 py-2 text-sm font-semibold text-slate-800 dark:text-slate-200 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15 focus:outline-none"
@@ -315,7 +312,7 @@ export default function ServiceCallDetailsPage() {
                                         </select>
                                     ) : (
                                         <dd className="mt-1.5">
-                                            <PriorityBadge priority={serviceCall.priority || "medium"} className="text-xs" />
+                                             <DSBadge category="priority" variant={serviceCall.priority || "medium"} className="text-xs" />
                                         </dd>
                                     )}
                                 </div>
@@ -494,7 +491,7 @@ export default function ServiceCallDetailsPage() {
                     {/* Notes Section */}
                     <section className={sectionCardClass}>
                         <h2 className="text-lg font-bold text-slate-900 dark:text-white sm:text-xl">
-                            Notes d'intervention
+                            Notes d&apos;intervention
                         </h2>
                         <textarea
                             className={`${inputClass} min-h-32 resize-y text-base`}
@@ -588,7 +585,7 @@ export default function ServiceCallDetailsPage() {
                     {/* Brand header */}
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "2px solid #e2e8f0", paddingBottom: "20px" }}>
                         <div>
-                            <h1 style={{ fontSize: "28px", fontWeight: "bold", color: "#0891b2", margin: 0 }}>RAPPORT D'INTERVENTION</h1>
+                            <h1 style={{ fontSize: "28px", fontWeight: "bold", color: "#0891b2", margin: 0 }}>RAPPORT D&apos;INTERVENTION</h1>
                             <p style={{ fontSize: "14px", color: "#64748b", marginTop: "4px", marginBottom: 0 }}>Plateforme Welo • SME Field Operations</p>
                         </div>
                         <div style={{ textAlign: "right" }}>
