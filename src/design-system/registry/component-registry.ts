@@ -108,5 +108,14 @@ export const COMPONENT_REGISTRY: Record<string, ComponentMetadata> = {
     syncRiskLevel: 'low',
     auditTags: ['Form/Validation', 'Accessibility', 'AlertText'],
     lastAuditedAt: '2026-06-06',
+  },
+  DSBadge: {
+    componentId: 'DSBadge',
+    version: '1.0.0',
+    lifecycleStage: 'validated',
+    figmaNodeMapping: 'figma.com/file/welo-ui?node-id=101:4',
+    syncRiskLevel: 'low',
+    auditTags: ['Unified/Badge', 'InterTypography', 'WCAG-AA-Pass'],
+    lastAuditedAt: '2026-06-07',
   }
 };

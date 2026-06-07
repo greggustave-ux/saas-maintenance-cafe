@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ServiceCall } from "../types";
 import { analyzeMachineHistory } from "../utils/machine-intelligence";
-import { StatusBadge } from "@/src/design-system/components/StatusBadge";
+import { DSBadge } from "@/src/design-system/components/DSBadge";
 
 interface MachineHistorySectionProps {
     machineHistory: ServiceCall[];
@@ -9,39 +9,8 @@ interface MachineHistorySectionProps {
     machineHistoryLoading: boolean;
 }
 
-const STATUS_LABELS: Record<string, string> = {
-    new: "Nouveau",
-    assigned: "Assigné",
-    on_the_way: "En route",
-    on_site: "Sur place",
-    waiting_parts: "En attente de pièces",
-    completed: "Terminé",
-    closed: "Clos",
-    cancelled: "Annulé",
-};
 
-function getStatusBadgeClass(status: string) {
-    switch (status) {
-        case "new":
-            return "bg-sky-500/10 text-sky-700 dark:text-sky-400 border border-sky-500/25";
-        case "assigned":
-            return "bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-500/25";
-        case "on_the_way":
-            return "bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/25";
-        case "on_site":
-            return "bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-500/25";
-        case "waiting_parts":
-            return "bg-purple-500/10 text-purple-700 dark:text-purple-400 border border-purple-500/25";
-        case "completed":
-            return "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25";
-        case "closed":
-            return "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-450 border border-slate-200/30";
-        case "cancelled":
-            return "bg-red-500/10 text-red-750 dark:text-red-400 border border-red-500/25";
-        default:
-            return "bg-slate-100 dark:bg-slate-800 text-slate-650 dark:text-slate-400 border border-slate-200/30";
-    }
-}
+
 
 export default function MachineHistorySection({
     machineHistory,
@@ -225,7 +194,7 @@ export default function MachineHistorySection({
                                         <span className="font-bold text-slate-900 dark:text-white">${analysis.estimatedMaintenanceCost}</span>
                                     </div>
                                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 py-1.5 border-b border-slate-100 dark:border-slate-800/50">
-                                        <span className="text-slate-500 dark:text-slate-400 font-medium">Risque d'indisponibilité</span>
+                                        <span className="text-slate-500 dark:text-slate-400 font-medium">Risque d&apos;indisponibilité</span>
                                         <span className={`font-semibold px-2 py-0.5 rounded-full text-[10px] border self-start sm:self-auto ${
                                             analysis.downtimeRisk === "Élevé"
                                                 ? "bg-red-500/10 text-red-650 dark:text-red-400 border-red-500/20"
@@ -259,7 +228,7 @@ export default function MachineHistorySection({
                                     Comprendre le score
                                 </h3>
                                 <p className="text-[11px] text-slate-400 dark:text-slate-500 leading-relaxed font-medium">
-                                    Le score de risque évalue la fiabilité de la machine. Il augmente en fonction du volume d'interventions récentes (pénalité accrue sous 30 jours), de la récurrence de pièces similaires changées et de termes critiques détectés dans la description des problèmes. L'absence de photos ou signatures clients pénalise également le score.
+                                    Le score de risque évalue la fiabilité de la machine. Il augmente en fonction du volume d&apos;interventions récentes (pénalité accrue sous 30 jours), de la récurrence de pièces similaires changées et de termes critiques détectés dans la description des problèmes. L&apos;absence de photos ou signatures clients pénalise également le score.
                                 </p>
                             </div>
                         </div>
@@ -306,7 +275,7 @@ export default function MachineHistorySection({
                                                                     {dateStr}
                                                                 </span>
                                                             )}
-                                                            <StatusBadge status={item.status} className="shrink-0" />
+                                                            <DSBadge category="status" variant={item.status} className="shrink-0" />
                                                             {item.archived && (
                                                                 <span className="rounded-full bg-slate-150 dark:bg-slate-805 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider shrink-0">
                                                                     Archivé
@@ -384,7 +353,7 @@ export default function MachineHistorySection({
                                                                     </ul>
                                                                 ) : (
                                                                     <ul className="list-disc list-inside space-y-1 text-slate-700 dark:text-slate-300 font-semibold">
-                                                                        <li>Filtre d'admission d'air (x1)</li>
+                                                                        <li>Filtre d&apos;admission d&apos;air (x1)</li>
                                                                     </ul>
                                                                 )}
                                                             </div>
