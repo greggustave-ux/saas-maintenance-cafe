@@ -49,14 +49,6 @@ export default function TechnicianCallDetailsPage() {
         );
     }
 
-    // GPS launcher action
-    const handleGPSLaunch = () => {
-        if (!serviceCall?.address) return;
-        const encodedAddr = encodeURIComponent(serviceCall.address);
-        const universalUrl = `https://www.google.com/maps/search/?api=1&query=${encodedAddr}`;
-        window.open(universalUrl, "_blank", "noopener,noreferrer");
-    };
-
     // Quick Status Update
     const handleStatusTransition = async (nextStatus: string) => {
         if (updatingStatus) return;
@@ -145,84 +137,115 @@ export default function TechnicianCallDetailsPage() {
                     </div>
                 )}
 
-                {/* 1. Client + Address Info */}
-                <DSCard variant="default" padding="md" className="space-y-3.5">
-                    <div className="flex items-start justify-between gap-3">
-                        <div className="space-y-0.5">
-                            <span className="text-xs font-bold text-[var(--foreground)]/40 uppercase tracking-wider">Client</span>
-                            <h2 className="text-lg font-bold text-[var(--foreground)] leading-tight">{serviceCall.client_name}</h2>
+                {/* 1. Client Info Header */}
+                <DSCard variant="default" padding="md" className="space-y-3">
+                    <div className="flex items-start justify-between gap-4">
+                        <div className="space-y-1">
+                            {serviceCall.reference_number && (
+                                <span className="block text-[10px] font-bold font-mono tracking-widest text-[var(--foreground)]/45 uppercase leading-none">
+                                    Intervention {serviceCall.reference_number}
+                                </span>
+                            )}
+                            <h2 className="text-xl font-bold text-[var(--foreground)] leading-tight tracking-tight">
+                                {serviceCall.client_name}
+                            </h2>
                         </div>
                         <div className="shrink-0 flex flex-col items-end gap-1.5">
-                            <DSBadge category="status" variant={currentStatus} />
-                            <DSBadge category="priority" variant={serviceCall.priority || "medium"} />
+                            <DSBadge category="status" variant={currentStatus} className="rounded-md" />
+                            <DSBadge category="priority" variant={serviceCall.priority || "medium"} className="rounded-md font-extrabold" />
                         </div>
-                    </div>
-
-                    <div className="border-t border-[var(--card-border)] pt-3.5 space-y-3">
-                        <div className="flex items-start gap-2 text-sm text-[var(--foreground)]/80 leading-relaxed break-words">
-                            <span className="shrink-0">📍</span>
-                            <span>{serviceCall.address}</span>
-                        </div>
-
-                        {/* 2. GPS Launcher Trigger */}
-                        {serviceCall.address ? (
-                            <button
-                                onClick={handleGPSLaunch}
-                                className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-slate-100 dark:bg-slate-900 border border-[var(--card-border)] text-sm font-semibold hover:bg-slate-200 dark:hover:bg-slate-800 text-[var(--foreground)] active:scale-98 transition-all cursor-pointer"
-                            >
-                                <svg className="h-4.5 w-4.5 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                Naviguer avec le GPS
-                            </button>
-                        ) : null}
                     </div>
                 </DSCard>
 
+                {/* 2. Interactive Address & GPS Navigation Card */}
+                {serviceCall.address ? (
+                    <a
+                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(serviceCall.address)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block w-full text-left cursor-pointer active:scale-[0.99] transition-transform duration-150"
+                    >
+                        <DSCard 
+                            variant="outlined" 
+                            padding="md" 
+                            className="relative hover:border-[var(--primary)]/60 dark:hover:border-[var(--primary)]/60 transition-colors duration-200 flex items-center justify-between gap-4"
+                        >
+                            <div className="space-y-1.5 flex-1 min-w-0">
+                                <span className="block text-[10px] font-bold font-mono tracking-widest text-[var(--foreground)]/45 uppercase leading-none">
+                                    📍 Adresse d&apos;intervention
+                                </span>
+                                <p className="text-sm font-semibold text-[var(--foreground)] leading-relaxed break-words">
+                                    {serviceCall.address}
+                                </p>
+                            </div>
+                            <div className="shrink-0 flex items-center justify-center h-10 w-10 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50 text-[var(--primary)]">
+                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </div>
+                        </DSCard>
+                    </a>
+                ) : (
+                    <DSCard variant="outlined" padding="md" className="flex items-center gap-3 text-slate-400">
+                        <span>📍</span>
+                        <span className="text-sm font-medium">Adresse non renseignée</span>
+                    </DSCard>
+                )}
+
                 {/* 3. Issue / Problem Description */}
                 <DSCard variant="outlined" padding="md" className="space-y-2">
-                    <span className="text-[11px] font-bold text-[var(--foreground)]/40 uppercase tracking-wider block">Description de la Panne</span>
-                    <p className="text-base text-[var(--foreground)]/90 leading-relaxed break-words font-sans">
+                    <span className="text-[10px] font-bold font-mono tracking-widest text-[var(--foreground)]/45 uppercase block leading-none">
+                        Description de la Panne
+                    </span>
+                    <p className="text-sm text-[var(--foreground)]/85 leading-relaxed break-words">
                         {serviceCall.issue_description || "Aucune description de panne consignée."}
                     </p>
                 </DSCard>
 
                 {/* 4. Machine Info */}
-                <DSCard variant="outlined" padding="md" className="space-y-2.5">
-                    <span className="text-[11px] font-bold text-[var(--foreground)]/40 uppercase tracking-wider block">Détails de l&apos;Équipement</span>
-                    <div className="grid grid-cols-2 gap-3 text-sm pt-0.5">
-                        <div className="space-y-0.5">
-                            <span className="text-xs text-[var(--foreground)]/45 uppercase tracking-wider block">Code Série</span>
-                            <span className="font-semibold text-[var(--foreground)] break-all">{serviceCall.machine_serial || "—"}</span>
+                <DSCard variant="outlined" padding="md" className="space-y-3">
+                    <span className="text-[10px] font-bold font-mono tracking-widest text-[var(--foreground)]/45 uppercase block leading-none">
+                        Détails de l&apos;Équipement
+                    </span>
+                    <div className="grid grid-cols-2 gap-4 text-[13px] pt-1">
+                        <div className="space-y-1">
+                            <span className="text-[11px] text-[var(--foreground)]/45 uppercase tracking-wider block leading-none">Code Série</span>
+                            <span className="font-mono font-semibold text-[var(--foreground)] break-all bg-slate-50 dark:bg-slate-900 border border-slate-200/40 dark:border-slate-800/40 px-2 py-1 rounded-md inline-block">
+                                {serviceCall.machine_serial || "—"}
+                            </span>
                         </div>
-                        <div className="space-y-0.5">
-                            <span className="text-xs text-[var(--foreground)]/45 uppercase tracking-wider block">Technicien</span>
-                            <span className="font-semibold text-[var(--foreground)]">{serviceCall.technician_name || "Non assigné"}</span>
+                        <div className="space-y-1">
+                            <span className="text-[11px] text-[var(--foreground)]/45 uppercase tracking-wider block leading-none">Technicien</span>
+                            <span className="font-semibold text-[var(--foreground)] block pt-1">{serviceCall.technician_name || "Non assigné"}</span>
                         </div>
                     </div>
                 </DSCard>
 
                 {/* 5. Notes (Read-Only) */}
-                <DSCard variant="outlined" padding="md" className="space-y-2">
-                    <span className="text-[11px] font-bold text-[var(--foreground)]/40 uppercase tracking-wider block">Rapport / Notes de visite</span>
-                    <p className="text-base text-[var(--foreground)]/90 leading-relaxed break-words whitespace-pre-wrap font-sans">
-                        {serviceCall.technician_notes || "Aucune note technique n'a été saisie pour le moment."}
+                <DSCard variant="outlined" padding="md" className="space-y-2.5">
+                    <span className="text-[10px] font-bold font-mono tracking-widest text-[var(--foreground)]/45 uppercase block leading-none">
+                        Rapport / Notes de visite
+                    </span>
+                    <p className="text-sm text-[var(--foreground)]/80 leading-relaxed break-words whitespace-pre-wrap bg-slate-50/50 dark:bg-slate-950/50 border border-slate-200/30 dark:border-slate-800/30 p-3 rounded-xl">
+                        {serviceCall.technician_notes || "Aucune note technique n&apos;a été saisie pour le moment."}
                     </p>
                 </DSCard>
 
                 {/* 6. Photos (Read-Only) */}
                 <DSCard variant="outlined" padding="md" className="space-y-3">
                     <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-bold text-[var(--foreground)]/40 uppercase tracking-wider">Photos de l&apos;intervention</span>
-                        <span className="text-xs text-[var(--foreground)]/50">{photos.length} photo(s)</span>
+                        <span className="text-[10px] font-bold font-mono tracking-widest text-[var(--foreground)]/45 uppercase block leading-none">
+                            Photos de l&apos;intervention
+                        </span>
+                        <span className="text-[11px] font-mono font-semibold text-[var(--foreground)]/50">{photos.length} photo(s)</span>
                     </div>
                     {photos.length === 0 ? (
                         <p className="text-sm text-[var(--foreground)]/50">Aucune photo enregistrée.</p>
                     ) : (
                         <div className="grid grid-cols-2 gap-3">
                             {photos.map((photo) => (
-                                <div key={photo.id} className="relative aspect-4/3 overflow-hidden rounded-xl border border-[var(--card-border)] bg-slate-50 dark:bg-slate-850">
+                                <div key={photo.id} className="relative aspect-4/3 overflow-hidden rounded-xl border border-slate-200/50 dark:border-slate-800/50 bg-slate-50 dark:bg-slate-900">
                                     <img
                                         src={photo.photo_url}
                                         alt="Intervention"
@@ -238,9 +261,11 @@ export default function TechnicianCallDetailsPage() {
 
                 {/* 7. Signature Client (Read-Only) */}
                 <DSCard variant="outlined" padding="md" className="space-y-3">
-                    <span className="text-[11px] font-bold text-[var(--foreground)]/40 uppercase tracking-wider block">Signature Client</span>
+                    <span className="text-[10px] font-bold font-mono tracking-widest text-[var(--foreground)]/45 uppercase block leading-none">
+                        Signature Client
+                    </span>
                     {serviceCall.signature_url ? (
-                        <div className="inline-block overflow-hidden rounded-xl border border-[var(--card-border)] bg-white p-2">
+                        <div className="inline-block overflow-hidden rounded-xl border border-slate-200/60 dark:border-slate-800/60 bg-white p-2">
                             <img
                                 src={serviceCall.signature_url}
                                 alt="Signature client"
