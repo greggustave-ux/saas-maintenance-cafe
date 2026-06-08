@@ -17,6 +17,7 @@ export default function TechnicianMobileShell({ children }: TechnicianMobileShel
   // Tab routing configuration
   const tabMapping: Record<string, string> = {
     "/technician": "calls",
+    "/technician/calls": "calls",
     "/technician/today": "today",
     "/technician/machines": "machines",
     "/technician/notifications": "notifications",
