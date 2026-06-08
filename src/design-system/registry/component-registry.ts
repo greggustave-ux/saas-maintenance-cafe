@@ -117,5 +117,14 @@ export const COMPONENT_REGISTRY: Record<string, ComponentMetadata> = {
     syncRiskLevel: 'low',
     auditTags: ['Unified/Badge', 'InterTypography', 'WCAG-AA-Pass'],
     lastAuditedAt: '2026-06-07',
+  },
+  DSCard: {
+    componentId: 'DSCard',
+    version: '1.0.0',
+    lifecycleStage: 'production-approved',
+    figmaNodeMapping: 'figma.com/file/welo-ui?node-id=202:4',
+    syncRiskLevel: 'low',
+    auditTags: ['Unified/Card', 'Layout', 'InterTypography'],
+    lastAuditedAt: '2026-06-08',
   }
 };

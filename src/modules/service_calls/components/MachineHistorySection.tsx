@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ServiceCall } from "../types";
 import { analyzeMachineHistory } from "../utils/machine-intelligence";
 import { DSBadge } from "@/src/design-system/components/DSBadge";
+import { DSCard } from "@/src/design-system/components/DSCard";
 
 interface MachineHistorySectionProps {
     machineHistory: ServiceCall[];
@@ -90,7 +91,7 @@ export default function MachineHistorySection({
                         {/* Column Left (Stats, predictive analysis) */}
                         <div className="lg:col-span-5 space-y-5">
                             {/* Predictive Analysis Card */}
-                            <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-slate-50/20 dark:bg-slate-950/20 p-4.5 space-y-3.5">
+                            <DSCard variant="flat" padding="md" className="space-y-3.5">
                                 <div className="flex items-center justify-between">
                                     <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
                                         Analyse prédictive
@@ -134,10 +135,10 @@ export default function MachineHistorySection({
                                         style={{ width: `${analysis.riskScore}%` }}
                                     />
                                 </div>
-                            </div>
+                            </DSCard>
 
                             {/* Reliability Statistics Card */}
-                            <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-950 p-4.5 space-y-4">
+                            <DSCard variant="outlined" padding="md" className="space-y-4">
                                 <h3 className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                                     Statistiques clés
                                 </h3>
@@ -181,10 +182,10 @@ export default function MachineHistorySection({
                                         </p>
                                     </div>
                                 </div>
-                            </div>
+                            </DSCard>
 
                             {/* Cost & Operational Card */}
-                            <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-950 p-4.5 space-y-3.5 min-w-0 overflow-hidden">
+                            <DSCard variant="outlined" padding="md" className="space-y-3.5 min-w-0 overflow-hidden">
                                 <h3 className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                                     Coût & Impact Opérationnel
                                 </h3>
@@ -220,17 +221,17 @@ export default function MachineHistorySection({
                                         </div>
                                     </div>
                                 )}
-                            </div>
+                            </DSCard>
 
                             {/* Understanding Risk Score explanatory card */}
-                            <div className="rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-950 p-4.5 space-y-2">
+                            <DSCard variant="outlined" padding="md" className="space-y-2">
                                 <h3 className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                                     Comprendre le score
                                 </h3>
                                 <p className="text-[11px] text-slate-400 dark:text-slate-500 leading-relaxed font-medium">
                                     Le score de risque évalue la fiabilité de la machine. Il augmente en fonction du volume d&apos;interventions récentes (pénalité accrue sous 30 jours), de la récurrence de pièces similaires changées et de termes critiques détectés dans la description des problèmes. L&apos;absence de photos ou signatures clients pénalise également le score.
                                 </p>
-                            </div>
+                            </DSCard>
                         </div>
 
                         {/* Column Right (Timeline) */}
@@ -260,7 +261,7 @@ export default function MachineHistorySection({
                                                 {/* Timeline bullet dot */}
                                                 <div className="hidden sm:block absolute -left-[32px] mt-2.5 h-3.5 w-3.5 rounded-full border-2 border-white dark:border-slate-900 bg-cyan-500 dark:bg-cyan-400 group-hover:scale-125 transition-all shadow-xs" />
 
-                                                <div className="bg-slate-50/50 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/60 rounded-xl p-4 transition-all hover:border-slate-350 dark:hover:hover:border-slate-750 hover:bg-slate-50/80 dark:hover:bg-slate-900/60 space-y-3 min-w-0">
+                                                <DSCard variant="flat" padding="md" className="!bg-slate-50/50 dark:!bg-slate-900/40 !border-slate-200/50 dark:!border-slate-800/60 hover:!border-slate-350 dark:hover:hover:!border-slate-750 hover:!bg-slate-50/80 dark:hover:bg-slate-900/60 space-y-3 min-w-0 transition-all">
                                                     {/* Header info & Buttons */}
                                                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 min-w-0">
                                                         <div className="flex items-center gap-2.5 min-w-0 flex-wrap">
@@ -395,7 +396,7 @@ export default function MachineHistorySection({
                                                             </div>
                                                         </div>
                                                     )}
-                                                </div>
+                                                </DSCard>
                                             </div>
                                         );
                                     })}
