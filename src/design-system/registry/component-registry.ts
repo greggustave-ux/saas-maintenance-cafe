@@ -126,5 +126,32 @@ export const COMPONENT_REGISTRY: Record<string, ComponentMetadata> = {
     syncRiskLevel: 'low',
     auditTags: ['Unified/Card', 'Layout', 'InterTypography'],
     lastAuditedAt: '2026-06-08',
+  },
+  DSBottomNavigation: {
+    componentId: 'DSBottomNavigation',
+    version: '1.0.0',
+    lifecycleStage: 'production-approved',
+    figmaNodeMapping: 'figma.com/file/welo-ui?node-id=310:1',
+    syncRiskLevel: 'low',
+    auditTags: ['Mobile/Navigation', 'TouchTarget48', 'OneThumbNavigation'],
+    lastAuditedAt: '2026-06-08',
+  },
+  DSMobileHeader: {
+    componentId: 'DSMobileHeader',
+    version: '1.0.0',
+    lifecycleStage: 'production-approved',
+    figmaNodeMapping: 'figma.com/file/welo-ui?node-id=310:2',
+    syncRiskLevel: 'low',
+    auditTags: ['Mobile/Header', 'TouchTarget48', 'Accessibility'],
+    lastAuditedAt: '2026-06-08',
+  },
+  DSMobilePage: {
+    componentId: 'DSMobilePage',
+    version: '1.0.0',
+    lifecycleStage: 'production-approved',
+    figmaNodeMapping: 'figma.com/file/welo-ui?node-id=310:3',
+    syncRiskLevel: 'low',
+    auditTags: ['Mobile/Layout', 'SafeAreaSupport', 'KeyboardSafety'],
+    lastAuditedAt: '2026-06-08',
   }
 };
