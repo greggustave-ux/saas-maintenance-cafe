@@ -1,0 +1,85 @@
+# Legacy UI Migration Plan - Welo Platform SaaS
+
+This document establishes the rollout, migration roadmap, and execution strategy for migrating Welo Platform's legacy UI elements to the design system.
+
+---
+
+## 📅 Rollout Strategy
+
+To prevent visual regressions or workflow disruption, the design system will rollout through five validation gates:
+
+```
+[Local Dev Sandboxing] ➔ [Staging & Visual Review] ➔ [Mobile Device QA] ➔ [Dark Launch Production] ➔ [Release Gate]
+```
+
+### 1. Local Validation
+- Implement components inside `/src/design-system/components/` and verify layout compliance.
+- Run typecheck checks (`tsc --noEmit`) to confirm zero compilation warnings.
+
+### 2. Staging Validation
+- Merge features into the `staging` branch.
+- Deploy to `staging.welo.app` and verify theme variable changes using Chrome developer tools.
+
+### 3. Mobile Device Testing
+- Load staging preview links on emulated viewports (`320px`, `375px`) and actual devices.
+- Verify touch targets remain >= 44x44px and that one-thumb action zones are responsive.
+
+### 4. Controlled Production Deployment
+- UI migration changes are deployed under light tags.
+- No database schemas or API variables are altered during styling migrations.
+
+### 5. Rollback Checkpoints
+- If layout breakage or rendering anomalies are reported, the release coordinator reverts changes by rolling back to the previous Git commit.
+
+---
+
+## 🚀 Future Integration Roadmap
+
+- **MCP-Assisted Refactoring:** AI subagents will scan file directories for hardcoded HEX colors or styles and replace them with variable tokens (e.g. `var(--primary)`).
+- **Automated Drift Detection:** CI/CD actions will run audits checking for CSS overrides that deviate from `docs/DESIGN_TOKEN_STRATEGY.md`.
+- **Snapshot Testing:** Integrate Jest/Playwright HTML snapshot validations to prevent unplanned structure changes.
+
+---
+
+## 🎯 First Migration Candidate: StatusBadge
+
+We propose **StatusBadge** and **PriorityBadge** as the first migration candidates.
+
+- **Reasoning:** Extremely low integration risk, high usage frequency, and does not alter core database interactions or routing rules.
+- **Migration Steps:**
+  1. Audit Next.js pages for existing inline status markers (e.g. text elements displaying "En Cours" or "Terminé").
+  2. Replace inline markers with the new `<StatusBadge status={...} />` component.
+  3. Validate contrast ratios and focus outlines locally.
+  4. Submit an atomic pull request containing only these badge substitutions.
+
+---
+
+## 📝 Migration Progress & Notes
+
+### ✅ StatusBadge (Migrated)
+- **Status:** Migrated as the first safe candidate.
+- **Scope:** Replaced static status markers in service call details, operations dashboard, and machine history timeline.
+- **Logic:** No business logic or state machines were modified.
+- **Database:** No Supabase schema, query, or RLS changes were introduced.
+
+### ✅ PriorityBadge (Migrated)
+- **Status:** Migrated as the second safe candidate.
+- **Scope:** Replaced static priority badges in ServiceCallCard listings and service call details views.
+- **Logic:** No business logic, filters, or sorting rules were altered.
+- **Database:** No Supabase schema or query modifications were introduced. Existing production status naming has been fully preserved.
+
+### ✅ ServiceCallCard (Migrated)
+- **Status:** Migrated as the first operational card.
+- **Scope:** Fully refactored `ServiceCallCard` and `ServiceCallCardSkeleton` to consume centralized tokens (spacing, colors, typography, borders, shadows, and touch targets >= 44px).
+- **Workflows:** All dispatch and technician navigation workflows, button interactions, filtering, and database operations were fully preserved without alteration. No Supabase schemas or queries were modified.
+
+### ✅ DispatchKanbanCard (Migrated)
+- **Status:** Migrated as the second operational card.
+- **Scope:** Fully refactored `DispatchCard` to use HSL colors, design-system spacing variables, standardized typography, card margins/paddings, and touch-target minimum dimensions (>= 44px) on all interactive select boxes and buttons.
+- **Workflows:** Renders `<PriorityBadge>` and `<StatusBadge>` statically in the header, while keeping all status, priority, and technician selectors interactive. All dispatch board column sorting, filtering, and mutations remain intact. No Supabase schema, query, or logic was altered.
+
+### ✅ ServiceCallCreateEditForm (Migrated)
+- **Status:** Migrated as the first operational form.
+- **Scope:** Fully refactored `NewServiceCallForm` to use standard design-system primitives (`DSInput`, `DSTextarea`, `DSSelect`, `DSLabel`, `DSFormSection`).
+- **Workflows:** Preserved all client name, priority, technician, address, machine serial, and description inputs. Enforced `min-h-[var(--touch-target-min)]` (44px) on all field inputs. Retained existing HTML validation tags, button interactions, state tracking, and onSubmit database hooks. No Supabase operations or schemas were modified.
+

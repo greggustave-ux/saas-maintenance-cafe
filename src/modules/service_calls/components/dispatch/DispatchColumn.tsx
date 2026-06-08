@@ -9,6 +9,10 @@ interface DispatchColumnProps {
     calls: ServiceCall[];
     updateStatus: (id: number, status: string) => Promise<void>;
     updatePriority: (id: number, priority: string) => Promise<void>;
+    updateTechnician: (id: number, technicianName: string) => Promise<void>;
+    technicians: { id: string; full_name: string }[];
+    archiveCall: (id: number, archived: boolean) => Promise<void>;
+    userRole: string | null;
 }
 
 export default function DispatchColumn({
@@ -16,6 +20,10 @@ export default function DispatchColumn({
     calls,
     updateStatus,
     updatePriority,
+    updateTechnician,
+    technicians,
+    archiveCall,
+    userRole,
 }: DispatchColumnProps) {
     const label = statusLabels[status] || status;
     const colorClass = statusColors[status] || "bg-slate-100 text-slate-700";
@@ -55,6 +63,10 @@ export default function DispatchColumn({
                             call={call}
                             updateStatus={updateStatus}
                             updatePriority={updatePriority}
+                            updateTechnician={updateTechnician}
+                            technicians={technicians}
+                            archiveCall={archiveCall}
+                            userRole={userRole}
                         />
                     ))
                 )}

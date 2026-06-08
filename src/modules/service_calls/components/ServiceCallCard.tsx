@@ -1,46 +1,69 @@
 "use client";
 
+import React from 'react';
 import { ServiceCall } from "../types";
+
+import { DSBadge } from "@/src/design-system/components/DSBadge";
+import { COMPONENT_REGISTRY } from "@/src/design-system/registry/component-registry";
+import { DSCard } from "@/src/design-system/components/DSCard";
 
 interface ServiceCallCardProps {
     call: ServiceCall;
     updateStatus: (id: number, status: string) => Promise<void>;
     deleteCall: (id: number) => Promise<void>;
     getStatusColor: (status: string) => string;
+    archiveCall?: (id: number, archived: boolean) => Promise<void>;
+    userRole?: string | null;
 }
 
-export default function ServiceCallCard({
+export const ServiceCallCard: React.FC<ServiceCallCardProps> & {
+    metadata: typeof COMPONENT_REGISTRY.ServiceCallCard;
+} = ({
     call,
     updateStatus,
     deleteCall,
     getStatusColor,
-}: ServiceCallCardProps) {
+    archiveCall,
+    userRole,
+}) => {
+    // Safety Fallbacks
+    const safePriority = call.priority || 'medium';
+    const safeStatus = call.status || 'new';
+
     return (
-        <article className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-5 shadow-xs transition-all duration-300 hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700">
-            <div className="space-y-4">
-                <div className="flex items-start justify-between gap-3">
-                    <div className="flex flex-col gap-1 min-w-0">
-                        {call.reference_number && (
-                            <span className="text-xs font-bold font-mono tracking-wider text-cyan-600 dark:text-cyan-400 uppercase">
-                                {call.reference_number}
-                            </span>
-                        )}
+        <DSCard 
+            data-welo-component="ServiceCallCard"
+            variant="default"
+            padding="md"
+            hoverable={true}
+            className="group relative flex flex-col justify-between font-sans"
+        >
+            <div className="space-y-[var(--space-sm)]">
+                <div className="flex items-start justify-between gap-[var(--space-sm)]">
+                    <div className="flex flex-col gap-[var(--space-xs)] min-w-0">
+                        <div className="flex items-center gap-[var(--space-xs)] flex-wrap">
+                            {call.reference_number && (
+                                <span className="text-[var(--font-size-sm)] font-bold font-mono tracking-wider text-[var(--primary)] uppercase">
+                                    {call.reference_number}
+                                </span>
+                            )}
+                            <DSBadge category="priority" variant={safePriority} className="text-[9px]" />
+                        </div>
                         <a
                             href={`/dashboard/service-calls/${call.id}`}
-                            className="text-lg font-bold tracking-tight text-slate-900 dark:text-white hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors leading-snug break-words"
+                            className="text-[var(--font-size-md)] font-bold tracking-tight text-[var(--foreground)] hover:text-[var(--primary)] transition-colors leading-snug break-words"
                         >
                             {call.client_name}
                         </a>
                     </div>
                     
+                    {/* Status selector (touch-target compliant) */}
                     <div className="shrink-0">
                         <select
-                            value={call.status}
-                            onChange={(e) =>
-                                updateStatus(call.id, e.target.value)
-                            }
+                            value={safeStatus}
+                            onChange={(e) => updateStatus(call.id, e.target.value)}
                             aria-label={`Statut pour ${call.client_name}`}
-                            className={`min-h-9 rounded-lg px-2.5 py-1 text-xs font-semibold ${getStatusColor(call.status)} cursor-pointer focus:ring-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800`}
+                            className={`min-h-[var(--touch-target-min)] rounded-[var(--radius-md)] px-2.5 py-1 text-[var(--font-size-sm)] font-semibold ${getStatusColor(safeStatus)} cursor-pointer focus:ring-0 bg-[var(--card-bg)] border border-[var(--card-border)] [color-scheme:light_dark]`}
                         >
                             <option value="new">Nouveau</option>
                             <option value="assigned">Assigné</option>
@@ -54,53 +77,77 @@ export default function ServiceCallCard({
                     </div>
                 </div>
 
-                <dl className="grid grid-cols-2 gap-x-4 gap-y-3.5 border-t border-slate-100 dark:border-slate-800/60 pt-4 text-sm">
+                <dl className="grid grid-cols-2 gap-x-[var(--space-md)] gap-y-[var(--space-sm)] border-t border-[var(--card-border)] pt-[var(--space-md)] text-[var(--font-size-base)]">
                     <div className="col-span-2">
-                        <dt className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                        <dt className="text-[var(--font-size-sm)] font-semibold uppercase tracking-wider text-[var(--foreground)]/40">
                             Adresse
                         </dt>
-                        <dd className="mt-1 font-medium text-slate-700 dark:text-slate-300 break-words leading-relaxed">
+                        <dd className="mt-0.5 font-medium text-[var(--foreground)]/80 break-words leading-relaxed">
                             {call.address}
                         </dd>
                     </div>
                     <div>
-                        <dt className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                        <dt className="text-[var(--font-size-sm)] font-semibold uppercase tracking-wider text-[var(--foreground)]/40">
                             N° série machine
                         </dt>
-                        <dd className="mt-0.5 font-medium text-slate-700 dark:text-slate-300 break-all">
+                        <dd className="mt-0.5 font-medium text-[var(--foreground)]/80 break-all">
                             {call.machine_serial || "—"}
                         </dd>
                     </div>
                     <div>
-                        <dt className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                        <dt className="text-[var(--font-size-sm)] font-semibold uppercase tracking-wider text-[var(--foreground)]/40">
                             Technicien
                         </dt>
-                        <dd className="mt-0.5 font-medium text-slate-700 dark:text-slate-300">
+                        <dd className="mt-0.5 font-medium text-[var(--foreground)]/80">
                             {call.technician_name || "Non assigné"}
                         </dd>
                     </div>
                     <div className="col-span-2">
-                        <dt className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                        <dt className="text-[var(--font-size-sm)] font-semibold uppercase tracking-wider text-[var(--foreground)]/40">
                             Problème
                         </dt>
-                        <dd className="mt-1 text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed">
+                        <dd className="mt-0.5 text-[var(--foreground)]/70 line-clamp-2 leading-relaxed">
                             {call.issue_description}
                         </dd>
                     </div>
                 </dl>
             </div>
 
-            <div className="mt-6 flex gap-3 border-t border-slate-100 dark:border-slate-800/60 pt-4">
+            {/* Bottom Actions section (touch-target compliant) */}
+            <div className="mt-[var(--space-md)] flex gap-[var(--space-sm)] border-t border-[var(--card-border)] pt-[var(--space-md)]">
                 <a
                     href={`/dashboard/service-calls/${call.id}`}
-                    className="flex-1 flex min-h-11 items-center justify-center rounded-xl bg-slate-50 dark:bg-slate-800/60 text-slate-900 dark:text-slate-100 border border-slate-200/50 dark:border-slate-700/50 text-sm font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-98 transition-all"
+                    className="flex-1 flex min-h-[var(--touch-target-min)] items-center justify-center rounded-[var(--radius-md)] bg-[var(--background)] text-[var(--foreground)] border border-[var(--card-border)] text-[var(--font-size-base)] font-semibold hover:bg-[var(--foreground)]/5 active:scale-98 transition-all"
                 >
                     Ouvrir la fiche
                 </a>
+                
+                {archiveCall && userRole && (userRole === "admin" || userRole === "dispatcher") && (
+                    call.archived ? (
+                        <button
+                            type="button"
+                            onClick={() => archiveCall(call.id, false)}
+                            className="flex-1 flex min-h-[var(--touch-target-min)] items-center justify-center gap-2 rounded-[var(--radius-md)] bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-[var(--font-size-base)] font-semibold hover:bg-amber-500/15 active:scale-98 transition-all cursor-pointer"
+                        >
+                            Désarchiver
+                        </button>
+                    ) : (
+                        (safeStatus === "completed" || safeStatus === "closed") && (
+                            <button
+                                type="button"
+                                onClick={() => archiveCall(call.id, true)}
+                                className="flex-1 flex min-h-[var(--touch-target-min)] items-center justify-center gap-2 rounded-[var(--radius-md)] bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-[var(--font-size-base)] font-semibold hover:bg-amber-500/15 active:scale-98 transition-all cursor-pointer"
+                            >
+                                Archiver
+                            </button>
+                        )
+                    )
+                )}
+
                 <button
                     type="button"
                     onClick={() => deleteCall(call.id)}
-                    className="flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/40 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/50 active:scale-95 transition-all cursor-pointer"
+                    className="flex min-h-[var(--touch-target-min)] min-w-[var(--touch-target-min)] items-center justify-center rounded-[var(--radius-md)] bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 hover:bg-red-500/15 active:scale-95 transition-all cursor-pointer"
                     aria-label="Supprimer l'appel"
                 >
                     <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -108,45 +155,57 @@ export default function ServiceCallCard({
                     </svg>
                 </button>
             </div>
-        </article>
+        </DSCard>
     );
-}
+};
 
 export function ServiceCallCardSkeleton() {
     return (
-        <div className="flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/60 dark:border-slate-800/60 bg-white dark:bg-slate-900 p-5 shadow-xs animate-pulse">
-            <div className="space-y-4">
-                <div className="flex items-start justify-between gap-3">
-                    <div className="h-6 w-1/2 rounded-md bg-slate-200 dark:bg-slate-800" />
-                    <div className="h-7 w-20 rounded-lg bg-slate-100 dark:bg-slate-700" />
+        <DSCard variant="default" padding="md" className="flex flex-col justify-between animate-pulse">
+            <div className="space-y-[var(--space-sm)]">
+                <div className="flex items-start justify-between gap-[var(--space-sm)]">
+                    <div className="h-6 w-1/2 rounded-[var(--radius-sm)] bg-[var(--foreground)]/10" />
+                    <div className="h-7 w-20 rounded-[var(--radius-md)] bg-[var(--foreground)]/5" />
                 </div>
 
-                <div className="space-y-3.5 border-t border-slate-150 dark:border-slate-850/65 pt-4">
+                <div className="space-y-[var(--space-sm)] border-t border-[var(--card-border)] pt-[var(--space-md)]">
                     <div>
-                        <div className="h-3 w-16 rounded bg-slate-250 dark:bg-slate-700/80" />
-                        <div className="mt-2 h-4 w-3/4 rounded bg-slate-150 dark:bg-slate-800/80" />
+                        <div className="h-3 w-16 rounded bg-[var(--foreground)]/10" />
+                        <div className="mt-2 h-4 w-3/4 rounded bg-[var(--foreground)]/5" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <div className="h-3 w-20 rounded bg-slate-250 dark:bg-slate-700/80" />
-                            <div className="mt-2 h-4 w-24 rounded bg-slate-150 dark:bg-slate-800/80" />
+                            <div className="h-3 w-20 rounded bg-[var(--foreground)]/10" />
+                            <div className="mt-2 h-4 w-24 rounded bg-[var(--foreground)]/5" />
                         </div>
                         <div>
-                            <div className="h-3 w-16 rounded bg-slate-250 dark:bg-slate-700/80" />
-                            <div className="mt-2 h-4 w-20 rounded bg-slate-150 dark:bg-slate-800/80" />
+                            <div className="h-3 w-16 rounded bg-[var(--foreground)]/10" />
+                            <div className="mt-2 h-4 w-20 rounded bg-[var(--foreground)]/5" />
                         </div>
                     </div>
                     <div>
-                        <div className="h-3 w-16 rounded bg-slate-250 dark:bg-slate-700/80" />
-                        <div className="mt-2 h-4 w-5/6 rounded bg-slate-150 dark:bg-slate-800/80" />
+                        <div className="h-3 w-16 rounded bg-[var(--foreground)]/10" />
+                        <div className="mt-2 h-4 w-5/6 rounded bg-[var(--foreground)]/5" />
                     </div>
                 </div>
             </div>
 
-            <div className="mt-6 flex gap-3 border-t border-slate-100 dark:border-slate-800/60 pt-4">
-                <div className="h-11 flex-1 rounded-xl bg-slate-100 dark:bg-slate-800" />
-                <div className="h-11 w-11 rounded-xl bg-red-100/30 dark:bg-red-950/10" />
+            <div className="mt-[var(--space-md)] flex gap-[var(--space-sm)] border-t border-[var(--card-border)] pt-[var(--space-md)]">
+                <div className="h-11 flex-1 rounded-[var(--radius-md)] bg-[var(--foreground)]/5" />
+                <div className="h-11 w-11 rounded-[var(--radius-md)] bg-red-500/5" />
             </div>
-        </div>
+        </DSCard>
     );
 }
+
+// Add component mapping to registry metadata
+ServiceCallCard.metadata = {
+    componentId: 'ServiceCallCard',
+    version: '1.0.0',
+    lifecycleStage: 'production-approved',
+    figmaNodeMapping: 'figma.com/file/welo-ui?node-id=201:10',
+    syncRiskLevel: 'medium',
+    auditTags: ['Mobile/List', 'InterTypography', 'TouchTarget44'],
+};
+
+export default ServiceCallCard;

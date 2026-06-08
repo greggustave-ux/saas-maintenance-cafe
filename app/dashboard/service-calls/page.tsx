@@ -54,6 +54,7 @@ export default function ServiceCallsPage() {
         handleCreateServiceCall,
         handleUpdateStatus,
         handleDeleteServiceCall,
+        handleArchiveCall,
         filteredCalls,
         userRole,
         technicians,
@@ -155,6 +156,8 @@ export default function ServiceCallsPage() {
                                 updateStatus={handleUpdateStatus}
                                 deleteCall={handleDeleteServiceCall}
                                 getStatusColor={getStatusColor}
+                                archiveCall={handleArchiveCall}
+                                userRole={userRole}
                             />
                         ))
                     )}

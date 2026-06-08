@@ -39,6 +39,7 @@ export default function ArchivedServiceCallsPage() {
         successMessage,
         handleUpdateStatus,
         handleDeleteServiceCall,
+        handleArchiveCall,
         filteredCalls,
         userRole,
     } = useArchivedServiceCalls();
@@ -130,6 +131,8 @@ export default function ArchivedServiceCallsPage() {
                                 updateStatus={handleUpdateStatus}
                                 deleteCall={handleDeleteServiceCall}
                                 getStatusColor={getStatusColor}
+                                archiveCall={handleArchiveCall}
+                                userRole={userRole}
                             />
                         ))
                     )}

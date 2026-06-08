@@ -1,13 +1,17 @@
 "use client";
 
-const inputClass =
-    "w-full min-h-12 rounded-xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 px-4 py-3 text-base text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/15";
+import React from 'react';
+import DSInput from "@/src/design-system/components/forms/DSInput";
+import DSTextarea from "@/src/design-system/components/forms/DSTextarea";
+import DSSelect from "@/src/design-system/components/forms/DSSelect";
+import DSLabel from "@/src/design-system/components/forms/DSLabel";
+import DSFormSection from "@/src/design-system/components/forms/DSFormSection";
 
 const btnPrimaryClass =
-    "flex min-h-12 w-full items-center justify-center rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-950 px-5 py-3 text-center text-base font-semibold hover:bg-slate-800 dark:hover:bg-white active:scale-98 transition-all md:w-auto cursor-pointer";
+    "flex min-h-[var(--touch-target-min)] w-full items-center justify-center rounded-[var(--radius-md)] bg-[var(--foreground)] text-[var(--background)] px-5 py-3 text-center text-[var(--font-size-base)] font-semibold hover:opacity-90 active:scale-98 transition-all md:w-auto cursor-pointer";
 
 const btnSecondaryClass =
-    "flex min-h-12 w-full items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 px-5 py-3 text-center text-base font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-98 transition-all md:w-auto cursor-pointer";
+    "flex min-h-[var(--touch-target-min)] w-full items-center justify-center rounded-[var(--radius-md)] bg-[var(--foreground)]/5 text-[var(--foreground)]/80 border border-[var(--card-border)] px-5 py-3 text-center text-[var(--font-size-base)] font-semibold hover:bg-[var(--foreground)]/10 active:scale-98 transition-all md:w-auto cursor-pointer";
 
 interface NewServiceCallFormProps {
     form: {
@@ -35,107 +39,110 @@ export default function NewServiceCallForm({
     onCancel,
     technicians = [],
 }: NewServiceCallFormProps) {
+    // Safety Fallbacks
+    const safeClientName = form.clientName || "";
+    const safeAddress = form.address || "";
+    const safeMachineSerial = form.machineSerial || "";
+    const safeIssueDescription = form.issueDescription || "";
+    const safeTechnicianName = form.technicianName || "";
+    const safePriority = form.priority || "medium";
+
     return (
-        <form
-            onSubmit={onSubmit}
-            className="w-full space-y-4 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-5 shadow-md animate-fade-in"
-        >
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                Créer une nouvelle fiche d'intervention
-            </h2>
+        <form onSubmit={onSubmit} className="w-full animate-fade-in">
+            <DSFormSection title="Créer une nouvelle fiche d'intervention">
+                <div className="grid gap-[var(--space-md)] sm:grid-cols-3">
+                    <div className="flex flex-col gap-[var(--space-xs)]">
+                        <DSLabel htmlFor="clientName" required>Nom du client</DSLabel>
+                        <DSInput
+                            id="clientName"
+                            placeholder="ex. Acme Corp"
+                            value={safeClientName}
+                            onChange={(e) => form.setClientName(e.target.value)}
+                            required
+                        />
+                    </div>
 
-            <div className="grid gap-4 sm:grid-cols-3">
-                <div className="space-y-1">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">Nom du client</label>
-                    <input
-                        className={inputClass}
-                        placeholder="ex. Acme Corp"
-                        value={form.clientName}
-                        onChange={(e) => form.setClientName(e.target.value)}
+                    <div className="flex flex-col gap-[var(--space-xs)]">
+                        <DSLabel htmlFor="technicianName" required>Technicien assigné</DSLabel>
+                        <DSSelect
+                            id="technicianName"
+                            value={safeTechnicianName}
+                            onChange={(e) => form.setTechnicianName(e.target.value)}
+                            required
+                        >
+                            <option value="">Sélectionner un technicien...</option>
+                            {technicians.map((tech) => (
+                                <option key={tech.id} value={tech.full_name}>
+                                    {tech.full_name}
+                                </option>
+                            ))}
+                        </DSSelect>
+                    </div>
+
+                    <div className="flex flex-col gap-[var(--space-xs)]">
+                        <DSLabel htmlFor="priority" required>Priorité</DSLabel>
+                        <DSSelect
+                            id="priority"
+                            value={safePriority}
+                            onChange={(e) => form.setPriority(e.target.value)}
+                            required
+                        >
+                            <option value="low">Faible</option>
+                            <option value="medium">Moyenne</option>
+                            <option value="high">Élevée</option>
+                            <option value="urgent">Urgente</option>
+                        </DSSelect>
+                    </div>
+                </div>
+
+                <div className="grid gap-[var(--space-md)] sm:grid-cols-2">
+                    <div className="flex flex-col gap-[var(--space-xs)]">
+                        <DSLabel htmlFor="address" required>Adresse</DSLabel>
+                        <DSInput
+                            id="address"
+                            placeholder="ex. 123 rue de la Paix, Paris"
+                            value={safeAddress}
+                            onChange={(e) => form.setAddress(e.target.value)}
+                            required
+                        />
+                    </div>
+
+                    <div className="flex flex-col gap-[var(--space-xs)]">
+                        <DSLabel htmlFor="machineSerial" required>N° série machine</DSLabel>
+                        <DSInput
+                            id="machineSerial"
+                            placeholder="ex. SN-847291-X"
+                            value={safeMachineSerial}
+                            onChange={(e) => form.setMachineSerial(e.target.value)}
+                            required
+                        />
+                    </div>
+                </div>
+
+                <div className="flex flex-col gap-[var(--space-xs)]">
+                    <DSLabel htmlFor="issueDescription" required>Description du problème</DSLabel>
+                    <DSTextarea
+                        id="issueDescription"
+                        placeholder="Décrivez précisément la panne signalée..."
+                        value={safeIssueDescription}
+                        onChange={(e) => form.setIssueDescription(e.target.value)}
                         required
                     />
                 </div>
 
-                <div className="space-y-1">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">Technicien assigné</label>
-                    <select
-                        className={inputClass}
-                        value={form.technicianName}
-                        onChange={(e) => form.setTechnicianName(e.target.value)}
-                        required
+                <div className="pt-[var(--space-sm)] flex justify-end gap-[var(--space-sm)]">
+                    <button
+                        type="button"
+                        onClick={onCancel}
+                        className={btnSecondaryClass}
                     >
-                        <option value="">Sélectionner un technicien...</option>
-                        {technicians.map((tech) => (
-                            <option key={tech.id} value={tech.full_name}>
-                                {tech.full_name}
-                            </option>
-                        ))}
-                    </select>
+                        Annuler
+                    </button>
+                    <button type="submit" className={btnPrimaryClass}>
+                        Créer l’appel de service
+                    </button>
                 </div>
-
-                <div className="space-y-1">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">Priorité</label>
-                    <select
-                        className={inputClass}
-                        value={form.priority}
-                        onChange={(e) => form.setPriority(e.target.value)}
-                        required
-                    >
-                        <option value="low">Faible</option>
-                        <option value="medium">Moyenne</option>
-                        <option value="high">Élevée</option>
-                        <option value="urgent">Urgente</option>
-                    </select>
-                </div>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-1">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">Adresse</label>
-                    <input
-                        className={inputClass}
-                        placeholder="ex. 123 rue de la Paix, Paris"
-                        value={form.address}
-                        onChange={(e) => form.setAddress(e.target.value)}
-                        required
-                    />
-                </div>
-
-                <div className="space-y-1">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">N° série machine</label>
-                    <input
-                        className={inputClass}
-                        placeholder="ex. SN-847291-X"
-                        value={form.machineSerial}
-                        onChange={(e) => form.setMachineSerial(e.target.value)}
-                        required
-                    />
-                </div>
-            </div>
-
-            <div className="space-y-1">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">Description du problème</label>
-                <textarea
-                    className={`${inputClass} min-h-24 resize-y`}
-                    placeholder="Décrivez précisément la panne signalée..."
-                    value={form.issueDescription}
-                    onChange={(e) => form.setIssueDescription(e.target.value)}
-                    required
-                />
-            </div>
-
-            <div className="pt-2 flex justify-end gap-3">
-                <button
-                    type="button"
-                    onClick={onCancel}
-                    className={btnSecondaryClass}
-                >
-                    Annuler
-                </button>
-                <button type="submit" className={btnPrimaryClass}>
-                    Créer l’appel de service
-                </button>
-            </div>
+            </DSFormSection>
         </form>
     );
 }

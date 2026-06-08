@@ -62,7 +62,7 @@ BEGIN
         WHERE nsp.nspname = 'public'
           AND rel.relname = 'service_calls'
           AND con.contype = 'c'
-          AND con.consrc LIKE '%status%'
+          AND pg_get_constraintdef(con.oid) LIKE '%status%'
     LOOP
         EXECUTE 'ALTER TABLE public.service_calls DROP CONSTRAINT ' || quote_ident(r.conname);
     END LOOP;

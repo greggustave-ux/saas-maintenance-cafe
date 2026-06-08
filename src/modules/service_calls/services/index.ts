@@ -108,13 +108,32 @@ export async function createServiceCall(call: {
 }
 
 // 4. Update service call status
-export async function updateServiceCallStatus(id: number, status: string): Promise<void> {
-    const { error } = await supabase
+export async function updateServiceCallStatus(id: number, status: string): Promise<{ completed_at: string | null; closed_at: string | null }> {
+    const updatePayload: any = {
+        status,
+    };
+
+    if (status === "completed") {
+        updatePayload.completed_at = new Date().toISOString();
+    } else {
+        updatePayload.completed_at = null;
+    }
+
+    if (status === "closed") {
+        updatePayload.closed_at = new Date().toISOString();
+    } else {
+        updatePayload.closed_at = null;
+    }
+
+    const { data, error } = await supabase
         .from("service_calls")
-        .update({ status })
-        .eq("id", id);
+        .update(updatePayload)
+        .eq("id", id)
+        .select("completed_at, closed_at")
+        .single();
 
     if (error) throw error;
+    return data || { completed_at: null, closed_at: null };
 }
 
 // 5. Delete service call
@@ -309,9 +328,28 @@ export async function getApprovedTechnicians(): Promise<{ id: string; full_name:
 
 // 15. Update service call assigned technician
 export async function updateServiceCallTechnician(id: number, technicianName: string): Promise<void> {
+    // Fetch current status
+    const { data: call, error: fetchError } = await supabase
+        .from("service_calls")
+        .select("status")
+        .eq("id", id)
+        .single();
+        
+    if (fetchError) throw fetchError;
+    if (!call) throw new Error("Appel de service introuvable.");
+
+    const updatePayload: Record<string, any> = { technician_name: technicianName };
+    const isTechDefined = technicianName && technicianName.trim() !== "" && technicianName !== "Non assigné";
+
+    if (isTechDefined && call.status === "new") {
+        updatePayload.status = "assigned";
+    } else if (!isTechDefined && call.status === "assigned") {
+        updatePayload.status = "new";
+    }
+
     const { error } = await supabase
         .from("service_calls")
-        .update({ technician_name: technicianName })
+        .update(updatePayload)
         .eq("id", id);
 
     if (error) throw error;
@@ -404,7 +442,7 @@ export async function getDispatchBoard(): Promise<ServiceCall[]> {
 
     const { data, error } = await supabase
         .from("service_calls")
-        .select("id, client_name, address, machine_serial, issue_description, status, technician_name, created_at, archived, reference_number, priority")
+        .select("id, client_name, address, machine_serial, issue_description, status, technician_name, created_at, completed_at, closed_at, archived, reference_number, priority")
         .eq("archived", false);
 
     if (error) throw error;

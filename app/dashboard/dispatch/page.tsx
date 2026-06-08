@@ -32,8 +32,11 @@ export default function DispatchPage() {
         successMessage,
         kpis,
         userRole,
+        technicians,
         updateStatus,
         updatePriority,
+        updateTechnician,
+        archiveCall,
     } = useDispatchBoard();
 
     // Access check: Dispatch board is restricted to admin and dispatcher roles
@@ -179,6 +182,10 @@ export default function DispatchPage() {
                         serviceCalls={serviceCalls}
                         updateStatus={updateStatus}
                         updatePriority={updatePriority}
+                        updateTechnician={updateTechnician}
+                        technicians={technicians}
+                        archiveCall={archiveCall}
+                        userRole={userRole}
                     />
                 </div>
             )}

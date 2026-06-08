@@ -2,6 +2,8 @@
 
 import { useOperationsDashboard } from "@/src/modules/service_calls/hooks";
 import { useState } from "react";
+import { StatusBadge } from "@/src/design-system/components/StatusBadge";
+import { DSCard } from "@/src/design-system/components/DSCard";
 
 const STATUS_LABELS: Record<string, string> = {
     new: "Nouveau",
@@ -86,64 +88,64 @@ export default function OperationsDashboardPage() {
             {/* KPI Section */}
             <section className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
                 {/* Total Interventions Today */}
-                <div className="rounded-xl border border-slate-200/70 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-4 shadow-2xs hover:shadow-xs transition-shadow duration-200 relative overflow-hidden group">
+                <DSCard variant="outlined" padding="none" className="p-4 shadow-2xs hover:shadow-xs transition-shadow duration-200 relative overflow-hidden group">
                     <div className="absolute top-0 left-0 w-1 h-full bg-cyan-500" />
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Aujourd'hui</span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Aujourd&apos;hui</span>
                     <span className="text-2xl font-bold text-slate-900 dark:text-white mt-1.5 block group-hover:scale-102 transition-transform origin-left">
                         {kpis.totalToday}
                     </span>
                     <span className="text-[10px] text-slate-400 mt-1 block">Intervention(s) créée(s)</span>
-                </div>
+                </DSCard>
 
                 {/* Pending */}
-                <div className="rounded-xl border border-slate-200/70 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-4 shadow-2xs hover:shadow-xs transition-shadow duration-200 relative overflow-hidden group">
+                <DSCard variant="outlined" padding="none" className="p-4 shadow-2xs hover:shadow-xs transition-shadow duration-200 relative overflow-hidden group">
                     <div className="absolute top-0 left-0 w-1 h-full bg-amber-500" />
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">En attente / cours</span>
                     <span className="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1.5 block group-hover:scale-102 transition-transform origin-left">
                         {kpis.pending}
                     </span>
                     <span className="text-[10px] text-slate-400 mt-1 block">À traiter ou en cours</span>
-                </div>
+                </DSCard>
 
                 {/* Completed */}
-                <div className="rounded-xl border border-slate-200/70 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-4 shadow-2xs hover:shadow-xs transition-shadow duration-200 relative overflow-hidden group">
+                <DSCard variant="outlined" padding="none" className="p-4 shadow-2xs hover:shadow-xs transition-shadow duration-200 relative overflow-hidden group">
                     <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500" />
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Terminées</span>
                     <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1.5 block group-hover:scale-102 transition-transform origin-left">
                         {kpis.completed}
                     </span>
                     <span className="text-[10px] text-slate-400 mt-1 block">Interventions closes</span>
-                </div>
+                </DSCard>
 
                 {/* Problematic Machines */}
-                <div className="rounded-xl border border-slate-200/70 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-4 shadow-2xs hover:shadow-xs transition-shadow duration-200 relative overflow-hidden group">
+                <DSCard variant="outlined" padding="none" className="p-4 shadow-2xs hover:shadow-xs transition-shadow duration-200 relative overflow-hidden group">
                     <div className="absolute top-0 left-0 w-1 h-full bg-red-600" />
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Problématiques</span>
                     <span className="text-2xl font-bold text-red-600 dark:text-red-400 mt-1.5 block group-hover:scale-102 transition-transform origin-left">
                         {kpis.problematicMachines}
                     </span>
                     <span className="text-[10px] text-slate-400 mt-1 block">Machines à risque rouge</span>
-                </div>
+                </DSCard>
 
                 {/* Watch Machines */}
-                <div className="rounded-xl border border-slate-200/70 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-4 shadow-2xs hover:shadow-xs transition-shadow duration-200 relative overflow-hidden group">
+                <DSCard variant="outlined" padding="none" className="p-4 shadow-2xs hover:shadow-xs transition-shadow duration-200 relative overflow-hidden group">
                     <div className="absolute top-0 left-0 w-1 h-full bg-amber-500" />
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">À surveiller</span>
                     <span className="text-2xl font-bold text-amber-500 mt-1.5 block group-hover:scale-102 transition-transform origin-left">
                         {kpis.watchMachines}
                     </span>
                     <span className="text-[10px] text-slate-400 mt-1 block">Machines à risque orange</span>
-                </div>
+                </DSCard>
 
                 {/* Active Techs */}
-                <div className="rounded-xl border border-slate-200/70 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-4 shadow-2xs hover:shadow-xs transition-shadow duration-200 relative overflow-hidden group">
+                <DSCard variant="outlined" padding="none" className="p-4 shadow-2xs hover:shadow-xs transition-shadow duration-200 relative overflow-hidden group">
                     <div className="absolute top-0 left-0 w-1 h-full bg-indigo-500" />
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Techs actifs</span>
                     <span className="text-2xl font-bold text-indigo-600 dark:text-indigo-400 mt-1.5 block group-hover:scale-102 transition-transform origin-left">
                         {kpis.activeTechnicians}
                     </span>
                     <span className="text-[10px] text-slate-400 mt-1 block">Techniciens assignés</span>
-                </div>
+                </DSCard>
             </section>
 
             {/* Main Content Grid */}
@@ -151,7 +153,7 @@ export default function OperationsDashboardPage() {
                 {/* Left side: Timeline of recent activity (2 cols) */}
                 <div className="lg:col-span-2 space-y-6">
                     {/* Recent Activity Card */}
-                    <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-5 shadow-2xs sm:p-6 space-y-4">
+                    <DSCard variant="outlined" padding="none" className="p-5 sm:p-6 shadow-2xs space-y-4">
                         <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                             <div>
                                 <h2 className="text-lg font-bold text-slate-900 dark:text-white sm:text-xl">
@@ -184,9 +186,7 @@ export default function OperationsDashboardPage() {
                                                     <span className="text-sm font-semibold text-slate-900 dark:text-white shrink-0">
                                                         #{item.id} — {item.client_name}
                                                     </span>
-                                                    <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${getStatusColor(item.status)}`}>
-                                                        {STATUS_LABELS[item.status] || item.status}
-                                                    </span>
+                                                    <StatusBadge status={item.status} />
                                                     {isUrgent && (
                                                         <span className="inline-flex items-center rounded-md px-1.5 py-0.5 text-[9px] font-semibold bg-red-150 dark:bg-red-950/40 text-red-650 dark:text-red-400 border border-red-500/10">
                                                             Urgent
@@ -235,22 +235,22 @@ export default function OperationsDashboardPage() {
                                 })}
                             </div>
                         )}
-                    </div>
+                    </DSCard>
 
                     {/* Previsional & SLA Targets (Future extensible architecture placeholders) */}
-                    <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-5 shadow-2xs sm:p-6 space-y-4">
+                    <DSCard variant="outlined" padding="none" className="p-5 sm:p-6 shadow-2xs space-y-4">
                         <div>
                             <h2 className="text-lg font-bold text-slate-900 dark:text-white sm:text-xl">
                                 Objectifs de SLA & Temps réel
                             </h2>
                             <p className="text-xs text-slate-400 dark:text-slate-500">
-                                Métriques d'engagements de service et de réactivité.
+                                Métriques d&apos;engagements de service et de réactivité.
                             </p>
                         </div>
 
                         <div className="grid gap-4 sm:grid-cols-2">
                             {/* SLA Chart mock */}
-                            <div className="rounded-xl border border-slate-100 dark:border-slate-800 p-4 bg-slate-50/50 dark:bg-slate-900/30 space-y-2">
+                            <DSCard variant="flat" padding="none" className="p-4 bg-slate-50/50 dark:bg-slate-900/30 space-y-2">
                                 <div className="flex items-center justify-between">
                                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Respect du SLA (24h)</span>
                                     <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">96.8%</span>
@@ -259,10 +259,10 @@ export default function OperationsDashboardPage() {
                                     <div className="h-full bg-emerald-500 rounded-full" style={{ width: "96.8%" }} />
                                 </div>
                                 <p className="text-[10px] text-slate-400">Objectif contractuel : 95.0% • 31 interventions analysées.</p>
-                            </div>
+                            </DSCard>
 
                             {/* Response time placeholder */}
-                            <div className="rounded-xl border border-slate-100 dark:border-slate-800 p-4 bg-slate-50/50 dark:bg-slate-900/30 space-y-2">
+                            <DSCard variant="flat" padding="none" className="p-4 bg-slate-50/50 dark:bg-slate-900/30 space-y-2">
                                 <div className="flex items-center justify-between">
                                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Temps moyen de prise en charge</span>
                                     <span className="text-xs font-bold text-cyan-600 dark:text-cyan-400">1.8h</span>
@@ -271,15 +271,15 @@ export default function OperationsDashboardPage() {
                                     <div className="h-full bg-cyan-500 rounded-full" style={{ width: "85%" }} />
                                 </div>
                                 <p className="text-[10px] text-slate-400">Objectif : sous 2.0h • Actuellement en hausse (+0.2h).</p>
-                            </div>
+                            </DSCard>
                         </div>
 
                         {/* Interactive Technician Assignation Maps (Placeholder layout) */}
-                        <div className="rounded-xl border border-slate-200/60 dark:border-slate-800 p-4 space-y-3 bg-slate-900/5 dark:bg-slate-950/20 relative overflow-hidden">
+                        <DSCard variant="flat" padding="none" className="p-4 space-y-3 bg-slate-900/5 dark:bg-slate-950/20 relative overflow-hidden">
                             <div className="flex items-center justify-between">
                                 <div className="space-y-0.5">
                                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Suivi Géolocalisation (Futur)</span>
-                                    <p className="text-xs text-slate-700 dark:text-slate-350 font-medium">Carte d'assignation dynamique des techniciens sur le terrain</p>
+                                    <p className="text-xs text-slate-700 dark:text-slate-350 font-medium">Carte d&apos;assignation dynamique des techniciens sur le terrain</p>
                                 </div>
                                 <span className="text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-500 border border-indigo-500/15">Bêta Prochainement</span>
                             </div>
@@ -287,16 +287,16 @@ export default function OperationsDashboardPage() {
                                 <svg className="h-8 w-8 text-slate-400 animate-pulse mb-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                                 </svg>
-                                <p className="text-[10px] text-slate-400 max-w-sm">Le SDK de carte affichera la position en temps réel des techniciens actifs et permettra l'assignation par glisser-déposer.</p>
+                                <p className="text-[10px] text-slate-400 max-w-sm">Le SDK de carte affichera la position en temps réel des techniciens actifs et permettra l&apos;assignation par glisser-déposer.</p>
                             </div>
-                        </div>
-                    </div>
+                        </DSCard>
+                    </DSCard>
                 </div>
 
                 {/* Right side: Machines at risk and previsons (1 col) */}
                 <div className="space-y-6">
                     {/* Machines at Risk Card */}
-                    <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-5 shadow-2xs sm:p-6 space-y-4">
+                    <DSCard variant="outlined" padding="none" className="p-5 sm:p-6 shadow-2xs space-y-4">
                         <div>
                             <h2 className="text-lg font-bold text-slate-900 dark:text-white sm:text-xl">
                                 Machines à risque
@@ -316,19 +316,21 @@ export default function OperationsDashboardPage() {
                                     const isProblematic = mach.riskStatus === "Problématique";
 
                                     return (
-                                        <div
+                                        <DSCard
                                             key={mach.machine_serial}
-                                            className={`p-3.5 rounded-xl border transition-all ${
+                                            variant="flat"
+                                            padding="none"
+                                            className={`p-3.5 rounded-xl transition-all ${
                                                 isProblematic
-                                                    ? "border-red-500/20 bg-red-500/5 dark:bg-red-950/10"
-                                                    : "border-amber-500/20 bg-amber-500/5 dark:bg-amber-950/10"
+                                                    ? "!border-red-500/20 !bg-red-500/5 dark:!bg-red-950/10"
+                                                    : "!border-amber-500/20 !bg-amber-500/5 dark:!bg-amber-950/10"
                                             }`}
                                         >
                                             <div className="flex items-center justify-between">
                                                 <span className="font-semibold text-xs text-slate-900 dark:text-white break-all">
                                                     {mach.machine_serial}
                                                 </span>
-                                                <span className={`text-xs font-bold ${isProblematic ? "text-red-600 dark:text-red-400" : "text-amber-600 dark:text-amber-500"}`}>
+                                                <span className={`text-xs font-bold ${isProblematic ? "text-red-650 dark:text-red-400" : "text-amber-600 dark:text-amber-500"}`}>
                                                     {mach.riskScore}/100
                                                 </span>
                                             </div>
@@ -346,15 +348,15 @@ export default function OperationsDashboardPage() {
                                             }`}>
                                                 Recommandation : {mach.recommendation}
                                             </div>
-                                        </div>
+                                        </DSCard>
                                     );
                                 })}
                             </div>
                         )}
-                    </div>
+                    </DSCard>
 
                     {/* Previsional Financial Machine Costs (Future extensible architecture placeholders) */}
-                    <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 p-5 shadow-2xs sm:p-6 space-y-4">
+                    <DSCard variant="outlined" padding="none" className="p-5 sm:p-6 shadow-2xs space-y-4">
                         <div>
                             <h2 className="text-lg font-bold text-slate-900 dark:text-white sm:text-xl">
                                 Coûts & Maintenance préventive
@@ -393,7 +395,7 @@ export default function OperationsDashboardPage() {
                                 Déclencher plan préventif
                             </button>
                         </div>
-                    </div>
+                    </DSCard>
                 </div>
             </div>
         </div>
@@ -415,19 +417,19 @@ function OperationsSkeleton() {
             {/* KPI grid skeleton */}
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
                 {[...Array(6)].map((_, idx) => (
-                    <div key={idx} className="h-24 rounded-xl bg-slate-150 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-850" />
+                    <DSCard key={idx} variant="outlined" padding="none" className="h-24 bg-slate-150 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-850" />
                 ))}
             </div>
 
             {/* Main grid skeleton */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 space-y-6">
-                    <div className="h-[400px] rounded-2xl bg-slate-150 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-850" />
-                    <div className="h-[300px] rounded-2xl bg-slate-150 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-850" />
+                    <DSCard variant="outlined" padding="none" className="h-[400px] bg-slate-150 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-850" />
+                    <DSCard variant="outlined" padding="none" className="h-[300px] bg-slate-150 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-850" />
                 </div>
                 <div className="space-y-6">
-                    <div className="h-[350px] rounded-2xl bg-slate-150 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-850" />
-                    <div className="h-[250px] rounded-2xl bg-slate-150 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-850" />
+                    <DSCard variant="outlined" padding="none" className="h-[350px] bg-slate-150 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-850" />
+                    <DSCard variant="outlined" padding="none" className="h-[250px] bg-slate-150 dark:bg-slate-900 border border-slate-200/50 dark:border-slate-850" />
                 </div>
             </div>
         </div>
