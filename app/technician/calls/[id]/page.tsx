@@ -7,8 +7,6 @@ import { DSBadge } from "@/src/design-system/components/DSBadge";
 import { DSCard } from "@/src/design-system/components/DSCard";
 import DSMobilePage from "@/src/design-system/components/DSMobilePage";
 import DSMobileHeader from "@/src/design-system/components/DSMobileHeader";
-import PhotosSection from "@/src/modules/service_calls/components/PhotosSection";
-import SignatureSection from "@/src/modules/service_calls/components/SignatureSection";
 
 export default function TechnicianCallDetailsPage() {
     const params = useParams();
@@ -20,18 +18,7 @@ export default function TechnicianCallDetailsPage() {
         setServiceCall,
         loading,
         error,
-        notes,
-        setNotes,
         photos,
-        uploadStatus,
-        uploadError,
-        savingSignature,
-        handleSaveNotes,
-        handleUploadPhoto,
-        handleDeletePhoto,
-        handleSaveSignature,
-        savingNotes,
-        deletingPhotoId,
     } = useServiceCallDetails(id);
 
     const [updatingStatus, setUpdatingStatus] = useState(false);
@@ -64,13 +51,10 @@ export default function TechnicianCallDetailsPage() {
 
     // GPS launcher action
     const handleGPSLaunch = () => {
-        if (!serviceCall.address) return;
+        if (!serviceCall?.address) return;
         const encodedAddr = encodeURIComponent(serviceCall.address);
-        const appleUrl = `maps://maps.apple.com/?daddr=${encodedAddr}`;
-        const googleUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedAddr}`;
-
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-        window.open(isIOS ? appleUrl : googleUrl, "_blank");
+        const universalUrl = `https://www.google.com/maps/search/?api=1&query=${encodedAddr}`;
+        window.open(universalUrl, "_blank", "noopener,noreferrer");
     };
 
     // Quick Status Update
@@ -219,41 +203,55 @@ export default function TechnicianCallDetailsPage() {
                     </div>
                 </DSCard>
 
-                {/* 5. Notes update form */}
-                <DSCard variant="outlined" padding="md" className="space-y-3">
+                {/* 5. Notes (Read-Only) */}
+                <DSCard variant="outlined" padding="md" className="space-y-2">
                     <span className="text-[11px] font-bold text-[var(--foreground)]/40 uppercase tracking-wider block">Rapport / Notes de visite</span>
-                    <textarea
-                        className="w-full min-h-[96px] rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] px-3 py-2 text-base text-[var(--foreground)] placeholder-[var(--foreground)]/35 focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
-                        placeholder="Rapportez les détails techniques de la visite..."
-                        value={notes}
-                        onChange={(e) => setNotes(e.target.value)}
-                    />
-                    <button
-                        onClick={handleSaveNotes}
-                        disabled={savingNotes}
-                        className="flex min-h-[48px] w-full items-center justify-center rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-semibold hover:bg-slate-800 dark:hover:bg-slate-100 active:scale-98 transition-all disabled:opacity-50 cursor-pointer shadow-2xs text-sm"
-                    >
-                        {savingNotes ? "Enregistrement..." : "Mettre à jour les notes"}
-                    </button>
+                    <p className="text-base text-[var(--foreground)]/90 leading-relaxed break-words whitespace-pre-wrap font-sans">
+                        {serviceCall.technician_notes || "Aucune note technique n'a été saisie pour le moment."}
+                    </p>
                 </DSCard>
 
-                {/* 6. Photos & Attachments Section */}
-                <PhotosSection
-                    photos={photos}
-                    uploadStatus={uploadStatus}
-                    uploadError={uploadError}
-                    handleUploadPhoto={handleUploadPhoto}
-                    handleDeletePhoto={handleDeletePhoto}
-                    setActivePhotoModal={() => {}} // Disabled full preview modal to keep code compact, or add it if needed
-                    deletingPhotoId={deletingPhotoId}
-                />
+                {/* 6. Photos (Read-Only) */}
+                <DSCard variant="outlined" padding="md" className="space-y-3">
+                    <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold text-[var(--foreground)]/40 uppercase tracking-wider">Photos de l&apos;intervention</span>
+                        <span className="text-xs text-[var(--foreground)]/50">{photos.length} photo(s)</span>
+                    </div>
+                    {photos.length === 0 ? (
+                        <p className="text-sm text-[var(--foreground)]/50">Aucune photo enregistrée.</p>
+                    ) : (
+                        <div className="grid grid-cols-2 gap-3">
+                            {photos.map((photo) => (
+                                <div key={photo.id} className="relative aspect-4/3 overflow-hidden rounded-xl border border-[var(--card-border)] bg-slate-50 dark:bg-slate-850">
+                                    <img
+                                        src={photo.photo_url}
+                                        alt="Intervention"
+                                        crossOrigin="anonymous"
+                                        loading="lazy"
+                                        className="h-full w-full object-cover"
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </DSCard>
 
-                {/* 7. Signature Client Section */}
-                <SignatureSection
-                    serviceCall={serviceCall}
-                    savingSignature={savingSignature}
-                    handleSaveSignature={handleSaveSignature}
-                />
+                {/* 7. Signature Client (Read-Only) */}
+                <DSCard variant="outlined" padding="md" className="space-y-3">
+                    <span className="text-[11px] font-bold text-[var(--foreground)]/40 uppercase tracking-wider block">Signature Client</span>
+                    {serviceCall.signature_url ? (
+                        <div className="inline-block overflow-hidden rounded-xl border border-[var(--card-border)] bg-white p-2">
+                            <img
+                                src={serviceCall.signature_url}
+                                alt="Signature client"
+                                crossOrigin="anonymous"
+                                className="h-16 w-auto object-contain sm:h-20"
+                            />
+                        </div>
+                    ) : (
+                        <p className="text-sm text-[var(--foreground)]/50">L&apos;intervention n&apos;est pas encore signée.</p>
+                    )}
+                </DSCard>
             </div>
         </DSMobilePage>
     );
