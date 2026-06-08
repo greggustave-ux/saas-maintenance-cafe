@@ -5,6 +5,7 @@ import { ServiceCall } from "../types";
 
 import { DSBadge } from "@/src/design-system/components/DSBadge";
 import { COMPONENT_REGISTRY } from "@/src/design-system/registry/component-registry";
+import { DSCard } from "@/src/design-system/components/DSCard";
 
 interface ServiceCallCardProps {
     call: ServiceCall;
@@ -30,9 +31,12 @@ export const ServiceCallCard: React.FC<ServiceCallCardProps> & {
     const safeStatus = call.status || 'new';
 
     return (
-        <article 
+        <DSCard 
             data-welo-component="ServiceCallCard"
-            className="group relative flex flex-col justify-between overflow-hidden rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--card-bg)] p-[var(--space-md)] shadow-[var(--shadow-sm)] transition-all duration-[var(--transition-normal)] hover:shadow-[var(--shadow-md)] hover:border-[var(--foreground)]/15 font-sans"
+            variant="default"
+            padding="md"
+            hoverable={true}
+            className="group relative flex flex-col justify-between font-sans"
         >
             <div className="space-y-[var(--space-sm)]">
                 <div className="flex items-start justify-between gap-[var(--space-sm)]">
@@ -151,13 +155,13 @@ export const ServiceCallCard: React.FC<ServiceCallCardProps> & {
                     </svg>
                 </button>
             </div>
-        </article>
+        </DSCard>
     );
 };
 
 export function ServiceCallCardSkeleton() {
     return (
-        <div className="flex flex-col justify-between overflow-hidden rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--card-bg)] p-[var(--space-md)] shadow-[var(--shadow-sm)] animate-pulse">
+        <DSCard variant="default" padding="md" className="flex flex-col justify-between animate-pulse">
             <div className="space-y-[var(--space-sm)]">
                 <div className="flex items-start justify-between gap-[var(--space-sm)]">
                     <div className="h-6 w-1/2 rounded-[var(--radius-sm)] bg-[var(--foreground)]/10" />
@@ -190,7 +194,7 @@ export function ServiceCallCardSkeleton() {
                 <div className="h-11 flex-1 rounded-[var(--radius-md)] bg-[var(--foreground)]/5" />
                 <div className="h-11 w-11 rounded-[var(--radius-md)] bg-red-500/5" />
             </div>
-        </div>
+        </DSCard>
     );
 }
 
